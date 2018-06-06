@@ -31,16 +31,16 @@
 // Library Setup
 
 // Uncomment this define to enable use of the software i2c library (min 4MHz+ processor required).
-//#define LEPFLIR_ENABLE_SOFTWARE_I2C     1   // http://playground.arduino.cc/Main/SoftwareI2CLibrary
+// #define LEPFLIR_ENABLE_SOFTWARE_I2C     1   // http://playground.arduino.cc/Main/SoftwareI2CLibrary
 
 // Uncomment this define to disable usage of the Scheduler library on SAM/SAMD architecures.
-//#define LEPFLIR_DISABLE_SCHEDULER       1   // https://github.com/arduino-libraries/Scheduler
+#define LEPFLIR_DISABLE_SCHEDULER       1   // https://github.com/arduino-libraries/Scheduler
 
 // Uncomment this define to disable 16 byte aligned memory allocations (may hinder performance).
-//#define LEPFLIR_DISABLE_ALIGNED_MALLOC  1
+#define LEPFLIR_DISABLE_ALIGNED_MALLOC  1
 
 // Uncomment this define if wanting to exclude extended i2c functions from compilation.
-//#define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
+#define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
 
 // Uncomment this define to enable debug output.
 //#define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
@@ -62,15 +62,16 @@
 // (i.e. processor speed /2, /4, /8, /16, ..., /128).
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include <Arduino.h>
+#include <subsystems/avr/Arduino.h>
 #else
 #include <WProgram.h>
 #endif
 #ifndef LEPFLIR_ENABLE_SOFTWARE_I2C
-#include <Wire.h>
+#include <drivers/wire/Wire.h>
 #endif
-#include <SPI.h>
+// #include <drivers/spi/SPI.h>
 #include "LeptonFLiRDefs.h"
+#include <inttypes.h>
 
 #ifndef ENABLED
 #define ENABLED  0x1
@@ -89,10 +90,10 @@ typedef struct {
     byte revisionMajor;
     byte revisionMinor;
     uint32_t cameraUptime;          // (milliseconds)
-    bool ffcDesired;
+    uint8_t ffcDesired;
     TelemetryData_FFCState ffcState;
-    bool agcEnabled;                // def:disabled
-    bool shutdownImminent;
+    uint8_t agcEnabled;                // def:disabled
+    uint8_t shutdownImminent;
     char serialNumber[24];
     char softwareRevision[12];
     uint32_t frameCounter;          // increments every 3rd frame, useful for determining new unique frame
@@ -142,14 +143,16 @@ typedef enum {
     LeptonFLiR_TemperatureMode_Count
 } LeptonFLiR_TemperatureMode;
 
+#if 0
 class LeptonFLiR {
 public:
+    #endif
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
     // May use a different Wire instance than Wire. Some chipsets, such as Due/Zero/etc.,
     // have a Wire1 class instance that uses the SDA1/SCL1 lines instead.
     // Supported i2c baud rates are 100kHz, 400kHz, and 1000kHz.
     // Supported SPI baud rates are 2.2MHz to 20MHz.
-    LeptonFLiR(TwoWire& i2cWire = Wire, byte spiCSPin = 53);
+    void LeptonFLiR_LeptonFLiR(/*TwoWire& i2cWire = Wire, *//*byte spiCSPin*//* = 53*/);
 #else
     // Minimum supported i2c baud rate is 100kHz, which means minimum supported processor
     // speed is 4MHz+ while running i2c standard mode. For 400kHz i2c baud rate, minimum
@@ -157,12 +160,13 @@ public:
     // Supported SPI baud rates are 2.2MHz to 20MHz.
     LeptonFLiR(byte spiCSPin = 53);
 #endif
+#if 0
     ~LeptonFLiR();
-
+#endif
     // Called in setup()
-    void init(LeptonFLiR_ImageStorageMode storageMode = LeptonFLiR_ImageStorageMode_80x60_16bpp, LeptonFLiR_TemperatureMode tempMode = LeptonFLiR_TemperatureMode_Celsius);
+    void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode/* = LeptonFLiR_ImageStorageMode_80x60_16bpp*/, LeptonFLiR_TemperatureMode tempMode/* = LeptonFLiR_TemperatureMode_Celsius*/);
 
-    byte getChipSelectPin();
+    // byte getChipSelectPin();
     LeptonFLiR_ImageStorageMode getImageStorageMode();
     LeptonFLiR_TemperatureMode getTemperatureMode();
 
@@ -174,33 +178,37 @@ public:
     int getImageTotalBytes();
 
     // Image data access (disabled during frame read)
-    byte *getImageData();
-    byte *getImageDataRow(int row);
-    uint16_t getImageDataRowCol(int row, int col);
+    // byte *getImageData();
+    // byte *getImageDataRow(int row);
+    // uint16_t getImageDataRowCol(int row, int col);
 
     // Telemetry data access (disabled during frame read)
+    #if 0
     byte *getTelemetryData(); // raw
-    void getTelemetryData(TelemetryData *telemetry);
+    #endif
+    // void getTelemetryData(TelemetryData *telemetry);
 
     // Commonly used properties from telemetry data
-    uint32_t getTelemetryFrameCounter();
-    bool getShouldRunFFCNormalization();
+    // uint32_t getTelemetryFrameCounter();
+    // uint8_t getShouldRunFFCNormalization();
 
     // Sets fast enable/disable methods to call when enabling and disabling the SPI chip
     // select pin (e.g. PORTB |= 0x01, PORTB &= ~0x01, etc.). The function itself depends
     // on the board and pin used (see also digitalWriteFast library). Enable should set
     // the pin LOW, and disable should set the pin HIGH (aka active-low).
     typedef void(*digitalWriteFunc)(byte); // Passes pin number in
-    void setFastCSFuncs(digitalWriteFunc csEnableFunc, digitalWriteFunc csDisableFunc);
+    // void setFastCSFuncs(digitalWriteFunc csEnableFunc, digitalWriteFunc csDisableFunc);
 
+    #if 0
     // This method reads the next image frame, taking up considerable processor time.
-    // Returns a boolean indicating if next frame was successfully retrieved or not.
-    bool readNextFrame();
+    // Returns a uint8_tean indicating if next frame was successfully retrieved or not.
+    uint8_t readNextFrame();
+    #endif
 
     // AGC module commands
 
-    void agc_setAGCEnabled(bool enabled); // def:disabled
-    bool agc_getAGCEnabled();
+    void agc_setAGCEnabled(uint8_t enabled); // def:disabled
+    uint8_t agc_getAGCEnabled();
 
     void agc_setAGCPolicy(LEP_AGC_POLICY policy); // def:LEP_AGC_HEQ
     LEP_AGC_POLICY agc_getAGCPolicy();
@@ -208,24 +216,24 @@ public:
     void agc_setHEQScaleFactor(LEP_AGC_HEQ_SCALE_FACTOR factor); // def:LEP_AGC_SCALE_TO_8_BITS
     LEP_AGC_HEQ_SCALE_FACTOR agc_getHEQScaleFactor();
 
-    void agc_setAGCCalcEnabled(bool enabled); // def:disabled
-    bool agc_getAGCCalcEnabled();
+    void agc_setAGCCalcEnabled(uint8_t enabled); // def:disabled
+    uint8_t agc_getAGCCalcEnabled();
 
     // SYS module commands
 
-    void sys_getCameraStatus(LEP_SYS_CAM_STATUS *status);
+    void sys_getCameraStatus_internal(LEP_SYS_CAM_STATUS *status);
     LEP_SYS_CAM_STATUS_STATES sys_getCameraStatus();
 
-    void sys_getFlirSerialNumber(char *buffer, int maxLength = 16); // maxLength must at least be 16, recommended 20
-    void sys_getCustomerSerialNumber(char *buffer, int maxLength = 64); // maxLength must at least be 64, recommended 80
+    void sys_getFlirSerialNumber(char *buffer, int maxLength/* = 16*/); // maxLength must at least be 16, recommended 20
+    void sys_getCustomerSerialNumber(char *buffer, int maxLength/* = 64*/); // maxLength must at least be 64, recommended 80
 
     uint32_t sys_getCameraUptime(); // (milliseconds)
 
     float sys_getAuxTemperature(); // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
     float sys_getFPATemperature(); // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
 
-    void sys_setTelemetryEnabled(bool enabled); // def:enabled
-    bool sys_getTelemetryEnabled();
+    void sys_setTelemetryEnabled(uint8_t enabled); // def:enabled
+    uint8_t sys_getTelemetryEnabled();
 
     void sys_runFFCNormalization();
 
@@ -237,11 +245,11 @@ public:
     void vid_setPseudoColorLUT(LEP_VID_PCOLOR_LUT table); // def:LEP_VID_FUSION_LUT
     LEP_VID_PCOLOR_LUT vid_getPseudoColorLUT(); 
 
-    void vid_setFocusCalcEnabled(bool enabled); // def:disabled
-    bool vid_getFocusCalcEnabled();
+    void vid_setFocusCalcEnabled(uint8_t enabled); // def:disabled
+    uint8_t vid_getFocusCalcEnabled();
 
-    void vid_setFreezeEnabled(bool enabled); // def:disabled
-    bool vid_getFreezeEnabled();
+    void vid_setFreezeEnabled(uint8_t enabled); // def:disabled
+    uint8_t vid_getFreezeEnabled();
 
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
 
@@ -331,8 +339,8 @@ public:
 
     uint32_t vid_getFocusMetric();
 
-    void vid_setSceneBasedNUCEnabled(bool enabled); // def:enabled
-    bool vid_getSceneBasedNUCEnabled();
+    void vid_setSceneBasedNUCEnabled(uint8_t enabled); // def:enabled
+    uint8_t vid_getSceneBasedNUCEnabled();
 
     void vid_setGamma(uint32_t gamma); // def:58
     uint32_t vid_getGamma();
@@ -353,42 +361,44 @@ public:
     void checkForErrors();
 #endif
 
+#if 0
 private:
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
-    TwoWire *_i2cWire;          // Wire class instance to use
 #endif
-    byte _spiCSPin;             // SPI chip select pin
-    SPISettings _spiSettings;   // SPI port settings to use
+#ifndef LEPFLIR_USE_SOFTWARE_I2C
+    // TwoWire *_i2cWire;          // Wire class instance to use
+#endif
+    // byte _spiCSPin;             // SPI chip select pin
+    // SPISettings _spiSettings;   // SPI port settings to use
     LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
     LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
-    digitalWriteFunc _csEnableFunc; // Chip select enable function
-    digitalWriteFunc _csDisableFunc; // Chip select disable function
-    byte *_imageData;           // Image data (column major)
-    byte *_spiFrameData;        // SPI frame data
-    byte *_telemetryData;       // SPI telemetry frame data
-    bool _isReadingNextFrame;   // Tracks if next frame is being read
+    // digitalWriteFunc _csEnableFunc; // Chip select enable function
+    // digitalWriteFunc _csDisableFunc; // Chip select disable function
+    // byte *_imageData;           // Image data (column major)
+    // byte *_spiFrameData;        // SPI frame data
+    // byte *_telemetryData;       // SPI telemetry frame data
+    // uint8_t _isReadingNextFrame;   // Tracks if next frame is being read
     byte _lastI2CError;         // Last i2c error
     byte _lastLepResult;        // Last lep result
 
-    byte *_getImageDataRow(int row);
+    // byte *_getImageDataRow(int row);
 
-    int getSPIFrameLines();
-    int getSPIFrameTotalBytes();
-    uint16_t *getSPIFrameDataRow(int row);
+    // int getSPIFrameLines();
+    // int getSPIFrameTotalBytes();
+    // uint16_t *getSPIFrameDataRow(int row);
 
-    bool waitCommandBegin(int timeout = 0);
-    bool waitCommandFinish(int timeout = 0);
+    uint8_t waitCommandBegin(int timeout/* = 0*/);
+    uint8_t waitCommandFinish(int timeout/* = 0*/);
 
     uint16_t cmdCode(uint16_t cmdID, uint16_t cmdType);
 
-    void sendCommand(uint16_t cmdCode);
-    void sendCommand(uint16_t cmdCode, uint16_t value);
-    void sendCommand(uint16_t cmdCode, uint32_t value);
-    void sendCommand(uint16_t cmdCode, uint16_t *dataWords, int dataLength);
+    void sendCommand_raw(uint16_t cmdCode);
+    void sendCommand_u16(uint16_t cmdCode, uint16_t value);
+    void sendCommand_u32(uint16_t cmdCode, uint32_t value);
+    void sendCommand_array(uint16_t cmdCode, uint16_t *dataWords, int dataLength);
 
-    void receiveCommand(uint16_t cmdCode, uint16_t *value);
-    void receiveCommand(uint16_t cmdCode, uint32_t *value);
-    void receiveCommand(uint16_t cmdCode, uint16_t *readWords, int maxLength);
+    void receiveCommand_u16(uint16_t cmdCode, uint16_t *value);
+    void receiveCommand_u32(uint16_t cmdCode, uint32_t *value);
+    void receiveCommand_array(uint16_t cmdCode, uint16_t *readWords, int maxLength);
 
     int writeCmdRegister(uint16_t cmdCode, uint16_t *dataWords, int dataLength);
     int readDataRegister(uint16_t *readWords, int maxLength);
@@ -406,7 +416,9 @@ private:
     size_t i2cWire_write16(uint16_t);
     uint8_t i2cWire_read(void);
     uint16_t i2cWire_read16(void);
+#if 0
 };
+#endif
 
 extern void wordsToHexString(uint16_t *dataWords, int dataLength, char *buffer, int maxLength);
 
