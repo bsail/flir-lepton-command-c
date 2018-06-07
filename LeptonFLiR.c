@@ -1235,7 +1235,7 @@ void /*LeptonFLiR::*/sys_runPingCamera() {
     Serial.println("/*LeptonFLiR::*/sys_runPingCamera");
 #endif
 
-    sendCommand_u16(cmdCode(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN));
+    sendCommand_raw(cmdCode(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN));
 }
 
 void /*LeptonFLiR::*/sys_setTelemetryLocation(LEP_SYS_TELEMETRY_LOCATION location) {
@@ -1261,7 +1261,7 @@ void /*LeptonFLiR::*/sys_runFrameAveraging() {
     Serial.println("/*LeptonFLiR::*/sys_runFrameAveraging");
 #endif
 
-    sendCommand_u16(cmdCode(LEP_CID_SYS_EXECTUE_FRAME_AVERAGE, LEP_I2C_COMMAND_TYPE_RUN));
+    sendCommand_raw(cmdCode(LEP_CID_SYS_EXECTUE_FRAME_AVERAGE, LEP_I2C_COMMAND_TYPE_RUN));
 }
 
 void /*LeptonFLiR::*/sys_setNumFramesToAverage(LEP_SYS_FRAME_AVERAGE average) {

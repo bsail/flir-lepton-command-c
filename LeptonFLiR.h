@@ -40,7 +40,7 @@
 #define LEPFLIR_DISABLE_ALIGNED_MALLOC  1
 
 // Uncomment this define if wanting to exclude extended i2c functions from compilation.
-#define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
+// #define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
 
 // Uncomment this define to enable debug output.
 //#define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
