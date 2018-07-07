@@ -134,16 +134,16 @@ typedef enum {
     // Called in setup()
     void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode/* = LeptonFLiR_ImageStorageMode_80x60_16bpp*/, LeptonFLiR_TemperatureMode tempMode/* = LeptonFLiR_TemperatureMode_Celsius*/);
 
-    void i2cWire_beginTransmission_set_callback(void(*callback)(uint8_t addr));
-    void i2cWire_endTransmission_set_callback(uint8_t(*callback)(void));
-    void i2cWire_requestFrom_set_callback(uint8_t(*callback)(uint8_t addr, uint8_t len));
-    void i2cWire_write_set_callback(size_t(*callback)(uint8_t data));
-    void i2cWire_write16_set_callback(size_t(*callback)(uint16_t data));
-    void i2cWire_read_set_callback(uint8_t(*callback)(void));
-    void i2cWire_read16_set_callback(uint16_t(*callback)(void));
-    void i2cWire_set_buffer_length(int length);
-    void millis_set_callback(unsigned long(*callback)(void));
-    void delay_set_callback(void (*callback)(unsigned long));
+    void lepton_i2cWire_beginTransmission_set_callback(void(*callback)(uint8_t addr));
+    void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback)(void));
+    void lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)(uint8_t addr, uint8_t len));
+    void lepton_i2cWire_write_set_callback(size_t(*callback)(uint8_t data));
+    void lepton_i2cWire_write16_set_callback(size_t(*callback)(uint16_t data));
+    void lepton_i2cWire_read_set_callback(uint8_t(*callback)(void));
+    void lepton_i2cWire_read16_set_callback(uint16_t(*callback)(void));
+    void lepton_i2cWire_set_buffer_length(int length);
+    void lepton_millis_set_callback(unsigned long(*callback)(void));
+    void lepton_delay_set_callback(void (*callback)(unsigned long));
 
     // uint8_t getChipSelectPin();
     LeptonFLiR_ImageStorageMode getImageStorageMode();

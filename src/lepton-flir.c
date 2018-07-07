@@ -1020,52 +1020,52 @@ int readRegister(uint16_t regAddress, uint16_t *value) {
     return _lastI2CError;
 }
 
-void i2cWire_beginTransmission_set_callback(void(*callback)(uint8_t addr))
+void lepton_i2cWire_beginTransmission_set_callback(void(*callback)(uint8_t addr))
 {
     i2cWire_beginTransmission = callback;
 }
 
-void i2cWire_endTransmission_set_callback(uint8_t(*callback)(void))
+void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback)(void))
 {
     i2cWire_endTransmission = callback;
 }
 
-void i2cWire_requestFrom_set_callback(uint8_t(*callback)(uint8_t addr, uint8_t len))
+void lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)(uint8_t addr, uint8_t len))
 {
     i2cWire_requestFrom = callback;
 }
 
-void i2cWire_write_set_callback(size_t(*callback)(uint8_t data))
+void lepton_i2cWire_write_set_callback(size_t(*callback)(uint8_t data))
 {
     i2cWire_write = callback;
 }
 
-void i2cWire_write16_set_callback(size_t(*callback)(uint16_t data))
+void lepton_i2cWire_write16_set_callback(size_t(*callback)(uint16_t data))
 {
     i2cWire_write16 = callback;
 }
 
-void i2cWire_read_set_callback(uint8_t(*callback)(void))
+void lepton_i2cWire_read_set_callback(uint8_t(*callback)(void))
 {
     i2cWire_read = callback;
 }
 
-void i2cWire_read16_set_callback(uint16_t(*callback)(void))
+void lepton_i2cWire_read16_set_callback(uint16_t(*callback)(void))
 {
     i2cWire_read16 = callback;
 }
 
-void i2cWire_set_buffer_length(int length)
+void lepton_i2cWire_set_buffer_length(int length)
 {
     BUFFER_LENGTH = length;
 }
 
-void millis_set_callback(unsigned long(*callback)(void))
+void lepton_millis_set_callback(unsigned long(*callback)(void))
 {
     millis_callback = callback;
 }
 
-void delay_set_callback(void (*callback)(unsigned long))
+void lepton_delay_set_callback(void (*callback)(unsigned long))
 {
     delay_callback = callback;
 }
