@@ -356,14 +356,6 @@ public:
     byte getLastI2CError();
     LEP_RESULT getLastLepResult();
 
-#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    void printModuleInfo();
-    void checkForErrors();
-#endif
-
-#if 0
-private:
-#endif
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
     // TwoWire *_i2cWire;          // Wire class instance to use
 #endif
