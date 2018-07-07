@@ -25,7 +25,7 @@
     Lepton-FLiR-Arduino - Version 0.9.91
 */
 
-#include "LeptonFLiR.h"
+#include "lepton-flir.h"
 #include <subsystems/os/critical.h>
 #if (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)) && !defined(LEPFLIR_DISABLE_SCHEDULER)
 #include "Scheduler.h"

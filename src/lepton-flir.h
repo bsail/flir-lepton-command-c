@@ -70,7 +70,7 @@
 #include <drivers/wire/Wire.h>
 #endif
 // #include <drivers/spi/SPI.h>
-#include "LeptonFLiRDefs.h"
+#include "lepton-flir-defs.h"
 #include <inttypes.h>
 
 #ifndef ENABLED
