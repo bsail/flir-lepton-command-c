@@ -26,7 +26,6 @@
 */
 
 #include "lepton-flir.h"
-#include <subsystems/os/critical.h>
 #if (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)) && !defined(LEPFLIR_DISABLE_SCHEDULER)
 #include "Scheduler.h"
 #define LEPFLIR_USE_SCHEDULER           1
@@ -65,14 +64,53 @@ static inline uint8_t highByte(uint16_t p)
     return ((p & 0xFF00) >> 8);
 }
 
+static void(*i2cWire_beginTransmission)(uint8_t addr);
+static uint8_t(*i2cWire_endTransmission)(void);
+static uint8_t(*i2cWire_requestFrom)(uint8_t addr, uint8_t len);
+static size_t(*i2cWire_write)(uint8_t data);
+static size_t(*i2cWire_write16)(uint16_t data);
+static uint8_t(*i2cWire_read)(void);
+static uint16_t(*i2cWire_read16)(void);
+
+#if 0
+/* Example implementation of i2cWire functions */
+
+void i2cWire_beginTransmission(uint8_t addr) {
+    _lastI2CError = 0;
+    TwoWire_beginTransmission(addr);
+}
+
+uint8_t i2cWire_endTransmission(void) {
+    _lastI2CError = TwoWire_endTransmission();
+    return _lastI2CError;
+}
+
+uint8_t i2cWire_requestFrom(uint8_t addr, uint8_t len) {
+    uint8_t ret = TwoWire_requestFrom(addr, len);
+    return ret;
+}
+
+size_t i2cWire_write(uint8_t data) {
+    uint8_t ret = TwoWire_write(data);
+    return ret;
+}
+
+size_t i2cWire_write16(uint16_t data) {
+    return TwoWire_write(highByte(data)) + TwoWire_write(lowByte(data));
+}
+
+uint8_t i2cWire_read(void) {
+    return (uint8_t)(TwoWire_read() & 0xFF);
+}
+
+uint16_t i2cWire_read16(void) {
+    return ((uint16_t)(TwoWire_read() & 0xFF) << 8) | (uint16_t)(TwoWire_read() & 0xFF);
+}
+
+#endif
+
 void LeptonFLiR_LeptonFLiR() {
-    // _spiCSPin = spiCSPin;
-    // _spiSettings = SPISettings(LEPFLIR_SPI_MAX_SPEED, MSBFIRST, SPI_MODE3);
     _storageMode = LeptonFLiR_ImageStorageMode_Count;
-    // _csEnableFunc = csEnableFuncDef;
-    // _csDisableFunc = csDisableFuncDef;
-    // _imageData = _spiFrameData = _telemetryData = NULL;
-    // _isReadingNextFrame = false;
     _lastI2CError = _lastLepResult = 0;
 }
 
@@ -1001,45 +1039,40 @@ int readRegister(uint16_t regAddress, uint16_t *value) {
     return _lastI2CError;
 }
 
-void i2cWire_beginTransmission(uint8_t addr) {
-    _lastI2CError = 0;
-    critical_i2c_lock();
-    TwoWire_beginTransmission(addr);
+void i2cWire_beginTransmission_set_callback(void(*callback)(uint8_t addr))
+{
+    i2cWire_beginTransmission = callback;
 }
 
-uint8_t i2cWire_endTransmission(void) {
-    // return (_lastI2CError = _i2cWire->endTransmission());
-    _lastI2CError = TwoWire_endTransmission();
-    critical_i2c_unlock();
-    return _lastI2CError;
+void i2cWire_endTransmission_set_callback(uint8_t(*callback)(void))
+{
+    i2cWire_endTransmission = callback;
 }
 
-uint8_t i2cWire_requestFrom(uint8_t addr, uint8_t len) {
-    critical_i2c_lock();
-    uint8_t ret = TwoWire_requestFrom(addr, len);
-    critical_i2c_unlock();
-    // return _i2cWire->requestFrom(addr, len);
-    return ret;
+void i2cWire_requestFrom_set_callback(uint8_t(*callback)(uint8_t addr, uint8_t len))
+{
+    i2cWire_requestFrom = callback;
 }
 
-size_t i2cWire_write(uint8_t data) {
-    uint8_t ret = TwoWire_write(data);
-    // return _i2cWire->write(data);
-    return ret;
+void i2cWire_write_set_callback(size_t(*callback)(uint8_t data))
+{
+    i2cWire_write = callback;
 }
 
-size_t i2cWire_write16(uint16_t data) {
-    // return _i2cWire->write(highByte(data)) + _i2cWire->write(lowByte(data));
-    return TwoWire_write(highByte(data)) + TwoWire_write(lowByte(data));
+void i2cWire_write16_set_callback(size_t(*callback)(uint16_t data))
+{
+    i2cWire_write16 = callback;
 }
 
-uint8_t i2cWire_read(void) {
-    return (uint8_t)(TwoWire_read() & 0xFF);
-    // return (uint8_t)(_i2cWire->read() & 0xFF);
+void i2cWire_read_set_callback(uint8_t(*callback)(void))
+{
+    i2cWire_read = callback;
 }
 
-uint16_t i2cWire_read16(void) {
-    return ((uint16_t)(TwoWire_read() & 0xFF) << 8) | (uint16_t)(TwoWire_read() & 0xFF);
-    // return ((uint16_t)(_i2cWire->read() & 0xFF) << 8) | (uint16_t)(_i2cWire->read() & 0xFF);
+void i2cWire_read16_set_callback(uint16_t(*callback)(void))
+{
+    i2cWire_read16 = callback;
 }
+
+
 

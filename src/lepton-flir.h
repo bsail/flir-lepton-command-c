@@ -151,6 +151,14 @@ typedef enum {
     // Called in setup()
     void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode/* = LeptonFLiR_ImageStorageMode_80x60_16bpp*/, LeptonFLiR_TemperatureMode tempMode/* = LeptonFLiR_TemperatureMode_Celsius*/);
 
+    void i2cWire_beginTransmission_set_callback(void(*callback)(uint8_t addr));
+    void i2cWire_endTransmission_set_callback(uint8_t(*callback)(void));
+    void i2cWire_requestFrom_set_callback(uint8_t(*callback)(uint8_t addr, uint8_t len));
+    void i2cWire_write_set_callback(size_t(*callback)(uint8_t data));
+    void i2cWire_write16_set_callback(size_t(*callback)(uint16_t data));
+    void i2cWire_read_set_callback(uint8_t(*callback)(void));
+    void i2cWire_read16_set_callback(uint16_t(*callback)(void));
+
     // byte getChipSelectPin();
     LeptonFLiR_ImageStorageMode getImageStorageMode();
     LeptonFLiR_TemperatureMode getTemperatureMode();
@@ -336,21 +344,12 @@ typedef enum {
     int writeRegister(uint16_t regAddress, uint16_t value);
     int readRegister(uint16_t regAddress, uint16_t *value);
 
-    void i2cWire_beginTransmission(uint8_t);
-    uint8_t i2cWire_endTransmission(void);
-    uint8_t i2cWire_requestFrom(uint8_t, uint8_t);
-    size_t i2cWire_write(uint8_t);
-    size_t i2cWire_write16(uint16_t);
-    uint8_t i2cWire_read(void);
-    uint16_t i2cWire_read16(void);
-
-extern void wordsToHexString(uint16_t *dataWords, int dataLength, char *buffer, int maxLength);
-
-extern float kelvin100ToCelsius(uint16_t kelvin100);
-extern float kelvin100ToFahrenheit(uint16_t kelvin100);
-extern float kelvin100ToKelvin(uint16_t kelvin100);
-extern uint16_t celsiusToKelvin100(float celsius);
-extern uint16_t fahrenheitToKelvin100(float fahrenheit);
-extern uint16_t kelvinToKelvin100(float kelvin);
+    extern void wordsToHexString(uint16_t *dataWords, int dataLength, char *buffer, int maxLength);
+    extern float kelvin100ToCelsius(uint16_t kelvin100);
+    extern float kelvin100ToFahrenheit(uint16_t kelvin100);
+    extern float kelvin100ToKelvin(uint16_t kelvin100);
+    extern uint16_t celsiusToKelvin100(float celsius);
+    extern uint16_t fahrenheitToKelvin100(float fahrenheit);
+    extern uint16_t kelvinToKelvin100(float kelvin);
 
 #endif
