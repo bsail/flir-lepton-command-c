@@ -94,11 +94,6 @@ LeptonFLiR_TemperatureMode getTemperatureMode() {
     return _tempMode;
 }
 
-// void setFastCSFuncs(digitalWriteFunc csEnableFunc, digitalWriteFunc csDisableFunc) {
-//     _csEnableFunc = csEnableFunc ? csEnableFunc : csEnableFuncDef;
-//     _csDisableFunc = csDisableFunc ? csDisableFunc : csDisableFuncDef;
-// }
-
 int getImageWidth() {
     switch (_storageMode) {
         case LeptonFLiR_ImageStorageMode_80x60_16bpp:
@@ -141,46 +136,6 @@ int getImageBpp() {
         case LeptonFLiR_ImageStorageMode_40x30_8bpp:
         case LeptonFLiR_ImageStorageMode_20x15_8bpp:
             return 1;
-        default:
-            return 0;
-    }
-}
-
-int getImagePitch() {
-    switch (_storageMode) {
-        case LeptonFLiR_ImageStorageMode_80x60_16bpp:
-            return roundUpVal16(80 * 2);
-        case LeptonFLiR_ImageStorageMode_80x60_8bpp:
-            return roundUpVal16(80 * 1);
-        case LeptonFLiR_ImageStorageMode_40x30_16bpp:
-            return roundUpVal16(40 * 2);
-        case LeptonFLiR_ImageStorageMode_40x30_8bpp:
-            return roundUpVal16(40 * 1);
-        case LeptonFLiR_ImageStorageMode_20x15_16bpp:
-            return roundUpVal16(20 * 2);
-        case LeptonFLiR_ImageStorageMode_20x15_8bpp:
-            return roundUpVal16(20 * 1);
-        default:
-            return 0;
-    }
-}
-
-int getImageTotalBytes() {
-    return ((getImageHeight() - 1) * getImagePitch()) + (getImageWidth() * getImageBpp());
-}
-
-
-int getSPIFrameLines() {
-    switch (_storageMode) {
-        case LeptonFLiR_ImageStorageMode_80x60_16bpp:
-        case LeptonFLiR_ImageStorageMode_80x60_8bpp:
-            return 1;
-        case LeptonFLiR_ImageStorageMode_40x30_16bpp:
-        case LeptonFLiR_ImageStorageMode_40x30_8bpp:
-            return 2;
-        case LeptonFLiR_ImageStorageMode_20x15_16bpp:
-        case LeptonFLiR_ImageStorageMode_20x15_8bpp:
-            return 4;
         default:
             return 0;
     }

@@ -143,10 +143,6 @@ typedef enum {
     LeptonFLiR_TemperatureMode_Count
 } LeptonFLiR_TemperatureMode;
 
-#if 0
-class LeptonFLiR {
-public:
-    #endif
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
     // May use a different Wire instance than Wire. Some chipsets, such as Due/Zero/etc.,
     // have a Wire1 class instance that uses the SDA1/SCL1 lines instead.
@@ -160,9 +156,6 @@ public:
     // Supported SPI baud rates are 2.2MHz to 20MHz.
     LeptonFLiR(byte spiCSPin = 53);
 #endif
-#if 0
-    ~LeptonFLiR();
-#endif
     // Called in setup()
     void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode/* = LeptonFLiR_ImageStorageMode_80x60_16bpp*/, LeptonFLiR_TemperatureMode tempMode/* = LeptonFLiR_TemperatureMode_Celsius*/);
 
@@ -174,36 +167,6 @@ public:
     int getImageWidth();
     int getImageHeight();
     int getImageBpp(); // Bytes per pixel
-    int getImagePitch(); // Bytes per row (may be different than Bpp * Width, in memory aligned mode)
-    int getImageTotalBytes();
-
-    // Image data access (disabled during frame read)
-    // byte *getImageData();
-    // byte *getImageDataRow(int row);
-    // uint16_t getImageDataRowCol(int row, int col);
-
-    // Telemetry data access (disabled during frame read)
-    #if 0
-    byte *getTelemetryData(); // raw
-    #endif
-    // void getTelemetryData(TelemetryData *telemetry);
-
-    // Commonly used properties from telemetry data
-    // uint32_t getTelemetryFrameCounter();
-    // uint8_t getShouldRunFFCNormalization();
-
-    // Sets fast enable/disable methods to call when enabling and disabling the SPI chip
-    // select pin (e.g. PORTB |= 0x01, PORTB &= ~0x01, etc.). The function itself depends
-    // on the board and pin used (see also digitalWriteFast library). Enable should set
-    // the pin LOW, and disable should set the pin HIGH (aka active-low).
-    typedef void(*digitalWriteFunc)(byte); // Passes pin number in
-    // void setFastCSFuncs(digitalWriteFunc csEnableFunc, digitalWriteFunc csDisableFunc);
-
-    #if 0
-    // This method reads the next image frame, taking up considerable processor time.
-    // Returns a uint8_tean indicating if next frame was successfully retrieved or not.
-    uint8_t readNextFrame();
-    #endif
 
     // AGC module commands
 
@@ -356,30 +319,13 @@ public:
     byte getLastI2CError();
     LEP_RESULT getLastLepResult();
 
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
-    // TwoWire *_i2cWire;          // Wire class instance to use
-#endif
-    // byte _spiCSPin;             // SPI chip select pin
-    // SPISettings _spiSettings;   // SPI port settings to use
     LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
     LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
-    // digitalWriteFunc _csEnableFunc; // Chip select enable function
-    // digitalWriteFunc _csDisableFunc; // Chip select disable function
-    // byte *_imageData;           // Image data (column major)
-    // byte *_spiFrameData;        // SPI frame data
-    // byte *_telemetryData;       // SPI telemetry frame data
-    // uint8_t _isReadingNextFrame;   // Tracks if next frame is being read
     byte _lastI2CError;         // Last i2c error
     byte _lastLepResult;        // Last lep result
 
-    // byte *_getImageDataRow(int row);
-
-    // int getSPIFrameLines();
-    // int getSPIFrameTotalBytes();
-    // uint16_t *getSPIFrameDataRow(int row);
-
-    uint8_t waitCommandBegin(int timeout/* = 0*/);
-    uint8_t waitCommandFinish(int timeout/* = 0*/);
+    uint8_t waitCommandBegin(int timeout);
+    uint8_t waitCommandFinish(int timeout);
 
     uint16_t cmdCode(uint16_t cmdID, uint16_t cmdType);
 
@@ -408,9 +354,6 @@ public:
     size_t i2cWire_write16(uint16_t);
     uint8_t i2cWire_read(void);
     uint16_t i2cWire_read16(void);
-#if 0
-};
-#endif
 
 extern void wordsToHexString(uint16_t *dataWords, int dataLength, char *buffer, int maxLength);
 
