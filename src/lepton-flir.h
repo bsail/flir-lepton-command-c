@@ -34,7 +34,7 @@
 // #define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
 
 // Uncomment this define to enable debug output functions.
-//#define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
+// #define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
 
 #include "lepton-flir-defs.h"
 #include <inttypes.h>
@@ -293,33 +293,8 @@ uint16_t temperatureToKelvin100(float temperature);
 const char *getTemperatureSymbol();
 
 uint8_t getLastI2CError();
+void setLastI2CError(uint8_t error);
 LEP_RESULT getLastLepResult();
-
-LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
-LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
-uint8_t _lastI2CError;          // Last i2c error
-uint8_t _lastLepResult;         // Last lep result
-
-uint8_t waitCommandBegin(int timeout);
-uint8_t waitCommandFinish(int timeout);
-
-uint16_t cmdCode(uint16_t cmdID, uint16_t cmdType);
-
-void sendCommand_raw(uint16_t cmdCode);
-void sendCommand_u16(uint16_t cmdCode, uint16_t value);
-void sendCommand_u32(uint16_t cmdCode, uint32_t value);
-void sendCommand_array(uint16_t cmdCode, uint16_t * dataWords, int dataLength);
-
-void receiveCommand_u16(uint16_t cmdCode, uint16_t * value);
-void receiveCommand_u32(uint16_t cmdCode, uint32_t * value);
-void receiveCommand_array(uint16_t cmdCode, uint16_t * readWords,
-                          int maxLength);
-
-int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength);
-int readDataRegister(uint16_t * readWords, int maxLength);
-
-int writeRegister(uint16_t regAddress, uint16_t value);
-int readRegister(uint16_t regAddress, uint16_t * value);
 
 extern void wordsToHexString(uint16_t * dataWords, int dataLength, char *buffer,
                              int maxLength);

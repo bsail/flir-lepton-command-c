@@ -24,6 +24,6 @@ There are several defines inside of the library's header file that allows for mo
 // #define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
 
 // Uncomment this define to enable debug output functions.
-//#define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
+// #define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
 ```
 

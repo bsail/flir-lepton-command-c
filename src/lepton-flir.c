@@ -106,6 +106,33 @@ uint16_t i2cWire_read16(void)
 
 #endif
 
+static LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
+static LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
+static uint8_t _lastI2CError;          // Last i2c error
+static uint8_t _lastLepResult;         // Last lep result
+
+static uint8_t waitCommandBegin(int timeout);
+static uint8_t waitCommandFinish(int timeout);
+
+static uint16_t cmdCode(uint16_t cmdID, uint16_t cmdType);
+
+static void sendCommand_raw(uint16_t cmdCode);
+static void sendCommand_u16(uint16_t cmdCode, uint16_t value);
+static void sendCommand_u32(uint16_t cmdCode, uint32_t value);
+static void sendCommand_array(uint16_t cmdCode, uint16_t * dataWords, int dataLength);
+
+static void receiveCommand_u16(uint16_t cmdCode, uint16_t * value);
+static void receiveCommand_u32(uint16_t cmdCode, uint32_t * value);
+static void receiveCommand_array(uint16_t cmdCode, uint16_t * readWords,
+                          int maxLength);
+
+static int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength);
+static int readDataRegister(uint16_t * readWords, int maxLength);
+
+static int writeRegister(uint16_t regAddress, uint16_t value);
+static int readRegister(uint16_t regAddress, uint16_t * value);
+
+
 void LeptonFLiR_LeptonFLiR()
 {
   _storageMode = LeptonFLiR_ImageStorageMode_Count;
@@ -946,6 +973,11 @@ const char *getTemperatureSymbol()
 uint8_t getLastI2CError()
 {
   return _lastI2CError;
+}
+
+void setLastI2CError(uint8_t error)
+{
+  _lastI2CError = error;
 }
 
 LEP_RESULT getLastLepResult()
