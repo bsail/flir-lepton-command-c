@@ -1,6 +1,8 @@
 C Library for the Lepton FLiR Thermal Camera Module.
 ===============
 
+Fork of original library by [NachtRaveVL](https://github.com/NachtRaveVL/Lepton-FLiR-Arduino).
+
 Library to control a Lepton FLiR (forward looking infrared) thermal camera module.
 Licensed under the non-restrictive MIT license.
 
