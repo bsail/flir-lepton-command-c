@@ -30,15 +30,6 @@
 
 // Library Setup
 
-// Uncomment this define to enable use of the software i2c library (min 4MHz+ processor required).
-// #define LEPFLIR_ENABLE_SOFTWARE_I2C     1   // http://playground.arduino.cc/Main/SoftwareI2CLibrary
-
-// Uncomment this define to disable usage of the Scheduler library on SAM/SAMD architecures.
-#define LEPFLIR_DISABLE_SCHEDULER       1   // https://github.com/arduino-libraries/Scheduler
-
-// Uncomment this define to disable 16 byte aligned memory allocations (may hinder performance).
-#define LEPFLIR_DISABLE_ALIGNED_MALLOC  1
-
 // Uncomment this define if wanting to exclude extended i2c functions from compilation.
 // #define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
 
@@ -61,17 +52,9 @@
 // selected will be the first rate equal to or below 20MHz given the SPI clock divider
 // (i.e. processor speed /2, /4, /8, /16, ..., /128).
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include <subsystems/avr/Arduino.h>
-#else
-#include <WProgram.h>
-#endif
-#ifndef LEPFLIR_ENABLE_SOFTWARE_I2C
-#include <drivers/wire/Wire.h>
-#endif
-// #include <drivers/spi/SPI.h>
 #include "lepton-flir-defs.h"
 #include <inttypes.h>
+#include <stdlib.h>
 
 #ifndef ENABLED
 #define ENABLED  0x1
@@ -87,8 +70,8 @@ typedef enum {
 } TelemetryData_FFCState;
 
 typedef struct {
-    byte revisionMajor;
-    byte revisionMinor;
+    uint8_t revisionMajor;
+    uint8_t revisionMinor;
     uint32_t cameraUptime;          // (milliseconds)
     uint8_t ffcDesired;
     TelemetryData_FFCState ffcState;
@@ -115,21 +98,21 @@ typedef struct {
 // 14bpp thermal image data with AGC mode disabled and 8bpp thermal image data with AGC
 // mode enabled, therefore if using AGC mode always enabled it is more memory efficient
 // to use an 8bpp mode to begin with. Note that with telemetry enabled, memory cost
-// incurs an additional 164 bytes for telemetry data storage.
+// incurs an additional 164 uint8_ts for telemetry data storage.
 typedef enum {
-    // Full 16bpp image mode, 9600 bytes for image data, 164 bytes for read frame (9604 bytes total, 9806 bytes if aligned)
+    // Full 16bpp image mode, 9600 uint8_ts for image data, 164 uint8_ts for read frame (9604 uint8_ts total, 9806 uint8_ts if aligned)
     LeptonFLiR_ImageStorageMode_80x60_16bpp,
-    // Full 8bpp image mode, 4800 bytes for image data, 164 bytes for read frame (4964 bytes total, 5006 bytes if aligned)
+    // Full 8bpp image mode, 4800 uint8_ts for image data, 164 uint8_ts for read frame (4964 uint8_ts total, 5006 uint8_ts if aligned)
     LeptonFLiR_ImageStorageMode_80x60_8bpp,
 
-    // Halved 16bpp image mode, 2400 bytes for image data, 328 bytes for read frame (2728 bytes total, 2782 bytes if aligned)
+    // Halved 16bpp image mode, 2400 uint8_ts for image data, 328 uint8_ts for read frame (2728 uint8_ts total, 2782 uint8_ts if aligned)
     LeptonFLiR_ImageStorageMode_40x30_16bpp,
-    // Halved 8bpp image mode, 1200 bytes for image data, 328 bytes for read frame (1528 bytes total, 1814 bytes if aligned)
+    // Halved 8bpp image mode, 1200 uint8_ts for image data, 328 uint8_ts for read frame (1528 uint8_ts total, 1814 uint8_ts if aligned)
     LeptonFLiR_ImageStorageMode_40x30_8bpp,
 
-    // Quartered 16bpp image mode, 600 bytes for image data, 656 bytes for read frame (1256 bytes total, 1446 bytes if aligned)
+    // Quartered 16bpp image mode, 600 uint8_ts for image data, 656 uint8_ts for read frame (1256 uint8_ts total, 1446 uint8_ts if aligned)
     LeptonFLiR_ImageStorageMode_20x15_16bpp,
-    // Quartered 8bpp image mode, 300 bytes for image data, 656 bytes for read frame (956 bytes total, 1202 bytes if aligned)
+    // Quartered 8bpp image mode, 300 uint8_ts for image data, 656 uint8_ts for read frame (956 uint8_ts total, 1202 uint8_ts if aligned)
     LeptonFLiR_ImageStorageMode_20x15_8bpp,
 
     LeptonFLiR_ImageStorageMode_Count
@@ -147,7 +130,7 @@ typedef enum {
     // have a Wire1 class instance that uses the SDA1/SCL1 lines instead.
     // Supported i2c baud rates are 100kHz, 400kHz, and 1000kHz.
     // Supported SPI baud rates are 2.2MHz to 20MHz.
-    void LeptonFLiR_LeptonFLiR(/*TwoWire& i2cWire = Wire, *//*byte spiCSPin*//* = 53*/);
+    void LeptonFLiR_LeptonFLiR(/*TwoWire& i2cWire = Wire, *//*uint8_t spiCSPin*//* = 53*/);
     // Called in setup()
     void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode/* = LeptonFLiR_ImageStorageMode_80x60_16bpp*/, LeptonFLiR_TemperatureMode tempMode/* = LeptonFLiR_TemperatureMode_Celsius*/);
 
@@ -158,8 +141,11 @@ typedef enum {
     void i2cWire_write16_set_callback(size_t(*callback)(uint16_t data));
     void i2cWire_read_set_callback(uint8_t(*callback)(void));
     void i2cWire_read16_set_callback(uint16_t(*callback)(void));
+    void i2cWire_set_buffer_length(uint32_t length);
+    void millis_set_callback(unsigned long(*callback)(void));
+    void delay_set_callback(void (*callback)(unsigned long));
 
-    // byte getChipSelectPin();
+    // uint8_t getChipSelectPin();
     LeptonFLiR_ImageStorageMode getImageStorageMode();
     LeptonFLiR_TemperatureMode getTemperatureMode();
 
@@ -316,13 +302,13 @@ typedef enum {
     uint16_t temperatureToKelvin100(float temperature);
     const char *getTemperatureSymbol();
 
-    byte getLastI2CError();
+    uint8_t getLastI2CError();
     LEP_RESULT getLastLepResult();
 
     LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
     LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
-    byte _lastI2CError;         // Last i2c error
-    byte _lastLepResult;        // Last lep result
+    uint8_t _lastI2CError;         // Last i2c error
+    uint8_t _lastLepResult;        // Last lep result
 
     uint8_t waitCommandBegin(int timeout);
     uint8_t waitCommandFinish(int timeout);

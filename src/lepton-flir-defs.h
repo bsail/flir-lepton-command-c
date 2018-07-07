@@ -83,7 +83,9 @@
 #ifndef LeptonFLiRDefs_H
 #define LeptonFLiRDefs_H
 
-#define LEP_I2C_DEVICE_ADDRESS                  (byte)0x2A
+#include <inttypes.h>
+
+#define LEP_I2C_DEVICE_ADDRESS                  (uint8_t)0x2A
 
 #define LEP_I2C_COMMAND_MODULE_ID_BIT_MASK      (uint16_t)0x0F00
 #define LEP_I2C_COMMAND_ID_BIT_MASK             (uint16_t)0x00FC
@@ -333,7 +335,7 @@ typedef enum {
     LEP_RANGE_ERROR = -3,    /* Camera range error */
     LEP_CHECKSUM_ERROR = -4,    /* Camera checksum error */
     LEP_BAD_ARG_POINTER_ERROR = -5,    /* Camera Bad argument  error */
-    LEP_DATA_SIZE_ERROR = -6,    /* Camera byte count error */
+    LEP_DATA_SIZE_ERROR = -6,    /* Camera uint8_t count error */
     LEP_UNDEFINED_FUNCTION_ERROR = -7,    /* Camera undefined function error */
     LEP_FUNCTION_NOT_SUPPORTED = -8,    /* Camera function not yet supported error */
 
@@ -366,7 +368,7 @@ typedef enum {
     LEP_TIMEOUT_ERROR = -109,  /* Comm timeout error */
     LEP_COMM_ERROR_WRITING_COMM = -110,  /* Error writing comm */
     LEP_COMM_ERROR_READING_COMM = -111,  /* Error reading comm */
-    LEP_COMM_COUNT_ERROR = -112,  /* Comm byte count error */
+    LEP_COMM_COUNT_ERROR = -112,  /* Comm uint8_t count error */
 
     /* Other Errors */
     LEP_OPERATION_CANCELED = -126,  /* Camera operation canceled */

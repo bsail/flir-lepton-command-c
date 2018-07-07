@@ -26,10 +26,7 @@
 */
 
 #include "lepton-flir.h"
-#if (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)) && !defined(LEPFLIR_DISABLE_SCHEDULER)
-#include "Scheduler.h"
-#define LEPFLIR_USE_SCHEDULER           1
-#endif
+#include <math.h>
 
 #define true 1
 #define false 0
@@ -42,17 +39,7 @@
 #define LEPFLIR_SPI_FRAME_PACKET_SIZE           164 // 2B ID + 2B CRC + 160B for 80x1 14bpp/8bppAGC thermal image data or telemetry data
 #define LEPFLIR_SPI_FRAME_PACKET_SIZE16         82
 
-#ifndef LEPFLIR_DISABLE_ALIGNED_MALLOC
-static inline int roundUpVal16(int val) { return ((val + 15) & -16); }
-static inline byte *roundUpPtr16(byte *ptr) { return ptr ? (byte *)(((uintptr_t)ptr + 15) & -16) : NULL; }
-static inline byte *roundUpMalloc16(int size) { return (byte *)malloc((size_t)(size + 15)); }
-static inline byte *roundUpSpiFrame16(byte *spiFrame) { return spiFrame ? roundUpPtr16(spiFrame) + 16 - 4 : NULL; }
-#else
-static inline int roundUpVal16(int val) { return val; }
-static inline byte *roundUpPtr16(byte *ptr) { return ptr; }
-static inline byte *roundUpMalloc16(int size) { return (byte *)malloc((size_t)size); }
-static inline byte *roundUpSpiFrame16(byte *spiFrame) { return spiFrame; }
-#endif
+static uint32_t BUFFER_LENGTH = 0;
 
 static inline uint8_t lowByte(uint16_t p)
 {
@@ -71,6 +58,8 @@ static size_t(*i2cWire_write)(uint8_t data);
 static size_t(*i2cWire_write16)(uint16_t data);
 static uint8_t(*i2cWire_read)(void);
 static uint16_t(*i2cWire_read16)(void);
+static unsigned long(*millis_callback)(void);
+static void (*delay_callback)(unsigned long);
 
 #if 0
 /* Example implementation of i2cWire functions */
@@ -590,9 +579,9 @@ uint32_t vid_getGamma() {
 
 #endif
 
-static inline void byteToHexString(byte value, char *buffer) {
-    byte highNibble = value / 16;
-    byte lowNibble = value % 16;
+static inline void uint8_tToHexString(uint8_t value, char *buffer) {
+    uint8_t highNibble = value / 16;
+    uint8_t lowNibble = value % 16;
     if (highNibble < 10) buffer[0] = '0' + highNibble;
     else buffer[0] = 'A' + (highNibble - 10);
     if (lowNibble < 10) buffer[1] = '0' + lowNibble;
@@ -604,9 +593,9 @@ void wordsToHexString(uint16_t *dataWords, int dataLength, char *buffer, int max
 
     while (dataLength-- > 0 && maxLength > 3) {
         if (maxLength > 3) {
-            byteToHexString(highByte(*dataWords), buffer);
+            uint8_tToHexString(highByte(*dataWords), buffer);
             buffer += 2; maxLength -= 2;
-            byteToHexString(lowByte(*dataWords), buffer);
+            uint8_tToHexString(lowByte(*dataWords), buffer);
             buffer += 2; maxLength -= 2;
             ++dataWords;
         }
@@ -686,7 +675,7 @@ const char *getTemperatureSymbol() {
     }
 }
 
-byte getLastI2CError() {
+uint8_t getLastI2CError() {
     return _lastI2CError;
 }
 
@@ -696,7 +685,7 @@ LEP_RESULT getLastLepResult() {
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
 
-static const char *textForI2CError(byte errorCode) {
+static const char *textForI2CError(uint8_t errorCode) {
     switch (errorCode) {
         case 0:
             return "Success";
@@ -726,7 +715,7 @@ static const char *textForLepResult(LEP_RESULT errorCode) {
         case LEP_BAD_ARG_POINTER_ERROR:
             return "LEP_BAD_ARG_POINTER_ERROR Camera Bad argument  error";
         case LEP_DATA_SIZE_ERROR:
-            return "LEP_DATA_SIZE_ERROR Camera byte count error";
+            return "LEP_DATA_SIZE_ERROR Camera uint8_t count error";
         case LEP_UNDEFINED_FUNCTION_ERROR:
             return "LEP_UNDEFINED_FUNCTION_ERROR Camera undefined function error";
         case LEP_FUNCTION_NOT_SUPPORTED:
@@ -774,7 +763,7 @@ static const char *textForLepResult(LEP_RESULT errorCode) {
         case LEP_COMM_ERROR_READING_COMM:
             return "LEP_COMM_ERROR_READING_COMM Error reading comm";
         case LEP_COMM_COUNT_ERROR:
-            return "LEP_COMM_COUNT_ERROR Comm byte count error";
+            return "LEP_COMM_COUNT_ERROR Comm uint8_t count error";
         case LEP_OPERATION_CANCELED:
             return "LEP_OPERATION_CANCELED Camera operation canceled";
         case LEP_UNDEFINED_ERROR_CODE:
@@ -795,14 +784,10 @@ uint8_t waitCommandBegin(int timeout) {
     if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK))
         return true;
 
-    unsigned long endTime = millis() + (unsigned long)timeout;
+    unsigned long endTime = millis_callback() + (unsigned long)timeout;
 
-    while ((status & LEP_I2C_STATUS_BUSY_BIT_MASK) && (timeout <= 0 || millis() < endTime)) {
-#ifdef LEPFLIR_USE_SCHEDULER
-        Scheduler.yield();
-#else
-        delay(1);
-#endif
+    while ((status & LEP_I2C_STATUS_BUSY_BIT_MASK) && (timeout <= 0 || millis_callback() < endTime)) {
+        delay_callback(1);
 
         if (readRegister(LEP_I2C_STATUS_REG, &status))
             return false;
@@ -822,25 +807,21 @@ uint8_t waitCommandFinish(int timeout) {
         return false;
 
     if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK)) {
-        _lastLepResult = (byte)((status & LEP_I2C_STATUS_ERROR_CODE_BIT_MASK) >> LEP_I2C_STATUS_ERROR_CODE_BIT_SHIFT);
+        _lastLepResult = (uint8_t)((status & LEP_I2C_STATUS_ERROR_CODE_BIT_MASK) >> LEP_I2C_STATUS_ERROR_CODE_BIT_SHIFT);
         return true;
     }
 
-    unsigned long endTime = millis() + (unsigned long)timeout;
+    unsigned long endTime = millis_callback() + (unsigned long)timeout;
 
-    while ((status & LEP_I2C_STATUS_BUSY_BIT_MASK) && (timeout <= 0 || millis() < endTime)) {
-#ifdef LEPFLIR_USE_SCHEDULER
-        Scheduler.yield();
-#else
-        delay(1);
-#endif
+    while ((status & LEP_I2C_STATUS_BUSY_BIT_MASK) && (timeout <= 0 || millis_callback() < endTime)) {
+        delay_callback(1);
 
         if (readRegister(LEP_I2C_STATUS_REG, &status))
             return false;
     }
 
     if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK)) {
-        _lastLepResult = (byte)((status & LEP_I2C_STATUS_ERROR_CODE_BIT_MASK) >> LEP_I2C_STATUS_ERROR_CODE_BIT_SHIFT);
+        _lastLepResult = (uint8_t)((status & LEP_I2C_STATUS_ERROR_CODE_BIT_MASK) >> LEP_I2C_STATUS_ERROR_CODE_BIT_SHIFT);
         return true;
     }
     else {
@@ -976,9 +957,9 @@ int readDataRegister(uint16_t *readWords, int maxLength) {
     if (i2cWire_endTransmission())
         return _lastI2CError;
 
-    int bytesRead = i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2);
-    if (bytesRead != 2) {
-        while (bytesRead-- > 0)
+    int uint8_tsRead = i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2);
+    if (uint8_tsRead != 2) {
+        while (uint8_tsRead-- > 0)
             i2cWire_read();
         return (_lastI2CError = 4);
     }
@@ -992,20 +973,20 @@ int readDataRegister(uint16_t *readWords, int maxLength) {
     // how many words can be read at once. Therefore, we loop around until all words
     // have been read out from their registers.
 
-    bytesRead = i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, min(BUFFER_LENGTH, readLength));
+    uint8_tsRead = i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, min(BUFFER_LENGTH, readLength));
 
-    while (bytesRead > 0 && readLength > 0) {
+    while (uint8_tsRead > 0 && readLength > 0) {
 
-        while (bytesRead > 1 && readLength > 1 && maxLength > 0) {
+        while (uint8_tsRead > 1 && readLength > 1 && maxLength > 0) {
             *readWords++ = i2cWire_read16();
-            bytesRead -= 2; readLength -= 2; --maxLength;
+            uint8_tsRead -= 2; readLength -= 2; --maxLength;
         }
 
         if (readLength > 0)
-            bytesRead += i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, min(BUFFER_LENGTH, readLength));
+            uint8_tsRead += i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, min(BUFFER_LENGTH, readLength));
     }
 
-    while (bytesRead-- > 0)
+    while (uint8_tsRead-- > 0)
         i2cWire_read();
 
     while (maxLength-- > 0)
@@ -1027,9 +1008,9 @@ int readRegister(uint16_t regAddress, uint16_t *value) {
     if (i2cWire_endTransmission())
         return _lastI2CError;
 
-    int bytesRead = i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2);
-    if (bytesRead != 2) {
-        while (bytesRead-- > 0)
+    int uint8_tsRead = i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2);
+    if (uint8_tsRead != 2) {
+        while (uint8_tsRead-- > 0)
             i2cWire_read();
         return (_lastI2CError = 4);
     }
@@ -1074,5 +1055,18 @@ void i2cWire_read16_set_callback(uint16_t(*callback)(void))
     i2cWire_read16 = callback;
 }
 
+void i2cWire_set_buffer_length(uint32_t length)
+{
+    BUFFER_LENGTH = length;
+}
 
+void millis_set_callback(unsigned long(*callback)(void))
+{
+    millis_callback = callback;
+}
+
+void delay_set_callback(void (*callback)(unsigned long))
+{
+    delay_callback = callback;
+}
 

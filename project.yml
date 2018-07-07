@@ -75,6 +75,8 @@
 :libraries:
   :placement: :end
   :flag: "${1}"  # or "-L ${1}" for example
+  :system:
+    - -lm
   :common: &common_libraries []
   :test:
     - *common_libraries
