@@ -149,29 +149,28 @@
 #define LEP_CID_AGC_CALC_ENABLE_STATE           (uint16_t)(LEP_AGC_MODULE_BASE + 0x0048)
 
 typedef enum {
-    LEP_AGC_LINEAR = 0,
-    LEP_AGC_HEQ,
+  LEP_AGC_LINEAR = 0,
+  LEP_AGC_HEQ,
 } LEP_AGC_POLICY;
 
 typedef struct {
-    uint16_t startCol;
-    uint16_t startRow;
-    uint16_t endCol;
-    uint16_t endRow;
+  uint16_t startCol;
+  uint16_t startRow;
+  uint16_t endCol;
+  uint16_t endRow;
 } LEP_AGC_HISTOGRAM_ROI;
 
 typedef struct {
-    uint16_t minIntensity;
-    uint16_t maxIntensity;
-    uint16_t meanIntensity;
-    uint16_t numPixels; // def: 4800
+  uint16_t minIntensity;
+  uint16_t maxIntensity;
+  uint16_t meanIntensity;
+  uint16_t numPixels;           // def: 4800
 } LEP_AGC_HISTOGRAM_STATISTICS;
 
 typedef enum {
-    LEP_AGC_SCALE_TO_8_BITS = 0,
-    LEP_AGC_SCALE_TO_14_BITS
+  LEP_AGC_SCALE_TO_8_BITS = 0,
+  LEP_AGC_SCALE_TO_14_BITS
 } LEP_AGC_HEQ_SCALE_FACTOR;
-
 
 #define LEP_SYS_MODULE_BASE                     (uint16_t)0x0200
 #define LEP_CID_SYS_PING                        (uint16_t)(LEP_SYS_MODULE_BASE + 0x0000)
@@ -194,89 +193,88 @@ typedef enum {
 #define LEP_CID_SYS_FFC_STATUS                  (uint16_t)(LEP_SYS_MODULE_BASE + 0x0044)
 
 typedef enum {
-    LEP_SYSTEM_READY = 0,
-    LEP_SYSTEM_INITIALIZING,
-    LEP_SYSTEM_IN_LOW_POWER_MODE,
-    LEP_SYSTEM_GOING_INTO_STANDBY,
-    LEP_SYSTEM_FLAT_FIELD_IN_PROCESS
+  LEP_SYSTEM_READY = 0,
+  LEP_SYSTEM_INITIALIZING,
+  LEP_SYSTEM_IN_LOW_POWER_MODE,
+  LEP_SYSTEM_GOING_INTO_STANDBY,
+  LEP_SYSTEM_FLAT_FIELD_IN_PROCESS
 } LEP_SYS_CAM_STATUS_STATES;
 
 typedef struct {
-    uint32_t camStatus; // LEP_SYS_CAM_STATUS_STATES
-    uint16_t commandCount;
-    uint16_t reserved;
+  uint32_t camStatus;           // LEP_SYS_CAM_STATUS_STATES
+  uint16_t commandCount;
+  uint16_t reserved;
 } LEP_SYS_CAM_STATUS;
 
 typedef enum {
-    LEP_TELEMETRY_LOCATION_HEADER = 0,
-    LEP_TELEMETRY_LOCATION_FOOTER
+  LEP_TELEMETRY_LOCATION_HEADER = 0,
+  LEP_TELEMETRY_LOCATION_FOOTER
 } LEP_SYS_TELEMETRY_LOCATION;
 
 typedef enum {
-    LEP_SYS_FA_DIV_1 = 0,
-    LEP_SYS_FA_DIV_2,
-    LEP_SYS_FA_DIV_4,
-    LEP_SYS_FA_DIV_8,
-    LEP_SYS_FA_DIV_16,
-    LEP_SYS_FA_DIV_32,
-    LEP_SYS_FA_DIV_64,
-    LEP_SYS_FA_DIV_128
+  LEP_SYS_FA_DIV_1 = 0,
+  LEP_SYS_FA_DIV_2,
+  LEP_SYS_FA_DIV_4,
+  LEP_SYS_FA_DIV_8,
+  LEP_SYS_FA_DIV_16,
+  LEP_SYS_FA_DIV_32,
+  LEP_SYS_FA_DIV_64,
+  LEP_SYS_FA_DIV_128
 } LEP_SYS_FRAME_AVERAGE;
 
 typedef struct {
-    uint16_t meanIntensity;
-    uint16_t maxIntensity;
-    uint16_t minIntensity;
-    uint16_t numPixels;
+  uint16_t meanIntensity;
+  uint16_t maxIntensity;
+  uint16_t minIntensity;
+  uint16_t numPixels;
 } LEP_SYS_SCENE_STATISTICS;
 
 typedef struct {
-    uint16_t startCol;
-    uint16_t startRow;
-    uint16_t endCol;
-    uint16_t endRow;
+  uint16_t startCol;
+  uint16_t startRow;
+  uint16_t endCol;
+  uint16_t endRow;
 } LEP_SYS_SCENE_ROI;
 
 typedef enum {
-    LEP_SYS_SHUTTER_POSITION_UNKNOWN = -1,
-    LEP_SYS_SHUTTER_POSITION_IDLE = 0,
-    LEP_SYS_SHUTTER_POSITION_OPEN,
-    LEP_SYS_SHUTTER_POSITION_CLOSED,
-    LEP_SYS_SHUTTER_POSITION_BRAKE_ON
+  LEP_SYS_SHUTTER_POSITION_UNKNOWN = -1,
+  LEP_SYS_SHUTTER_POSITION_IDLE = 0,
+  LEP_SYS_SHUTTER_POSITION_OPEN,
+  LEP_SYS_SHUTTER_POSITION_CLOSED,
+  LEP_SYS_SHUTTER_POSITION_BRAKE_ON
 } LEP_SYS_SHUTTER_POSITION;
 
 typedef enum {
-    LEP_SYS_FFC_SHUTTER_MODE_MANUAL = 0,
-    LEP_SYS_FFC_SHUTTER_MODE_AUTO,
-    LEP_SYS_FFC_SHUTTER_MODE_EXTERNAL
+  LEP_SYS_FFC_SHUTTER_MODE_MANUAL = 0,
+  LEP_SYS_FFC_SHUTTER_MODE_AUTO,
+  LEP_SYS_FFC_SHUTTER_MODE_EXTERNAL
 } LEP_SYS_FFC_SHUTTER_MODE_STATE;
 
 typedef enum {
-    LEP_SYS_SHUTTER_LOCKOUT_INACTIVE = 0,
-    LEP_SYS_SHUTTER_LOCKOUT_HIGH,
-    LEP_SYS_SHUTTER_LOCKOUT_LOW
+  LEP_SYS_SHUTTER_LOCKOUT_INACTIVE = 0,
+  LEP_SYS_SHUTTER_LOCKOUT_HIGH,
+  LEP_SYS_SHUTTER_LOCKOUT_LOW
 } LEP_SYS_SHUTTER_TEMP_LOCKOUT_STATE;
 
 typedef struct {
-    uint32_t shutterMode;               // LEP_SYS_FFC_SHUTTER_MODE_STATE def:LEP_SYS_FFC_SHUTTER_MODE_EXTERNAL
-    uint32_t tempLockoutState;          // LEP_SYS_SHUTTER_TEMP_LOCKOUT_STATE def:LEP_SYS_SHUTTER_LOCKOUT_INACTIVE
-    uint32_t videoFreezeDuringFFC;      // bool def:enabled
-    uint32_t ffcDesired;                // bool def:disabled
-    uint32_t elapsedTimeSinceLastFFC;   // (ms)
-    uint32_t desiredFFCPeriod;          // def:300000 (ms)
-    uint32_t explicitCmdToOpen;         // bool def:disabled
-    uint16_t desiredFFCTempDelta;       // def:300 (kelvins*100)
-    uint16_t imminentDelay;             // def:52 (frame counts)
+  uint32_t shutterMode;         // LEP_SYS_FFC_SHUTTER_MODE_STATE def:LEP_SYS_FFC_SHUTTER_MODE_EXTERNAL
+  uint32_t tempLockoutState;    // LEP_SYS_SHUTTER_TEMP_LOCKOUT_STATE def:LEP_SYS_SHUTTER_LOCKOUT_INACTIVE
+  uint32_t videoFreezeDuringFFC; // bool def:enabled
+  uint32_t ffcDesired;          // bool def:disabled
+  uint32_t elapsedTimeSinceLastFFC; // (ms)
+  uint32_t desiredFFCPeriod;    // def:300000 (ms)
+  uint32_t explicitCmdToOpen;   // bool def:disabled
+  uint16_t desiredFFCTempDelta; // def:300 (kelvins*100)
+  uint16_t imminentDelay;       // def:52 (frame counts)
 } LEP_SYS_FFC_SHUTTER_MODE;
 
 typedef enum {
-    LEP_SYS_FFC_STATUS_WRITE_ERROR = -2,
-    LEP_SYS_FFC_STATUS_ERROR = -1,
-    LEP_SYS_FFC_STATUS_READY = 0,
-    LEP_SYS_FFC_STATUS_BUSY,
-    LEP_SYS_FRAME_AVERAGE_COLLECTING_FRAMES,
+  LEP_SYS_FFC_STATUS_WRITE_ERROR = -2,
+  LEP_SYS_FFC_STATUS_ERROR = -1,
+  LEP_SYS_FFC_STATUS_READY = 0,
+  LEP_SYS_FFC_STATUS_BUSY,
+  LEP_SYS_FRAME_AVERAGE_COLLECTING_FRAMES,
 } LEP_SYS_FFC_STATUS;
-
 
 #define LEP_VID_MODULE_BASE                     (uint16_t)0x0300
 #define LEP_CID_VID_POLARITY_SELECT             (uint16_t)(LEP_VID_MODULE_BASE + 0x0000)
@@ -291,88 +289,87 @@ typedef enum {
 #define LEP_CID_VID_FREEZE_ENABLE               (uint16_t)(LEP_VID_MODULE_BASE + 0x0024)
 
 typedef enum {
-    LEP_VID_WHITE_HOT = 0,
-    LEP_VID_BLACK_HOT
+  LEP_VID_WHITE_HOT = 0,
+  LEP_VID_BLACK_HOT
 } LEP_VID_POLARITY;
 
 typedef enum {
-    LEP_VID_WHEEL6_LUT = 0,
-    LEP_VID_FUSION_LUT,
-    LEP_VID_RAINBOW_LUT,
-    LEP_VID_GLOBOW_LUT,
-    LEP_VID_SEPIA_LUT,
-    LEP_VID_COLOR_LUT,
-    LEP_VID_ICE_FIRE_LUT,
-    LEP_VID_RAIN_LUT,
-    LEP_VID_USER_LUT,
+  LEP_VID_WHEEL6_LUT = 0,
+  LEP_VID_FUSION_LUT,
+  LEP_VID_RAINBOW_LUT,
+  LEP_VID_GLOBOW_LUT,
+  LEP_VID_SEPIA_LUT,
+  LEP_VID_COLOR_LUT,
+  LEP_VID_ICE_FIRE_LUT,
+  LEP_VID_RAIN_LUT,
+  LEP_VID_USER_LUT,
 } LEP_VID_PCOLOR_LUT;
 
 typedef struct {
-    uint8_t reserved;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
+  uint8_t reserved;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
 } LEP_VID_LUT_PIXEL;
 
 typedef struct {
-    LEP_VID_LUT_PIXEL bin[256];
+  LEP_VID_LUT_PIXEL bin[256];
 } LEP_VID_LUT_BUFFER;
 
 typedef struct {
-    uint16_t startCol;
-    uint16_t startRow;
-    uint16_t endCol;
-    uint16_t endRow;
+  uint16_t startCol;
+  uint16_t startRow;
+  uint16_t endCol;
+  uint16_t endRow;
 } LEP_VID_FOCUS_ROI;
 
-
 typedef enum {
-    LEP_OK = 0,     /* Camera ok */
-    LEP_COMM_OK = LEP_OK, /* Camera comm ok (same as LEP_OK) */
+  LEP_OK = 0,                   /* Camera ok */
+  LEP_COMM_OK = LEP_OK,         /* Camera comm ok (same as LEP_OK) */
 
-    LEP_ERROR = -1,    /* Camera general error */
-    LEP_NOT_READY = -2,    /* Camera not ready error */
-    LEP_RANGE_ERROR = -3,    /* Camera range error */
-    LEP_CHECKSUM_ERROR = -4,    /* Camera checksum error */
-    LEP_BAD_ARG_POINTER_ERROR = -5,    /* Camera Bad argument  error */
-    LEP_DATA_SIZE_ERROR = -6,    /* Camera uint8_t count error */
-    LEP_UNDEFINED_FUNCTION_ERROR = -7,    /* Camera undefined function error */
-    LEP_FUNCTION_NOT_SUPPORTED = -8,    /* Camera function not yet supported error */
+  LEP_ERROR = -1,               /* Camera general error */
+  LEP_NOT_READY = -2,           /* Camera not ready error */
+  LEP_RANGE_ERROR = -3,         /* Camera range error */
+  LEP_CHECKSUM_ERROR = -4,      /* Camera checksum error */
+  LEP_BAD_ARG_POINTER_ERROR = -5, /* Camera Bad argument  error */
+  LEP_DATA_SIZE_ERROR = -6,     /* Camera uint8_t count error */
+  LEP_UNDEFINED_FUNCTION_ERROR = -7, /* Camera undefined function error */
+  LEP_FUNCTION_NOT_SUPPORTED = -8, /* Camera function not yet supported error */
 
-    /* OTP access errors */
-    LEP_OTP_WRITE_ERROR = -15,   /*!< Camera OTP write error */
-    LEP_OTP_READ_ERROR = -16,   /* double bit error detected (uncorrectible) */
+  /* OTP access errors */
+  LEP_OTP_WRITE_ERROR = -15,    /*!< Camera OTP write error */
+  LEP_OTP_READ_ERROR = -16,     /* double bit error detected (uncorrectible) */
 
-    LEP_OTP_NOT_PROGRAMMED_ERROR = -18,   /* Flag read as non-zero */
+  LEP_OTP_NOT_PROGRAMMED_ERROR = -18, /* Flag read as non-zero */
 
-    /* I2C Errors */
-    LEP_ERROR_I2C_BUS_NOT_READY = -20,   /* I2C Bus Error - Bus Not Avaialble */
-    LEP_ERROR_I2C_BUFFER_OVERFLOW = -22,   /* I2C Bus Error - Buffer Overflow */
-    LEP_ERROR_I2C_ARBITRATION_LOST = -23,   /* I2C Bus Error - Bus Arbitration Lost */
-    LEP_ERROR_I2C_BUS_ERROR = -24,   /* I2C Bus Error - General Bus Error */
-    LEP_ERROR_I2C_NACK_RECEIVED = -25,   /* I2C Bus Error - NACK Received */
-    LEP_ERROR_I2C_FAIL = -26,   /* I2C Bus Error - General Failure */
+  /* I2C Errors */
+  LEP_ERROR_I2C_BUS_NOT_READY = -20, /* I2C Bus Error - Bus Not Avaialble */
+  LEP_ERROR_I2C_BUFFER_OVERFLOW = -22, /* I2C Bus Error - Buffer Overflow */
+  LEP_ERROR_I2C_ARBITRATION_LOST = -23, /* I2C Bus Error - Bus Arbitration Lost */
+  LEP_ERROR_I2C_BUS_ERROR = -24, /* I2C Bus Error - General Bus Error */
+  LEP_ERROR_I2C_NACK_RECEIVED = -25, /* I2C Bus Error - NACK Received */
+  LEP_ERROR_I2C_FAIL = -26,     /* I2C Bus Error - General Failure */
 
-    /* Processing Errors */
-    LEP_DIV_ZERO_ERROR = -80,   /* Attempted div by zero */
+  /* Processing Errors */
+  LEP_DIV_ZERO_ERROR = -80,     /* Attempted div by zero */
 
-    /* Comm Errors */
-    LEP_COMM_PORT_NOT_OPEN = -101,  /* Comm port not open */
-    LEP_COMM_INVALID_PORT_ERROR = -102,  /* Comm port no such port error */
-    LEP_COMM_RANGE_ERROR = -103,  /* Comm port range error */
-    LEP_ERROR_CREATING_COMM = -104,  /* Error creating comm */
-    LEP_ERROR_STARTING_COMM = -105,  /* Error starting comm */
-    LEP_ERROR_CLOSING_COMM = -106,  /* Error closing comm */
-    LEP_COMM_CHECKSUM_ERROR = -107,  /* Comm checksum error */
-    LEP_COMM_NO_DEV = -108,  /* No comm device */
-    LEP_TIMEOUT_ERROR = -109,  /* Comm timeout error */
-    LEP_COMM_ERROR_WRITING_COMM = -110,  /* Error writing comm */
-    LEP_COMM_ERROR_READING_COMM = -111,  /* Error reading comm */
-    LEP_COMM_COUNT_ERROR = -112,  /* Comm uint8_t count error */
+  /* Comm Errors */
+  LEP_COMM_PORT_NOT_OPEN = -101, /* Comm port not open */
+  LEP_COMM_INVALID_PORT_ERROR = -102, /* Comm port no such port error */
+  LEP_COMM_RANGE_ERROR = -103,  /* Comm port range error */
+  LEP_ERROR_CREATING_COMM = -104, /* Error creating comm */
+  LEP_ERROR_STARTING_COMM = -105, /* Error starting comm */
+  LEP_ERROR_CLOSING_COMM = -106, /* Error closing comm */
+  LEP_COMM_CHECKSUM_ERROR = -107, /* Comm checksum error */
+  LEP_COMM_NO_DEV = -108,       /* No comm device */
+  LEP_TIMEOUT_ERROR = -109,     /* Comm timeout error */
+  LEP_COMM_ERROR_WRITING_COMM = -110, /* Error writing comm */
+  LEP_COMM_ERROR_READING_COMM = -111, /* Error reading comm */
+  LEP_COMM_COUNT_ERROR = -112,  /* Comm uint8_t count error */
 
-    /* Other Errors */
-    LEP_OPERATION_CANCELED = -126,  /* Camera operation canceled */
-    LEP_UNDEFINED_ERROR_CODE = -127   /* Undefined error */
+  /* Other Errors */
+  LEP_OPERATION_CANCELED = -126, /* Camera operation canceled */
+  LEP_UNDEFINED_ERROR_CODE = -127 /* Undefined error */
 } LEP_RESULT;
 
 #endif
