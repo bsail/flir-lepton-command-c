@@ -143,19 +143,11 @@ typedef enum {
     LeptonFLiR_TemperatureMode_Count
 } LeptonFLiR_TemperatureMode;
 
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     // May use a different Wire instance than Wire. Some chipsets, such as Due/Zero/etc.,
     // have a Wire1 class instance that uses the SDA1/SCL1 lines instead.
     // Supported i2c baud rates are 100kHz, 400kHz, and 1000kHz.
     // Supported SPI baud rates are 2.2MHz to 20MHz.
     void LeptonFLiR_LeptonFLiR(/*TwoWire& i2cWire = Wire, *//*byte spiCSPin*//* = 53*/);
-#else
-    // Minimum supported i2c baud rate is 100kHz, which means minimum supported processor
-    // speed is 4MHz+ while running i2c standard mode. For 400kHz i2c baud rate, minimum
-    // supported processor speed is 16MHz+ while running i2c fast mode.
-    // Supported SPI baud rates are 2.2MHz to 20MHz.
-    LeptonFLiR(byte spiCSPin = 53);
-#endif
     // Called in setup()
     void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode/* = LeptonFLiR_ImageStorageMode_80x60_16bpp*/, LeptonFLiR_TemperatureMode tempMode/* = LeptonFLiR_TemperatureMode_Celsius*/);
 
@@ -344,9 +336,6 @@ typedef enum {
     int writeRegister(uint16_t regAddress, uint16_t value);
     int readRegister(uint16_t regAddress, uint16_t *value);
 
-#ifdef LEPFLIR_USE_SOFTWARE_I2C
-    uint8_t _readBytes;
-#endif
     void i2cWire_beginTransmission(uint8_t);
     uint8_t i2cWire_endTransmission(void);
     uint8_t i2cWire_requestFrom(uint8_t, uint8_t);

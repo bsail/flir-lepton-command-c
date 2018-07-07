@@ -65,12 +65,7 @@ static inline uint8_t highByte(uint16_t p)
     return ((p & 0xFF00) >> 8);
 }
 
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
 void LeptonFLiR_LeptonFLiR() {
-    // _i2cWire = &i2cWire;
-#else
-LeptonFLiR_LeptonFLiR(byte spiCSPin) {
-#endif
     // _spiCSPin = spiCSPin;
     // _spiSettings = SPISettings(LEPFLIR_SPI_MAX_SPEED, MSBFIRST, SPI_MODE3);
     _storageMode = LeptonFLiR_ImageStorageMode_Count;
@@ -82,8 +77,8 @@ LeptonFLiR_LeptonFLiR(byte spiCSPin) {
 }
 
 void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode, LeptonFLiR_TemperatureMode tempMode) {
-    _storageMode = storageMode;//(LeptonFLiR_ImageStorageMode)constrain((int)storageMode, 0, (int)LeptonFLiR_ImageStorageMode_Count - 1);
-    _tempMode = tempMode;//(LeptonFLiR_TemperatureMode)constrain((int)tempMode, 0, (int)LeptonFLiR_TemperatureMode_Count - 1);
+    _storageMode = storageMode;
+    _tempMode = tempMode;
 }
 
 LeptonFLiR_ImageStorageMode getImageStorageMode() {
@@ -1006,97 +1001,45 @@ int readRegister(uint16_t regAddress, uint16_t *value) {
     return _lastI2CError;
 }
 
-#ifdef LEPFLIR_USE_SOFTWARE_I2C
-uint8_t __attribute__((noinline)) i2c_start(uint8_t addr);
-void __attribute__((noinline)) i2c_stop(void) asm("ass_i2c_stop");
-uint8_t __attribute__((noinline)) i2c_write(uint8_t value) asm("ass_i2c_write");
-uint8_t __attribute__((noinline)) i2c_read(uint8_t last);
-#endif
-
 void i2cWire_beginTransmission(uint8_t addr) {
     _lastI2CError = 0;
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
-    // _i2cWire->beginTransmission(addr);
     critical_i2c_lock();
     TwoWire_beginTransmission(addr);
-#else
-    i2c_start(addr);
-#endif
 }
 
 uint8_t i2cWire_endTransmission(void) {
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     // return (_lastI2CError = _i2cWire->endTransmission());
     _lastI2CError = TwoWire_endTransmission();
     critical_i2c_unlock();
     return _lastI2CError;
-#else
-    i2c_stop();
-    return (_lastI2CError = 0);
-#endif
 }
 
 uint8_t i2cWire_requestFrom(uint8_t addr, uint8_t len) {
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     critical_i2c_lock();
     uint8_t ret = TwoWire_requestFrom(addr, len);
     critical_i2c_unlock();
     // return _i2cWire->requestFrom(addr, len);
     return ret;
-#else
-    i2c_start(addr | 0x01);
-    return (_readBytes = len);
-#endif
 }
 
 size_t i2cWire_write(uint8_t data) {
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     uint8_t ret = TwoWire_write(data);
     // return _i2cWire->write(data);
     return ret;
-#else
-    return (size_t)i2c_write(data);
-#endif
 }
 
 size_t i2cWire_write16(uint16_t data) {
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     // return _i2cWire->write(highByte(data)) + _i2cWire->write(lowByte(data));
     return TwoWire_write(highByte(data)) + TwoWire_write(lowByte(data));
-#else
-    return (size_t)i2c_write(highByte(data)) + (size_t)i2c_write(lowByte(data));
-#endif
 }
 
 uint8_t i2cWire_read(void) {
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     return (uint8_t)(TwoWire_read() & 0xFF);
     // return (uint8_t)(_i2cWire->read() & 0xFF);
-#else
-    if (_readBytes > 1) {
-        _readByes -= 1;
-        return (uint8_t)(i2c_read(false) & 0xFF);
-    }
-    else {
-        _readBytes = 0;
-        return (uint8_t)(i2c_read(true) & 0xFF);
-    }
-#endif
 }
 
 uint16_t i2cWire_read16(void) {
-#ifndef LEPFLIR_USE_SOFTWARE_I2C
     return ((uint16_t)(TwoWire_read() & 0xFF) << 8) | (uint16_t)(TwoWire_read() & 0xFF);
     // return ((uint16_t)(_i2cWire->read() & 0xFF) << 8) | (uint16_t)(_i2cWire->read() & 0xFF);
-#else
-    if (_readBytes > 2) {
-        readBytes -= 2;
-        return ((uint16_t)(i2c_read(false) & 0xFF) << 8) | (uint16_t)(i2c_read(false) & 0xFF);
-    }
-    else {
-        _readBytes = 0;
-        return ((uint16_t)(i2c_read(false) & 0xFF) << 8) | (uint16_t)(i2c_read(true) & 0xFF);
-    }
-#endif
 }
 
