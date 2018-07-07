@@ -19,20 +19,11 @@ This version differs from original version by [NachtRaveVL](https://github.com/N
 
 There are several defines inside of the library's header file that allows for more fine-tuned control.
 
-```Arduino
-// Uncomment this define to enable use of the software i2c library (min 4MHz+ processor required).
-//#define LEPFLIR_ENABLE_SOFTWARE_I2C     1   // http://playground.arduino.cc/Main/SoftwareI2CLibrary
-
-// Uncomment this define to disable usage of the Scheduler library on SAM/SAMD architecures.
-//#define LEPFLIR_DISABLE_SCHEDULER       1   // https://github.com/arduino-libraries/Scheduler
-
-// Uncomment this define to disable 16 byte aligned memory allocations (may hinder performance).
-//#define LEPFLIR_DISABLE_ALIGNED_MALLOC  1
-
+```C
 // Uncomment this define if wanting to exclude extended i2c functions from compilation.
-//#define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
+// #define LEPFLIR_EXCLUDE_EXT_I2C_FUNCS   1
 
-// Uncomment this define to enable debug output.
+// Uncomment this define to enable debug output functions.
 //#define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
 ```
 
