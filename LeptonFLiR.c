@@ -26,10 +26,16 @@
 */
 
 #include "LeptonFLiR.h"
+#include <subsystems/os/critical.h>
 #if (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)) && !defined(LEPFLIR_DISABLE_SCHEDULER)
 #include "Scheduler.h"
 #define LEPFLIR_USE_SCHEDULER           1
 #endif
+
+#define true 1
+#define false 0
+
+#define min(a,b) (((a)<(b))?(a):(b))
 
 #define LEPFLIR_GEN_CMD_TIMEOUT         5000        // Timeout for commands to be processed
 #define LEPFLIR_SPI_MAX_SPEED           20000000    // Maximum SPI speed for FLiR module
@@ -49,42 +55,57 @@ static inline byte *roundUpMalloc16(int size) { return (byte *)malloc((size_t)si
 static inline byte *roundUpSpiFrame16(byte *spiFrame) { return spiFrame; }
 #endif
 
-#ifndef digitalWriteFast
-static void csEnableFuncDef(byte pin) { digitalWrite(pin, LOW); }
-static void csDisableFuncDef(byte pin) { digitalWrite(pin, HIGH); }
-#else
-static void csEnableFuncDef(byte pin) { digitalWriteFast(pin, LOW); }
-static void csDisableFuncDef(byte pin) { digitalWriteFast(pin, HIGH); }
-#endif
+// #ifndef digitalWriteFast
+// static void csEnableFuncDef(byte pin) { digitalWrite(pin, LOW); }
+// static void csDisableFuncDef(byte pin) { digitalWrite(pin, HIGH); }
+// #else
+// static void csEnableFuncDef(byte pin) { digitalWriteFast(pin, LOW); }
+// static void csDisableFuncDef(byte pin) { digitalWriteFast(pin, HIGH); }
+// #endif
+
+// #define lowByte(p) ((p) && 0x00FF)
+// #define highByte(p) (((p) && 0xFF00) >> 8)
+
+static inline uint8_t /*lowByte*//*highByte*/lowByte(uint16_t p)
+{
+    return (p & 0x00FF);
+}
+
+static inline uint8_t /*highByte*//*lowByte*/highByte(uint16_t p)
+{
+    return ((p & 0xFF00) >> 8);
+}
 
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-LeptonFLiR::LeptonFLiR(TwoWire& i2cWire, byte spiCSPin) {
-    _i2cWire = &i2cWire;
+void /*LeptonFLiR::*/LeptonFLiR_LeptonFLiR(/*TwoWire& i2cWire, *//*byte spiCSPin*//*=53*/) {
+    // _i2cWire = &i2cWire;
 #else
-LeptonFLiR::LeptonFLiR(byte spiCSPin) {
+/*LeptonFLiR::*/LeptonFLiR_LeptonFLiR(byte spiCSPin) {
 #endif
-    _spiCSPin = spiCSPin;
-    _spiSettings = SPISettings(LEPFLIR_SPI_MAX_SPEED, MSBFIRST, SPI_MODE3);
+    // _spiCSPin = spiCSPin;
+    // _spiSettings = SPISettings(LEPFLIR_SPI_MAX_SPEED, MSBFIRST, SPI_MODE3);
     _storageMode = LeptonFLiR_ImageStorageMode_Count;
-    _csEnableFunc = csEnableFuncDef;
-    _csDisableFunc = csDisableFuncDef;
-    _imageData = _spiFrameData = _telemetryData = NULL;
-    _isReadingNextFrame = false;
+    // _csEnableFunc = csEnableFuncDef;
+    // _csDisableFunc = csDisableFuncDef;
+    // _imageData = _spiFrameData = _telemetryData = NULL;
+    // _isReadingNextFrame = false;
     _lastI2CError = _lastLepResult = 0;
 }
 
-LeptonFLiR::~LeptonFLiR() {
+#if 0
+/*LeptonFLiR::*/~LeptonFLiR() {
     if (_imageData) free(_imageData);
     if (_spiFrameData) free(_spiFrameData);
     if (_telemetryData) free(_telemetryData);
 }
+#endif
 
-void LeptonFLiR::init(LeptonFLiR_ImageStorageMode storageMode, LeptonFLiR_TemperatureMode tempMode) {
-    _storageMode = (LeptonFLiR_ImageStorageMode)constrain((int)storageMode, 0, (int)LeptonFLiR_ImageStorageMode_Count - 1);
-    _tempMode = (LeptonFLiR_TemperatureMode)constrain((int)tempMode, 0, (int)LeptonFLiR_TemperatureMode_Count - 1);
+void /*LeptonFLiR::*/LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode, LeptonFLiR_TemperatureMode tempMode) {
+    _storageMode = storageMode;//(LeptonFLiR_ImageStorageMode)constrain((int)storageMode, 0, (int)LeptonFLiR_ImageStorageMode_Count - 1);
+    _tempMode = tempMode;//(LeptonFLiR_TemperatureMode)constrain((int)tempMode, 0, (int)LeptonFLiR_TemperatureMode_Count - 1);
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("LeptonFLiR::init spiCSPin: ");
+    Serial.print("/*LeptonFLiR::*/init spiCSPin: ");
     Serial.print(_spiCSPin);
     Serial.print(", storageMode: ");
     Serial.print(_storageMode);
@@ -92,19 +113,19 @@ void LeptonFLiR::init(LeptonFLiR_ImageStorageMode storageMode, LeptonFLiR_Temper
     Serial.println(_tempMode);
 #endif
 
-    pinMode(_spiCSPin, OUTPUT);
-    _csDisableFunc(_spiCSPin);
+    // pinMode(_spiCSPin, OUTPUT);
+    // _csDisableFunc(_spiCSPin);
 
-    _imageData = roundUpMalloc16(getImageTotalBytes());
+    // _imageData = roundUpMalloc16(getImageTotalBytes());
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
     if (!_imageData)
-        Serial.println("  LeptonFLiR::init Failure allocating imageData.");
+        Serial.println("  /*LeptonFLiR::*/init Failure allocating imageData.");
 #endif
 
-    _spiFrameData = roundUpMalloc16(getSPIFrameTotalBytes());
+    // _spiFrameData = roundUpMalloc16(getSPIFrameTotalBytes());
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
     if (!_spiFrameData)
-        Serial.println("  LeptonFLiR::init Failure allocating spiFrameData.");
+        Serial.println("  /*LeptonFLiR::*/init Failure allocating spiFrameData.");
 #endif
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
@@ -112,14 +133,14 @@ void LeptonFLiR::init(LeptonFLiR_ImageStorageMode storageMode, LeptonFLiR_Temper
 #ifndef LEPFLIR_DISABLE_ALIGNED_MALLOC
     mallocOffset = 15;
 #endif
-    Serial.print("  LeptonFLiR::init imageData: ");
+    Serial.print("  /*LeptonFLiR::*/init imageData: ");
     Serial.print(_imageData ? getImageTotalBytes() + mallocOffset : 0);
     Serial.print("B, spiFrameData: ");
     Serial.print(_spiFrameData ? getSPIFrameTotalBytes() + mallocOffset : 0);
     Serial.print("B, total: ");
     Serial.print((_imageData ? getImageTotalBytes() + mallocOffset : 0) + (_spiFrameData ? getSPIFrameTotalBytes() + mallocOffset : 0));
     Serial.println("B");
-    Serial.print("  LeptonFLiR::init SPIPortSpeed: ");
+    Serial.print("  /*LeptonFLiR::*/init SPIPortSpeed: ");
     for (int divisor = 2; divisor <= 128; divisor *= 2) {
         if (F_CPU / (float)divisor <= LEPFLIR_SPI_MAX_SPEED + 0.00001f || divisor == 128) {
             Serial.print(roundf((F_CPU / (float)divisor) / 1000.0f) / 1000.0f);
@@ -138,24 +159,24 @@ void LeptonFLiR::init(LeptonFLiR_ImageStorageMode storageMode, LeptonFLiR_Temper
 #endif
 }
 
-byte LeptonFLiR::getChipSelectPin() {
-    return _spiCSPin;
-}
+// byte /*LeptonFLiR::*/getChipSelectPin() {
+//     return _spiCSPin;
+// }
 
-LeptonFLiR_ImageStorageMode LeptonFLiR::getImageStorageMode() {
+LeptonFLiR_ImageStorageMode /*LeptonFLiR::*/getImageStorageMode() {
     return _storageMode;
 }
 
-LeptonFLiR_TemperatureMode LeptonFLiR::getTemperatureMode() {
+LeptonFLiR_TemperatureMode /*LeptonFLiR::*/getTemperatureMode() {
     return _tempMode;
 }
 
-void LeptonFLiR::setFastCSFuncs(digitalWriteFunc csEnableFunc, digitalWriteFunc csDisableFunc) {
-    _csEnableFunc = csEnableFunc ? : csEnableFuncDef;
-    _csDisableFunc = csDisableFunc ? : csDisableFuncDef;
-}
+// void /*LeptonFLiR::*/setFastCSFuncs(digitalWriteFunc csEnableFunc, digitalWriteFunc csDisableFunc) {
+//     _csEnableFunc = csEnableFunc ? csEnableFunc : csEnableFuncDef;
+//     _csDisableFunc = csDisableFunc ? csDisableFunc : csDisableFuncDef;
+// }
 
-int LeptonFLiR::getImageWidth() {
+int /*LeptonFLiR::*/getImageWidth() {
     switch (_storageMode) {
         case LeptonFLiR_ImageStorageMode_80x60_16bpp:
         case LeptonFLiR_ImageStorageMode_80x60_8bpp:
@@ -171,7 +192,7 @@ int LeptonFLiR::getImageWidth() {
     }
 }
 
-int LeptonFLiR::getImageHeight() {
+int /*LeptonFLiR::*/getImageHeight() {
     switch (_storageMode) {
         case LeptonFLiR_ImageStorageMode_80x60_16bpp:
         case LeptonFLiR_ImageStorageMode_80x60_8bpp:
@@ -187,7 +208,7 @@ int LeptonFLiR::getImageHeight() {
     }
 }
 
-int LeptonFLiR::getImageBpp() {
+int /*LeptonFLiR::*/getImageBpp() {
     switch (_storageMode) {
         case LeptonFLiR_ImageStorageMode_80x60_16bpp:
         case LeptonFLiR_ImageStorageMode_40x30_16bpp:
@@ -202,7 +223,7 @@ int LeptonFLiR::getImageBpp() {
     }
 }
 
-int LeptonFLiR::getImagePitch() {
+int /*LeptonFLiR::*/getImagePitch() {
     switch (_storageMode) {
         case LeptonFLiR_ImageStorageMode_80x60_16bpp:
             return roundUpVal16(80 * 2);
@@ -221,33 +242,36 @@ int LeptonFLiR::getImagePitch() {
     }
 }
 
-int LeptonFLiR::getImageTotalBytes() {
+int /*LeptonFLiR::*/getImageTotalBytes() {
     return ((getImageHeight() - 1) * getImagePitch()) + (getImageWidth() * getImageBpp());
 }
 
-byte *LeptonFLiR::getImageData() {
+#if 0
+byte */*LeptonFLiR::*/getImageData() {
     return !_isReadingNextFrame && _imageData ? roundUpPtr16(_imageData) : NULL;
 }
 
-byte *LeptonFLiR::getImageDataRow(int row) {
+byte */*LeptonFLiR::*/getImageDataRow(int row) {
     return !_isReadingNextFrame && _imageData ? (roundUpPtr16(_imageData) + (row * getImagePitch())) : NULL;
 }
 
-byte *LeptonFLiR::_getImageDataRow(int row) {
+byte */*LeptonFLiR::*/_getImageDataRow(int row) {
     return _imageData ? roundUpPtr16(_imageData) + (getImagePitch() * row) : NULL;
 }
 
-uint16_t LeptonFLiR::getImageDataRowCol(int row, int col) {
+uint16_t /*LeptonFLiR::*/getImageDataRowCol(int row, int col) {
     if (_isReadingNextFrame || !_imageData) return 0;
     byte *imageData = roundUpPtr16(_imageData) + (row * getImagePitch()) + (col * getImageBpp());
     return getImageBpp() == 2 ? *((uint16_t *)imageData) : (uint16_t)(*imageData);
 }
+#endif
 
-byte *LeptonFLiR::getTelemetryData() {
+#if 0
+byte */*LeptonFLiR::*/getTelemetryData() {
     return !_isReadingNextFrame && _telemetryData && !(*((uint16_t *)_telemetryData) & 0x0F00 == 0x0F00) ? _telemetryData : NULL;
 }
 
-void LeptonFLiR::getTelemetryData(TelemetryData *telemetry) {
+void /*LeptonFLiR::*/getTelemetryData(TelemetryData *telemetry) {
     if (_isReadingNextFrame || !_telemetryData || !telemetry) return;
     uint16_t *telemetryData = (uint16_t *)&_telemetryData[4];
 
@@ -288,25 +312,27 @@ void LeptonFLiR::getTelemetryData(TelemetryData *telemetry) {
     telemetry->log2FFCFrames = telemetryData[74];
 }
 
-uint32_t LeptonFLiR::getTelemetryFrameCounter() {
+uint32_t /*LeptonFLiR::*/getTelemetryFrameCounter() {
     if (_isReadingNextFrame || !_telemetryData) return 0;
     uint16_t *telemetryData = (uint16_t *)&_telemetryData[4];
 
     return ((uint32_t)telemetryData[20] << 16) | (uint32_t)telemetryData[21];
 }
 
-bool LeptonFLiR::getShouldRunFFCNormalization() {
+uint8_t /*LeptonFLiR::*/getShouldRunFFCNormalization() {
     if (_isReadingNextFrame || !_telemetryData) return false;
     uint16_t *telemetryData = (uint16_t *)&_telemetryData[4];
 
     uint_fast8_t ffcState = (telemetryData[4] & 0x0018) >> 3;
-    if (lowByte(telemetryData[0]) >= 9 && ffcState >= 1)
+    if ((lowByte(telemetryData[0]) >= 9) && (ffcState >= 1))
         ffcState -= 1;
 
     return (telemetryData[4] & 0x0004) && ffcState != (uint_fast8_t)TelemetryData_FFCState_InProgress;
 }
 
-int LeptonFLiR::getSPIFrameLines() {
+#endif
+
+int /*LeptonFLiR::*/getSPIFrameLines() {
     switch (_storageMode) {
         case LeptonFLiR_ImageStorageMode_80x60_16bpp:
         case LeptonFLiR_ImageStorageMode_80x60_8bpp:
@@ -322,13 +348,15 @@ int LeptonFLiR::getSPIFrameLines() {
     }
 }
 
-int LeptonFLiR::getSPIFrameTotalBytes() {
+#if 0
+int /*LeptonFLiR::*/getSPIFrameTotalBytes() {
     return getSPIFrameLines() * roundUpVal16(LEPFLIR_SPI_FRAME_PACKET_SIZE);
 }
 
-uint16_t *LeptonFLiR::getSPIFrameDataRow(int row) {
+uint16_t */*LeptonFLiR::*/getSPIFrameDataRow(int row) {
     return (uint16_t *)(roundUpSpiFrame16(_spiFrameData) + (row * roundUpVal16(LEPFLIR_SPI_FRAME_PACKET_SIZE)));
 }
+#endif
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
 
@@ -352,6 +380,8 @@ static void printSPIFrame(uint16_t *spiFrame) {
 
 #endif
 
+#if 0
+
 static void delayTimeout(int timeout) {
     unsigned long endTime = millis() + (unsigned long)timeout;
 
@@ -373,21 +403,23 @@ static void SPI_ignore16(int count) {
     while (count-- > 0)
         SPI.transfer16(0x0000);
 }
+#endif
 
 //#define LEPFLIR_ENABLE_FRAME_PACKET_DEBUG_OUTPUT    1
 
-bool LeptonFLiR::readNextFrame() {
+#if 0
+uint8_t /*LeptonFLiR::*/readNextFrame() {
     if (!_isReadingNextFrame) {
         _isReadingNextFrame = true;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-        Serial.println("LeptonFLiR::readNextFrame");
+        Serial.println("/*LeptonFLiR::*/readNextFrame");
 #endif
 
-        bool agc8Enabled;
+        uint8_t agc8Enabled;
         LEP_SYS_TELEMETRY_LOCATION telemetryLocation;
 
-        {   bool telemetryEnabled, cameraBooted, stateErrors = false;
+        {   uint8_t telemetryEnabled, cameraBooted, stateErrors = false;
             uint32_t value = 0;
 
             receiveCommand(cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &value);
@@ -419,7 +451,7 @@ bool LeptonFLiR::readNextFrame() {
             
             if (stateErrors) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-                Serial.println("  LeptonFLiR::readNextFrame Errors reading state encountered. Aborting.");
+                Serial.println("  /*LeptonFLiR::*/readNextFrame Errors reading state encountered. Aborting.");
 #endif
                 _isReadingNextFrame = false;
                 return false;
@@ -427,7 +459,7 @@ bool LeptonFLiR::readNextFrame() {
 
             if (!cameraBooted) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-                Serial.println("  LeptonFLiR::readNextFrame Camera has not yet booted. Aborting.");
+                Serial.println("  /*LeptonFLiR::*/readNextFrame Camera has not yet booted. Aborting.");
 #endif
                 _isReadingNextFrame = false;
                 return false;
@@ -440,7 +472,7 @@ bool LeptonFLiR::readNextFrame() {
                     _telemetryData[0] = _telemetryData[1] = 0xFF; // initialize as discard packet
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
                 if (!_telemetryData)
-                    Serial.println("  LeptonFLiR::readNextFrame Failure allocating telemetryData.");
+                    Serial.println("  /*LeptonFLiR::*/readNextFrame Failure allocating telemetryData.");
 #endif
             }
             else if (!telemetryEnabled && _telemetryData) {
@@ -450,7 +482,7 @@ bool LeptonFLiR::readNextFrame() {
         }
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-        Serial.print("  LeptonFLiR::readNextFrame AGC-8bit: ");
+        Serial.print("  /*LeptonFLiR::*/readNextFrame AGC-8bit: ");
         Serial.print(agc8Enabled ? "enabled" : "disabled");
         Serial.print(", Telemetry: ");
         if (_telemetryData) {
@@ -471,8 +503,8 @@ bool LeptonFLiR::readNextFrame() {
         uint_fast8_t currReadRow = 0;        
         uint_fast8_t framesSkipped = 0;
         uint_fast8_t currRow = 0;
-        bool skipFrame = false;
-        bool spiPacketRead = false;
+        uint8_t skipFrame = false;
+        uint8_t spiPacketRead = false;
 
         SPI.beginTransaction(_spiSettings);
 
@@ -498,7 +530,7 @@ bool LeptonFLiR::readNextFrame() {
                 ((!teleRows || telemetryLocation == LEP_TELEMETRY_LOCATION_FOOTER) && currRow < 60) ||
                 (telemetryLocation == LEP_TELEMETRY_LOCATION_HEADER && currReadRow >= teleRows))) { // Image packet
 #if defined(LEPFLIR_ENABLE_DEBUG_OUTPUT) && defined(LEPFLIR_ENABLE_FRAME_PACKET_DEBUG_OUTPUT)
-                Serial.println("    LeptonFLiR::readNextFrame VoSPI Image Packet:");
+                Serial.println("    /*LeptonFLiR::*/readNextFrame VoSPI Image Packet:");
                 Serial.print("      ");  printSPIFrame(spiFrame);
 #endif
 
@@ -511,7 +543,7 @@ bool LeptonFLiR::readNextFrame() {
                     memcpy(_telemetryData, spiFrame, LEPFLIR_SPI_FRAME_PACKET_SIZE);
 
 #if defined(LEPFLIR_ENABLE_DEBUG_OUTPUT) && defined(LEPFLIR_ENABLE_FRAME_PACKET_DEBUG_OUTPUT)
-                Serial.print("    LeptonFLiR::readNextFrame VoSPI Telemetry(");
+                Serial.print("    /*LeptonFLiR::*/readNextFrame VoSPI Telemetry(");
                 Serial.print((char)('A' + currTeleRow));
                 Serial.println(") Packet:");
                 Serial.print("      ");  printSPIFrame(spiFrame);
@@ -521,13 +553,13 @@ bool LeptonFLiR::readNextFrame() {
             }
             else if (!skipFrame && currRow < currReadRow) { // Ignore packet
 #if defined(LEPFLIR_ENABLE_DEBUG_OUTPUT) && defined(LEPFLIR_ENABLE_FRAME_PACKET_DEBUG_OUTPUT)
-                Serial.println("    LeptonFLiR::readNextFrame VoSPI Ignore Packet:");
+                Serial.println("    /*LeptonFLiR::*/readNextFrame VoSPI Ignore Packet:");
                 Serial.print("      ");  printSPIFrame(spiFrame);
 #endif
             }
             else { // Discard packet
 #if defined(LEPFLIR_ENABLE_DEBUG_OUTPUT) && defined(LEPFLIR_ENABLE_FRAME_PACKET_DEBUG_OUTPUT)
-                Serial.println("    LeptonFLiR::readNextFrame VoSPI Discard Packet:");
+                Serial.println("    /*LeptonFLiR::*/readNextFrame VoSPI Discard Packet:");
                 Serial.print("      ");  printSPIFrame(spiFrame);
 #endif
 
@@ -553,7 +585,7 @@ bool LeptonFLiR::readNextFrame() {
                         else if (currRow == 0) { // Reestablished sync at next frame position
                             if ((currReadRow || framesSkipped) && ++framesSkipped >= 5) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-                                Serial.println("  LeptonFLiR::readNextFrame Maximum frame skip reached. Aborting.");
+                                Serial.println("  /*LeptonFLiR::*/readNextFrame Maximum frame skip reached. Aborting.");
 #endif
 
                                 _csDisableFunc(_spiCSPin);
@@ -575,7 +607,7 @@ bool LeptonFLiR::readNextFrame() {
                     }
 
 #if defined(LEPFLIR_ENABLE_DEBUG_OUTPUT) && defined(LEPFLIR_ENABLE_FRAME_PACKET_DEBUG_OUTPUT)
-                    Serial.println("    LeptonFLiR::readNextFrame VoSPI Discard Retry Packet:");
+                    Serial.println("    /*LeptonFLiR::*/readNextFrame VoSPI Discard Retry Packet:");
                     Serial.print("      ");  printSPIFrame(spiFrame);
 #endif
 
@@ -584,7 +616,7 @@ bool LeptonFLiR::readNextFrame() {
 
                 if (triesLeft == 0) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-                    Serial.println("  LeptonFLiR::readNextFrame Maximum resync retries reached. Aborting.");
+                    Serial.println("  /*LeptonFLiR::*/readNextFrame Maximum resync retries reached. Aborting.");
 #endif
 
                     _csDisableFunc(_spiCSPin);
@@ -654,154 +686,156 @@ bool LeptonFLiR::readNextFrame() {
 
     return true;
 }
-
-void LeptonFLiR::agc_setAGCEnabled(bool enabled) {
-#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setAGCEnabled");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
+void /*LeptonFLiR::*/agc_setAGCEnabled(uint8_t enabled) {
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+    Serial.println("/*LeptonFLiR::*/agc_setAGCEnabled");
+#endif
+
+    sendCommand_u32(cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
 }
 
-bool LeptonFLiR::agc_getAGCEnabled() {
+uint8_t /*LeptonFLiR::*/agc_getAGCEnabled() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getAGCEnabled");
+    Serial.println("/*LeptonFLiR::*/agc_getAGCEnabled");
 #endif
 
     uint32_t enabled;
-    receiveCommand(cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    receiveCommand_u32(cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
 }
 
-void LeptonFLiR::agc_setAGCPolicy(LEP_AGC_POLICY policy) {
+void /*LeptonFLiR::*/agc_setAGCPolicy(LEP_AGC_POLICY policy) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setAGCPolicy");
+    Serial.println("/*LeptonFLiR::*/agc_setAGCPolicy");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)policy);
+    sendCommand_u32(cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)policy);
 }
 
-LEP_AGC_POLICY LeptonFLiR::agc_getAGCPolicy() {
+LEP_AGC_POLICY /*LeptonFLiR::*/agc_getAGCPolicy() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getAGCPolicy");
+    Serial.println("/*LeptonFLiR::*/agc_getAGCPolicy");
 #endif
 
     uint32_t policy;
-    receiveCommand(cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_GET), &policy);
+    receiveCommand_u32(cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_GET), &policy);
     return (LEP_AGC_POLICY)policy;
 }
 
-void LeptonFLiR::agc_setHEQScaleFactor(LEP_AGC_HEQ_SCALE_FACTOR factor) {
+void /*LeptonFLiR::*/agc_setHEQScaleFactor(LEP_AGC_HEQ_SCALE_FACTOR factor) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQScaleFactor");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQScaleFactor");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)factor);
+    sendCommand_u32(cmdCode(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)factor);
 }
 
-LEP_AGC_HEQ_SCALE_FACTOR LeptonFLiR::agc_getHEQScaleFactor() {
+LEP_AGC_HEQ_SCALE_FACTOR /*LeptonFLiR::*/agc_getHEQScaleFactor() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQScaleFactor");
+    Serial.println("/*LeptonFLiR::*/agc_getHEQScaleFactor");
 #endif
 
     uint32_t factor;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
+    receiveCommand_u32(cmdCode(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
     return (LEP_AGC_HEQ_SCALE_FACTOR)factor;
 }
 
-void LeptonFLiR::agc_setAGCCalcEnabled(bool enabled) {
+void /*LeptonFLiR::*/agc_setAGCCalcEnabled(uint8_t enabled) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setAGCCalcEnabled");
+    Serial.println("/*LeptonFLiR::*/agc_setAGCCalcEnabled");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
+    sendCommand_u32(cmdCode(LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
 }
 
-bool LeptonFLiR::agc_getAGCCalcEnabled() {
+uint8_t /*LeptonFLiR::*/agc_getAGCCalcEnabled() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getAGCCalcEnabled");
+    Serial.println("/*LeptonFLiR::*/agc_getAGCCalcEnabled");
 #endif
 
     uint32_t enabled;
-    receiveCommand(cmdCode(LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    receiveCommand_u32(cmdCode(LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
 }
 
-void LeptonFLiR::sys_getCameraStatus(LEP_SYS_CAM_STATUS *status) {
+void /*LeptonFLiR::*/sys_getCameraStatus_internal(LEP_SYS_CAM_STATUS *status) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getCameraStatus");
+    Serial.println("/*LeptonFLiR::*/sys_getCameraStatus");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_SYS_CAM_STATUS, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)status, sizeof(LEP_SYS_CAM_STATUS) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_SYS_CAM_STATUS, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)(status), sizeof(LEP_SYS_CAM_STATUS) / 2);
 }
 
-LEP_SYS_CAM_STATUS_STATES LeptonFLiR::sys_getCameraStatus() {
+LEP_SYS_CAM_STATUS_STATES /*LeptonFLiR::*/sys_getCameraStatus() {
     LEP_SYS_CAM_STATUS camStatus;
-    sys_getCameraStatus(&camStatus);
+    sys_getCameraStatus_internal(&camStatus);
     return (LEP_SYS_CAM_STATUS_STATES)camStatus.camStatus;
 }
 
-void LeptonFLiR::sys_getFlirSerialNumber(char *buffer, int maxLength) {
+void /*LeptonFLiR::*/sys_getFlirSerialNumber(char *buffer, int maxLength) {
     if (!buffer || maxLength < 16) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getFlirSerialNumber");
+    Serial.println("/*LeptonFLiR::*/sys_getFlirSerialNumber");
 #endif
 
     uint16_t innerBuffer[4];
-    receiveCommand(cmdCode(LEP_CID_SYS_FLIR_SERIAL_NUMBER, LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 4);
+    receiveCommand_array(cmdCode(LEP_CID_SYS_FLIR_SERIAL_NUMBER, LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 4);
     wordsToHexString(innerBuffer, 4, buffer, maxLength);
 }
 
-void LeptonFLiR::sys_getCustomerSerialNumber(char *buffer, int maxLength) {
+void /*LeptonFLiR::*/sys_getCustomerSerialNumber(char *buffer, int maxLength) {
     if (!buffer || maxLength < 64) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getCustomerSerialNumber");
+    Serial.println("/*LeptonFLiR::*/sys_getCustomerSerialNumber");
 #endif
 
     uint16_t innerBuffer[16];
-    receiveCommand(cmdCode(LEP_CID_SYS_CUST_SERIAL_NUMBER, LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 16);
+    receiveCommand_array(cmdCode(LEP_CID_SYS_CUST_SERIAL_NUMBER, LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 16);
     wordsToHexString(innerBuffer, 16, buffer, maxLength);
 }
 
-uint32_t LeptonFLiR::sys_getCameraUptime() {
+uint32_t /*LeptonFLiR::*/sys_getCameraUptime() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getCameraUptime");
+    Serial.println("/*LeptonFLiR::*/sys_getCameraUptime");
 #endif
 
-    uint32_t uptime;
-    receiveCommand(cmdCode(LEP_CID_SYS_CAM_UPTIME, LEP_I2C_COMMAND_TYPE_GET), &uptime);
+    uint32_t uptime = 0;
+    receiveCommand_u32(cmdCode(LEP_CID_SYS_CAM_UPTIME, LEP_I2C_COMMAND_TYPE_GET), &uptime);
     return uptime;
 }
 
-float LeptonFLiR::sys_getAuxTemperature() {
+float /*LeptonFLiR::*/sys_getAuxTemperature() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getAuxTemperature");
+    Serial.println("/*LeptonFLiR::*/sys_getAuxTemperature");
 #endif
 
     uint16_t kelvin100;
-    receiveCommand(cmdCode(LEP_CID_SYS_AUX_TEMPERATURE_KELVIN, LEP_I2C_COMMAND_TYPE_GET), &kelvin100);
+    receiveCommand_u16(cmdCode(LEP_CID_SYS_AUX_TEMPERATURE_KELVIN, LEP_I2C_COMMAND_TYPE_GET), &kelvin100);
     return kelvin100ToTemperature(kelvin100);
 }
 
-float LeptonFLiR::sys_getFPATemperature() {
+float /*LeptonFLiR::*/sys_getFPATemperature() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getFPATemperature");
+    Serial.println("/*LeptonFLiR::*/sys_getFPATemperature");
 #endif
 
     uint16_t kelvin100;
-    receiveCommand(cmdCode(LEP_CID_SYS_FPA_TEMPERATURE_KELVIN, LEP_I2C_COMMAND_TYPE_GET), &kelvin100);
+    receiveCommand_u16(cmdCode(LEP_CID_SYS_FPA_TEMPERATURE_KELVIN, LEP_I2C_COMMAND_TYPE_GET), &kelvin100);
     return kelvin100ToTemperature(kelvin100);
 }
 
-void LeptonFLiR::sys_setTelemetryEnabled(bool enabled) {
+void /*LeptonFLiR::*/sys_setTelemetryEnabled(uint8_t enabled) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_setTelemetryEnabled");
+    Serial.println("/*LeptonFLiR::*/sys_setTelemetryEnabled");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
+    sendCommand_u32(cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
 
+#if 0
     if (!_lastI2CError && !_lastLepResult) {
         if (enabled && !_telemetryData) {
             _telemetryData = (byte *)malloc(LEPFLIR_SPI_FRAME_PACKET_SIZE);
@@ -810,7 +844,7 @@ void LeptonFLiR::sys_setTelemetryEnabled(bool enabled) {
                 _telemetryData[0] = _telemetryData[1] = 0xFF; // initialize as discard packet
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
             if (!_telemetryData)
-                Serial.println("  LeptonFLiR::sys_setTelemetryEnabled Failure allocating telemetryData.");
+                Serial.println("  /*LeptonFLiR::*/sys_setTelemetryEnabled Failure allocating telemetryData.");
 #endif
         }
         else if (!enabled && _telemetryData) {
@@ -818,16 +852,18 @@ void LeptonFLiR::sys_setTelemetryEnabled(bool enabled) {
             _telemetryData = NULL;
         }
     }
+#endif
 }
 
-bool LeptonFLiR::sys_getTelemetryEnabled() {
+uint8_t /*LeptonFLiR::*/sys_getTelemetryEnabled() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getTelemetryEnabled");
+    Serial.println("/*LeptonFLiR::*/sys_getTelemetryEnabled");
 #endif
 
     uint32_t enabled;
-    receiveCommand(cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    receiveCommand_u32(cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
 
+#if 0
     if (!_lastI2CError && !_lastLepResult) {
         if (enabled && !_telemetryData) {
             _telemetryData = (byte *)malloc(LEPFLIR_SPI_FRAME_PACKET_SIZE);
@@ -836,7 +872,7 @@ bool LeptonFLiR::sys_getTelemetryEnabled() {
                 _telemetryData[0] = _telemetryData[1] = 0xFF; // initialize as discard packet
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
             if (!_telemetryData)
-                Serial.println("  LeptonFLiR::sys_getTelemetryEnabled Failure allocating telemetryData.");
+                Serial.println("  /*LeptonFLiR::*/sys_getTelemetryEnabled Failure allocating telemetryData.");
 #endif
         }
         else if (!enabled && _telemetryData) {
@@ -844,597 +880,597 @@ bool LeptonFLiR::sys_getTelemetryEnabled() {
             _telemetryData = NULL;
         }
     }
-
+#endif
     return enabled;
 }
 
-void LeptonFLiR::sys_runFFCNormalization() {
+void /*LeptonFLiR::*/sys_runFFCNormalization() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_runFFCNormalization");
+    Serial.println("/*LeptonFLiR::*/sys_runFFCNormalization");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_RUN_FFC, LEP_I2C_COMMAND_TYPE_RUN));
+    sendCommand_raw(cmdCode(LEP_CID_SYS_RUN_FFC, LEP_I2C_COMMAND_TYPE_RUN));
 }
 
-void LeptonFLiR::vid_setPolarity(LEP_VID_POLARITY polarity) {
+void /*LeptonFLiR::*/vid_setPolarity(LEP_VID_POLARITY polarity) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setPolarity");
+    Serial.println("/*LeptonFLiR::*/vid_setPolarity");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)polarity);
+    sendCommand_u32(cmdCode(LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)polarity);
 }
 
-LEP_VID_POLARITY LeptonFLiR::vid_getPolarity() {
+LEP_VID_POLARITY /*LeptonFLiR::*/vid_getPolarity() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getPolarity");
+    Serial.println("/*LeptonFLiR::*/vid_getPolarity");
 #endif
 
     uint32_t polarity;
-    receiveCommand(cmdCode(LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_GET), &polarity);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_GET), &polarity);
     return (LEP_VID_POLARITY)polarity;
 }
 
-void LeptonFLiR::vid_setPseudoColorLUT(LEP_VID_PCOLOR_LUT table) {
+void /*LeptonFLiR::*/vid_setPseudoColorLUT(LEP_VID_PCOLOR_LUT table) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setPseudoColorLUT");
+    Serial.println("/*LeptonFLiR::*/vid_setPseudoColorLUT");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)table);
+    sendCommand_u32(cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)table);
 }
 
-LEP_VID_PCOLOR_LUT LeptonFLiR::vid_getPseudoColorLUT() {
+LEP_VID_PCOLOR_LUT /*LeptonFLiR::*/vid_getPseudoColorLUT() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getPseudoColorLUT");
+    Serial.println("/*LeptonFLiR::*/vid_getPseudoColorLUT");
 #endif
 
     uint32_t table;
-    receiveCommand(cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_GET), &table);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_GET), &table);
     return (LEP_VID_PCOLOR_LUT)table;
 }
 
-void LeptonFLiR::vid_setFocusCalcEnabled(bool enabled) {
+void /*LeptonFLiR::*/vid_setFocusCalcEnabled(uint8_t enabled) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setFocusCalcEnabled");
+    Serial.println("/*LeptonFLiR::*/vid_setFocusCalcEnabled");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_FOCUS_CALC_ENABLE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
+    sendCommand_u32(cmdCode(LEP_CID_VID_FOCUS_CALC_ENABLE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
 }
 
-bool LeptonFLiR::vid_getFocusCalcEnabled() {
+uint8_t /*LeptonFLiR::*/vid_getFocusCalcEnabled() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getFocusCalcEnabled");
+    Serial.println("/*LeptonFLiR::*/vid_getFocusCalcEnabled");
 #endif
 
     uint32_t enabled;
-    receiveCommand(cmdCode(LEP_CID_VID_FOCUS_CALC_ENABLE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_FOCUS_CALC_ENABLE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
 }
 
-void LeptonFLiR::vid_setFreezeEnabled(bool enabled) {
+void /*LeptonFLiR::*/vid_setFreezeEnabled(uint8_t enabled) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setFreezeEnabled");
+    Serial.println("/*LeptonFLiR::*/vid_setFreezeEnabled");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_FREEZE_ENABLE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
+    sendCommand_u32(cmdCode(LEP_CID_VID_FREEZE_ENABLE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
 }
 
-bool LeptonFLiR::vid_getFreezeEnabled() {
+uint8_t /*LeptonFLiR::*/vid_getFreezeEnabled() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getFreezeEnabled");
+    Serial.println("/*LeptonFLiR::*/vid_getFreezeEnabled");
 #endif
 
     uint32_t enabled;
-    receiveCommand(cmdCode(LEP_CID_VID_FREEZE_ENABLE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_FREEZE_ENABLE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
 }
 
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
 
-void LeptonFLiR::agc_setHistogramRegion(LEP_AGC_HISTOGRAM_ROI *region) {
+void /*LeptonFLiR::*/agc_setHistogramRegion(LEP_AGC_HISTOGRAM_ROI *region) {
     if (!region) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHistogramRegion");
+    Serial.println("/*LeptonFLiR::*/agc_setHistogramRegion");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
+    sendCommand_array(cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
 }
 
-void LeptonFLiR::agc_getHistogramRegion(LEP_AGC_HISTOGRAM_ROI *region) {
+void /*LeptonFLiR::*/agc_getHistogramRegion(LEP_AGC_HISTOGRAM_ROI *region) {
     if (!region) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHistogramRegion");
+    Serial.println("/*LeptonFLiR::*/agc_getHistogramRegion");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
 }
 
-void LeptonFLiR::agc_getHistogramStatistics(LEP_AGC_HISTOGRAM_STATISTICS *statistics) {
+void /*LeptonFLiR::*/agc_getHistogramStatistics(LEP_AGC_HISTOGRAM_STATISTICS *statistics) {
     if (!statistics) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHistogramStatistics");
+    Serial.println("/*LeptonFLiR::*/agc_getHistogramStatistics");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_AGC_STATISTICS, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)statistics, sizeof(LEP_AGC_HISTOGRAM_STATISTICS) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_AGC_STATISTICS, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)statistics, sizeof(LEP_AGC_HISTOGRAM_STATISTICS) / 2);
 }
 
-void LeptonFLiR::agc_setHistogramClipPercent(uint16_t percent) {
+void /*LeptonFLiR::*/agc_setHistogramClipPercent(uint16_t percent) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHistogramClipPercent");
+    Serial.println("/*LeptonFLiR::*/agc_setHistogramClipPercent");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT, LEP_I2C_COMMAND_TYPE_SET), percent);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT, LEP_I2C_COMMAND_TYPE_SET), percent);
 }
 
-uint16_t LeptonFLiR::agc_getHistogramClipPercent() {
+uint16_t /*LeptonFLiR::*/agc_getHistogramClipPercent() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHistogramClipPercent");
+    Serial.println("/*LeptonFLiR::*/agc_getHistogramClipPercent");
 #endif
 
     uint16_t percent;
-    receiveCommand(cmdCode(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT, LEP_I2C_COMMAND_TYPE_GET), &percent);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT, LEP_I2C_COMMAND_TYPE_GET), &percent);
     return percent;
 }
 
-void LeptonFLiR::agc_setHistogramTailSize(uint16_t size) {
+void /*LeptonFLiR::*/agc_setHistogramTailSize(uint16_t size) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHistogramTailSize");
+    Serial.println("/*LeptonFLiR::*/agc_setHistogramTailSize");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_SET), size);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_SET), size);
 }
 
-uint16_t LeptonFLiR::agc_getHistogramTailSize() {
+uint16_t /*LeptonFLiR::*/agc_getHistogramTailSize() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHistogramTailSize");
+    Serial.println("/*LeptonFLiR::*/agc_getHistogramTailSize");
 #endif
 
     uint16_t size;
-    receiveCommand(cmdCode(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_GET), &size);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_GET), &size);
     return size;
 }
 
-void LeptonFLiR::agc_setLinearMaxGain(uint16_t gain) {
+void /*LeptonFLiR::*/agc_setLinearMaxGain(uint16_t gain) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setLinearMaxGain");
+    Serial.println("/*LeptonFLiR::*/agc_setLinearMaxGain");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET), gain);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET), gain);
 }
 
-uint16_t LeptonFLiR::agc_getLinearMaxGain() {
+uint16_t /*LeptonFLiR::*/agc_getLinearMaxGain() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getLinearMaxGain");
+    Serial.println("/*LeptonFLiR::*/agc_getLinearMaxGain");
 #endif
 
     uint16_t gain;
-    receiveCommand(cmdCode(LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET), &gain);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET), &gain);
     return gain;
 }
 
-void LeptonFLiR::agc_setLinearMidpoint(uint16_t midpoint) {
+void /*LeptonFLiR::*/agc_setLinearMidpoint(uint16_t midpoint) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setLinearMidpoint");
+    Serial.println("/*LeptonFLiR::*/agc_setLinearMidpoint");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET), midpoint);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET), midpoint);
 }
 
-uint16_t LeptonFLiR::agc_getLinearMidpoint() {
+uint16_t /*LeptonFLiR::*/agc_getLinearMidpoint() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getLinearMidpoint");
+    Serial.println("/*LeptonFLiR::*/agc_getLinearMidpoint");
 #endif
 
     uint16_t midpoint;
-    receiveCommand(cmdCode(LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET), &midpoint);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET), &midpoint);
     return midpoint;
 }
 
-void LeptonFLiR::agc_setLinearDampeningFactor(uint16_t factor) {
+void /*LeptonFLiR::*/agc_setLinearDampeningFactor(uint16_t factor) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setLinearDampeningFactor");
+    Serial.println("/*LeptonFLiR::*/agc_setLinearDampeningFactor");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET), factor);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET), factor);
 }
 
-uint16_t LeptonFLiR::agc_getLinearDampeningFactor() {
+uint16_t /*LeptonFLiR::*/agc_getLinearDampeningFactor() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getLinearDampeningFactor");
-#endif
-
-    uint16_t factor;
-    receiveCommand(cmdCode(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
-    return factor;
-}
-
-void LeptonFLiR::agc_setHEQDampeningFactor(uint16_t factor) {
-#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQDampeningFactor");
-#endif
-
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET), factor);
-}
-
-uint16_t LeptonFLiR::agc_getHEQDampeningFactor() {
-#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQDampeningFactor");
+    Serial.println("/*LeptonFLiR::*/agc_getLinearDampeningFactor");
 #endif
 
     uint16_t factor;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
     return factor;
 }
 
-void LeptonFLiR::agc_setHEQMaxGain(uint16_t gain) {
+void /*LeptonFLiR::*/agc_setHEQDampeningFactor(uint16_t factor) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQMaxGain");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQDampeningFactor");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET), gain);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET), factor);
 }
 
-uint16_t LeptonFLiR::agc_getHEQMaxGain() {
+uint16_t /*LeptonFLiR::*/agc_getHEQDampeningFactor() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQMaxGain");
+    Serial.println("/*LeptonFLiR::*/agc_getHEQDampeningFactor");
+#endif
+
+    uint16_t factor;
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
+    return factor;
+}
+
+void /*LeptonFLiR::*/agc_setHEQMaxGain(uint16_t gain) {
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+    Serial.println("/*LeptonFLiR::*/agc_setHEQMaxGain");
+#endif
+
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET), gain);
+}
+
+uint16_t /*LeptonFLiR::*/agc_getHEQMaxGain() {
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+    Serial.println("/*LeptonFLiR::*/agc_getHEQMaxGain");
 #endif
 
     uint16_t gain;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET), &gain);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET), &gain);
     return gain;
 }
 
-void LeptonFLiR::agc_setHEQClipLimitHigh(uint16_t limit) {
+void /*LeptonFLiR::*/agc_setHEQClipLimitHigh(uint16_t limit) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQClipLimitHigh");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQClipLimitHigh");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_SET), limit);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_SET), limit);
 }
 
-uint16_t LeptonFLiR::agc_getHEQClipLimitHigh() {
+uint16_t /*LeptonFLiR::*/agc_getHEQClipLimitHigh() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQClipLimitHigh");
-#endif
-
-    uint16_t limit;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_GET), &limit);
-    return limit;
-}
-
-void LeptonFLiR::agc_setHEQClipLimitLow(uint16_t limit) {
-#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQClipLimitLow");
-#endif
-
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_SET), limit);
-}
-
-uint16_t LeptonFLiR::agc_getHEQClipLimitLow() {
-#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQClipLimitLow");
+    Serial.println("/*LeptonFLiR::*/agc_getHEQClipLimitHigh");
 #endif
 
     uint16_t limit;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_GET), &limit);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_GET), &limit);
     return limit;
 }
 
-void LeptonFLiR::agc_setHEQBinExtension(uint16_t extension) {
+void /*LeptonFLiR::*/agc_setHEQClipLimitLow(uint16_t limit) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQBinExtension");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQClipLimitLow");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_SET), extension);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_SET), limit);
 }
 
-uint16_t LeptonFLiR::agc_getHEQBinExtension() {
+uint16_t /*LeptonFLiR::*/agc_getHEQClipLimitLow() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQBinExtension");
+    Serial.println("/*LeptonFLiR::*/agc_getHEQClipLimitLow");
+#endif
+
+    uint16_t limit;
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_GET), &limit);
+    return limit;
+}
+
+void /*LeptonFLiR::*/agc_setHEQBinExtension(uint16_t extension) {
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+    Serial.println("/*LeptonFLiR::*/agc_setHEQBinExtension");
+#endif
+
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_SET), extension);
+}
+
+uint16_t /*LeptonFLiR::*/agc_getHEQBinExtension() {
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+    Serial.println("/*LeptonFLiR::*/agc_getHEQBinExtension");
 #endif
 
     uint16_t extension;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_GET), &extension);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_GET), &extension);
     return extension;
 }
 
-void LeptonFLiR::agc_setHEQMidpoint(uint16_t midpoint) {
+void /*LeptonFLiR::*/agc_setHEQMidpoint(uint16_t midpoint) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQMidpoint");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQMidpoint");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET), midpoint);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET), midpoint);
 }
 
-uint16_t LeptonFLiR::agc_getHEQMidpoint() {
+uint16_t /*LeptonFLiR::*/agc_getHEQMidpoint() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQMidpoint");
+    Serial.println("/*LeptonFLiR::*/agc_getHEQMidpoint");
 #endif
 
     uint16_t midpoint;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET), &midpoint);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET), &midpoint);
     return midpoint;
 }
 
-void LeptonFLiR::agc_setHEQEmptyCounts(uint16_t counts) {
+void /*LeptonFLiR::*/agc_setHEQEmptyCounts(uint16_t counts) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQEmptyCounts");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQEmptyCounts");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_SET), counts);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_SET), counts);
 }
 
-uint16_t LeptonFLiR::agc_getHEQEmptyCounts() {
+uint16_t /*LeptonFLiR::*/agc_getHEQEmptyCounts() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQEmptyCounts");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQEmptyCounts");
 #endif
 
     uint16_t counts;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_GET), &counts);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_GET), &counts);
     return counts;
 }
 
-void LeptonFLiR::agc_setHEQNormalizationFactor(uint16_t factor) {
+void /*LeptonFLiR::*/agc_setHEQNormalizationFactor(uint16_t factor) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_setHEQNormalizationFactor");
+    Serial.println("/*LeptonFLiR::*/agc_setHEQNormalizationFactor");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR, LEP_I2C_COMMAND_TYPE_SET), factor);
+    sendCommand_u16(cmdCode(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR, LEP_I2C_COMMAND_TYPE_SET), factor);
 }
 
-uint16_t LeptonFLiR::agc_getHEQNormalizationFactor() {
+uint16_t /*LeptonFLiR::*/agc_getHEQNormalizationFactor() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::agc_getHEQNormalizationFactor");
+    Serial.println("/*LeptonFLiR::*/agc_getHEQNormalizationFactor");
 #endif
 
     uint16_t factor;
-    receiveCommand(cmdCode(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
+    receiveCommand_u16(cmdCode(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR, LEP_I2C_COMMAND_TYPE_GET), &factor);
     return factor;
 }
 
-void LeptonFLiR::sys_runPingCamera() {
+void /*LeptonFLiR::*/sys_runPingCamera() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_runPingCamera");
+    Serial.println("/*LeptonFLiR::*/sys_runPingCamera");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN));
+    sendCommand_raw(cmdCode(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN));
 }
 
-void LeptonFLiR::sys_setTelemetryLocation(LEP_SYS_TELEMETRY_LOCATION location) {
+void /*LeptonFLiR::*/sys_setTelemetryLocation(LEP_SYS_TELEMETRY_LOCATION location) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_setTelemetryLocation");
+    Serial.println("/*LeptonFLiR::*/sys_setTelemetryLocation");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)location);
+    sendCommand_u32(cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)location);
 }
 
-LEP_SYS_TELEMETRY_LOCATION LeptonFLiR::sys_getTelemetryLocation() {
+LEP_SYS_TELEMETRY_LOCATION /*LeptonFLiR::*/sys_getTelemetryLocation() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getTelemetryLocation");
+    Serial.println("/*LeptonFLiR::*/sys_getTelemetryLocation");
 #endif
 
     uint32_t location;
-    receiveCommand(cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET), &location);
+    receiveCommand_u32(cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET), &location);
     return (LEP_SYS_TELEMETRY_LOCATION)location;
 }
 
-void LeptonFLiR::sys_runFrameAveraging() {
+void /*LeptonFLiR::*/sys_runFrameAveraging() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_runFrameAveraging");
+    Serial.println("/*LeptonFLiR::*/sys_runFrameAveraging");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_EXECTUE_FRAME_AVERAGE, LEP_I2C_COMMAND_TYPE_RUN));
+    sendCommand_raw(cmdCode(LEP_CID_SYS_EXECTUE_FRAME_AVERAGE, LEP_I2C_COMMAND_TYPE_RUN));
 }
 
-void LeptonFLiR::sys_setNumFramesToAverage(LEP_SYS_FRAME_AVERAGE average) {
+void /*LeptonFLiR::*/sys_setNumFramesToAverage(LEP_SYS_FRAME_AVERAGE average) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_setNumFramesToAverage");
+    Serial.println("/*LeptonFLiR::*/sys_setNumFramesToAverage");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)average);
+    sendCommand_u32(cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)average);
 }
 
-LEP_SYS_FRAME_AVERAGE LeptonFLiR::sys_getNumFramesToAverage() {
+LEP_SYS_FRAME_AVERAGE /*LeptonFLiR::*/sys_getNumFramesToAverage() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getNumFramesToAverage");
+    Serial.println("/*LeptonFLiR::*/sys_getNumFramesToAverage");
 #endif
 
     uint32_t average;
-    receiveCommand(cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_GET), &average);
+    receiveCommand_u32(cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_GET), &average);
     return (LEP_SYS_FRAME_AVERAGE)average;
 }
 
-void LeptonFLiR::sys_getSceneStatistics(LEP_SYS_SCENE_STATISTICS *statistics) {
+void /*LeptonFLiR::*/sys_getSceneStatistics(LEP_SYS_SCENE_STATISTICS *statistics) {
     if (!statistics) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getSceneStatistics");
+    Serial.println("/*LeptonFLiR::*/sys_getSceneStatistics");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_SYS_SCENE_STATISTICS, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)statistics, sizeof(LEP_SYS_SCENE_STATISTICS) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_SYS_SCENE_STATISTICS, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)statistics, sizeof(LEP_SYS_SCENE_STATISTICS) / 2);
 }
 
-void LeptonFLiR::sys_setSceneRegion(LEP_SYS_SCENE_ROI *region) {
+void /*LeptonFLiR::*/sys_setSceneRegion(LEP_SYS_SCENE_ROI *region) {
     if (!region) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_setSceneRegion");
+    Serial.println("/*LeptonFLiR::*/sys_setSceneRegion");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)region, sizeof(LEP_SYS_SCENE_ROI) / 2);
+    sendCommand_array(cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)region, sizeof(LEP_SYS_SCENE_ROI) / 2);
 }
 
-void LeptonFLiR::sys_getSceneRegion(LEP_SYS_SCENE_ROI *region) {
+void /*LeptonFLiR::*/sys_getSceneRegion(LEP_SYS_SCENE_ROI *region) {
     if (!region) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getSceneRegion");
+    Serial.println("/*LeptonFLiR::*/sys_getSceneRegion");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)region, sizeof(LEP_SYS_SCENE_ROI) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)region, sizeof(LEP_SYS_SCENE_ROI) / 2);
 }
 
-uint16_t LeptonFLiR::sys_getThermalShutdownCount() {
+uint16_t /*LeptonFLiR::*/sys_getThermalShutdownCount() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getThermalShutdownCount");
+    Serial.println("/*LeptonFLiR::*/sys_getThermalShutdownCount");
 #endif
 
     uint16_t count;
-    receiveCommand(cmdCode(LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT, LEP_I2C_COMMAND_TYPE_GET), &count);
+    receiveCommand_u16(cmdCode(LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT, LEP_I2C_COMMAND_TYPE_GET), &count);
     return count;
 }
 
-void LeptonFLiR::sys_setShutterPosition(LEP_SYS_SHUTTER_POSITION position) {
+void /*LeptonFLiR::*/sys_setShutterPosition(LEP_SYS_SHUTTER_POSITION position) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_setShutterPosition");
+    Serial.println("/*LeptonFLiR::*/sys_setShutterPosition");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)position);
+    sendCommand_u32(cmdCode(LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)position);
 }
 
-LEP_SYS_SHUTTER_POSITION LeptonFLiR::sys_getShutterPosition() {
+LEP_SYS_SHUTTER_POSITION /*LeptonFLiR::*/sys_getShutterPosition() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getShutterPosition");
+    Serial.println("/*LeptonFLiR::*/sys_getShutterPosition");
 #endif
 
     uint32_t position;
-    receiveCommand(cmdCode(LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_GET), &position);
+    receiveCommand_u32(cmdCode(LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_GET), &position);
     return (LEP_SYS_SHUTTER_POSITION)position;
 }
 
-void LeptonFLiR::sys_setFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE *mode) {
+void /*LeptonFLiR::*/sys_setFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE *mode) {
     if (!mode) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_setFFCShutterMode");
+    Serial.println("/*LeptonFLiR::*/sys_setFFCShutterMode");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2);
+    sendCommand_array(cmdCode(LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2);
 }
 
-void LeptonFLiR::sys_getFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE *mode) {
+void /*LeptonFLiR::*/sys_getFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE *mode) {
     if (!mode) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getFFCShutterMode");
+    Serial.println("/*LeptonFLiR::*/sys_getFFCShutterMode");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2);
 }
 
-LEP_SYS_FFC_STATUS LeptonFLiR::sys_getFFCNormalizationStatus() {
+LEP_SYS_FFC_STATUS /*LeptonFLiR::*/sys_getFFCNormalizationStatus() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::sys_getFFCNormalizationStatus");
+    Serial.println("/*LeptonFLiR::*/sys_getFFCNormalizationStatus");
 #endif
 
     uint32_t status;
-    receiveCommand(cmdCode(LEP_CID_SYS_FFC_STATUS, LEP_I2C_COMMAND_TYPE_GET), &status);
+    receiveCommand_u32(cmdCode(LEP_CID_SYS_FFC_STATUS, LEP_I2C_COMMAND_TYPE_GET), &status);
     return (LEP_SYS_FFC_STATUS)status;
 }
 
-void LeptonFLiR::vid_setUserColorLUT(LEP_VID_LUT_BUFFER *table) {
+void /*LeptonFLiR::*/vid_setUserColorLUT(LEP_VID_LUT_BUFFER *table) {
     if (!table) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setUserColorLUT");
+    Serial.println("/*LeptonFLiR::*/vid_setUserColorLUT");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_LUT_TRANSFER, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)table, sizeof(LEP_VID_LUT_BUFFER) / 2);
+    sendCommand_array(cmdCode(LEP_CID_VID_LUT_TRANSFER, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)table, sizeof(LEP_VID_LUT_BUFFER) / 2);
 }
 
-void LeptonFLiR::vid_getUserColorLUT(LEP_VID_LUT_BUFFER *table) {
+void /*LeptonFLiR::*/vid_getUserColorLUT(LEP_VID_LUT_BUFFER *table) {
     if (!table) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getUserColorLUT");
+    Serial.println("/*LeptonFLiR::*/vid_getUserColorLUT");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_VID_LUT_TRANSFER, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)table, sizeof(LEP_VID_LUT_BUFFER) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_VID_LUT_TRANSFER, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)table, sizeof(LEP_VID_LUT_BUFFER) / 2);
 }
 
-void LeptonFLiR::vid_setFocusRegion(LEP_VID_FOCUS_ROI *region) {
+void /*LeptonFLiR::*/vid_setFocusRegion(LEP_VID_FOCUS_ROI *region) {
     if (!region) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setFocusRegion");
+    Serial.println("/*LeptonFLiR::*/vid_setFocusRegion");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)region, sizeof(LEP_VID_FOCUS_ROI) / 2);
+    sendCommand_array(cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_SET), (uint16_t *)region, sizeof(LEP_VID_FOCUS_ROI) / 2);
 }
 
-void LeptonFLiR::vid_getFocusRegion(LEP_VID_FOCUS_ROI *region) {
+void /*LeptonFLiR::*/vid_getFocusRegion(LEP_VID_FOCUS_ROI *region) {
     if (!region) return;
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getFocusRegion");
+    Serial.println("/*LeptonFLiR::*/vid_getFocusRegion");
 #endif
 
-    receiveCommand(cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)region, sizeof(LEP_VID_FOCUS_ROI) / 2);
+    receiveCommand_array(cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_GET), (uint16_t *)region, sizeof(LEP_VID_FOCUS_ROI) / 2);
 }
 
-void LeptonFLiR::vid_setFocusThreshold(uint32_t threshold) {
+void /*LeptonFLiR::*/vid_setFocusThreshold(uint32_t threshold) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setFocusThreshold");
+    Serial.println("/*LeptonFLiR::*/vid_setFocusThreshold");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_FOCUS_THRESHOLD, LEP_I2C_COMMAND_TYPE_SET), threshold);
+    sendCommand_u32(cmdCode(LEP_CID_VID_FOCUS_THRESHOLD, LEP_I2C_COMMAND_TYPE_SET), threshold);
 }
 
-uint32_t LeptonFLiR::vid_getFocusThreshold() {
+uint32_t /*LeptonFLiR::*/vid_getFocusThreshold() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getFocusThreshold");
+    Serial.println("/*LeptonFLiR::*/vid_getFocusThreshold");
 #endif
 
     uint32_t threshold;
-    receiveCommand(cmdCode(LEP_CID_VID_FOCUS_THRESHOLD, LEP_I2C_COMMAND_TYPE_GET), &threshold);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_FOCUS_THRESHOLD, LEP_I2C_COMMAND_TYPE_GET), &threshold);
     return threshold;
 }
 
-uint32_t LeptonFLiR::vid_getFocusMetric() {
+uint32_t /*LeptonFLiR::*/vid_getFocusMetric() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getFocusMetric");
+    Serial.println("/*LeptonFLiR::*/vid_getFocusMetric");
 #endif
 
     uint32_t metric;
-    receiveCommand(cmdCode(LEP_CID_VID_FOCUS_METRIC, LEP_I2C_COMMAND_TYPE_GET), &metric);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_FOCUS_METRIC, LEP_I2C_COMMAND_TYPE_GET), &metric);
     return metric;
 }
 
-void LeptonFLiR::vid_setSceneBasedNUCEnabled(bool enabled) {
+void /*LeptonFLiR::*/vid_setSceneBasedNUCEnabled(uint8_t enabled) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setSceneBasedNUCEnabled");
+    Serial.println("/*LeptonFLiR::*/vid_setSceneBasedNUCEnabled");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
+    sendCommand_u32(cmdCode(LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_SET), (uint32_t)enabled);
 }
 
-bool LeptonFLiR::vid_getSceneBasedNUCEnabled() {
+uint8_t /*LeptonFLiR::*/vid_getSceneBasedNUCEnabled() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getSceneBasedNUCEnabled");
+    Serial.println("/*LeptonFLiR::*/vid_getSceneBasedNUCEnabled");
 #endif
 
     uint32_t enabled;
-    receiveCommand(cmdCode(LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
 }
 
-void LeptonFLiR::vid_setGamma(uint32_t gamma) {
+void /*LeptonFLiR::*/vid_setGamma(uint32_t gamma) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_setGamma");
+    Serial.println("/*LeptonFLiR::*/vid_setGamma");
 #endif
 
-    sendCommand(cmdCode(LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_SET), gamma);
+    sendCommand_u32(cmdCode(LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_SET), gamma);
 }
 
-uint32_t LeptonFLiR::vid_getGamma() {
+uint32_t /*LeptonFLiR::*/vid_getGamma() {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("LeptonFLiR::vid_getGamma");
+    Serial.println("/*LeptonFLiR::*/vid_getGamma");
 #endif
 
     uint32_t gamma;
-    receiveCommand(cmdCode(LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_GET), &gamma);
+    receiveCommand_u32(cmdCode(LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_GET), &gamma);
     return gamma;
 }
 
@@ -1450,7 +1486,7 @@ static inline void byteToHexString(byte value, char *buffer) {
 }
 
 void wordsToHexString(uint16_t *dataWords, int dataLength, char *buffer, int maxLength) {
-    bool insertColons = maxLength >= (dataLength * 4) + (dataLength - 1);
+    uint8_t insertColons = maxLength >= (dataLength * 4) + (dataLength - 1);
 
     while (dataLength-- > 0 && maxLength > 3) {
         if (maxLength > 3) {
@@ -1497,7 +1533,7 @@ uint16_t kelvinToKelvin100(float kelvin) {
     return (uint16_t)roundf(kelvin * 100.0f);
 }
 
-float LeptonFLiR::kelvin100ToTemperature(uint16_t kelvin100) {
+float /*LeptonFLiR::*/kelvin100ToTemperature(uint16_t kelvin100) {
     switch (_tempMode) {
         case LeptonFLiR_TemperatureMode_Celsius:
             return kelvin100ToCelsius(kelvin100);
@@ -1510,7 +1546,7 @@ float LeptonFLiR::kelvin100ToTemperature(uint16_t kelvin100) {
     }
 }
 
-uint16_t LeptonFLiR::temperatureToKelvin100(float temperature) {
+uint16_t /*LeptonFLiR::*/temperatureToKelvin100(float temperature) {
     switch (_tempMode) {
         case LeptonFLiR_TemperatureMode_Celsius:
             return celsiusToKelvin100(temperature);
@@ -1523,7 +1559,7 @@ uint16_t LeptonFLiR::temperatureToKelvin100(float temperature) {
     }
 }
 
-const char *LeptonFLiR::getTemperatureSymbol() {
+const char */*LeptonFLiR::*/getTemperatureSymbol() {
     switch (_tempMode) {
         case LeptonFLiR_TemperatureMode_Celsius:
             return "°C";
@@ -1536,11 +1572,11 @@ const char *LeptonFLiR::getTemperatureSymbol() {
     }
 }
 
-byte LeptonFLiR::getLastI2CError() {
+byte /*LeptonFLiR::*/getLastI2CError() {
     return _lastI2CError;
 }
 
-LEP_RESULT LeptonFLiR::getLastLepResult() {
+LEP_RESULT /*LeptonFLiR::*/getLastLepResult() {
     return (LEP_RESULT)_lastLepResult;
 }
 
@@ -1634,15 +1670,15 @@ static const char *textForLepResult(LEP_RESULT errorCode) {
     }
 }
 
-void LeptonFLiR::checkForErrors() {
+void /*LeptonFLiR::*/checkForErrors() {
     if (_lastI2CError) {
-        Serial.print("  LeptonFLiR::checkErrors lastI2CError: ");
+        Serial.print("  /*LeptonFLiR::*/checkErrors lastI2CError: ");
         Serial.print(_lastI2CError);
         Serial.print(": ");
         Serial.println(textForI2CError(getLastI2CError()));
     }
     if (_lastLepResult) {
-        Serial.print("  LeptonFLiR::checkErrors lastLepResult: ");
+        Serial.print("  /*LeptonFLiR::*/checkErrors lastLepResult: ");
         Serial.print(_lastLepResult);
         Serial.print(": ");
         Serial.println(textForLepResult(getLastLepResult()));
@@ -1651,9 +1687,9 @@ void LeptonFLiR::checkForErrors() {
 
 #endif
 
-bool LeptonFLiR::waitCommandBegin(int timeout) {
+uint8_t /*LeptonFLiR::*/waitCommandBegin(int timeout) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("    LeptonFLiR::waitCommandBegin");
+    Serial.println("    /*LeptonFLiR::*/waitCommandBegin");
 #endif
 
     _lastLepResult = 0;
@@ -1693,9 +1729,9 @@ bool LeptonFLiR::waitCommandBegin(int timeout) {
     }
 }
 
-bool LeptonFLiR::waitCommandFinish(int timeout) {
+uint8_t /*LeptonFLiR::*/waitCommandFinish(int timeout) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.println("    LeptonFLiR::waitCommandFinish");
+    Serial.println("    /*LeptonFLiR::*/waitCommandFinish");
 #endif
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
@@ -1737,13 +1773,13 @@ bool LeptonFLiR::waitCommandFinish(int timeout) {
     }
 }
 
-uint16_t LeptonFLiR::cmdCode(uint16_t cmdID, uint16_t cmdType) {
+uint16_t /*LeptonFLiR::*/cmdCode(uint16_t cmdID, uint16_t cmdType) {
     return (cmdID & LEP_I2C_COMMAND_MODULE_ID_BIT_MASK) | (cmdID & LEP_I2C_COMMAND_ID_BIT_MASK) | (cmdType & LEP_I2C_COMMAND_TYPE_BIT_MASK);
 }
 
-void LeptonFLiR::sendCommand(uint16_t cmdCode) {
+void /*LeptonFLiR::*/sendCommand_raw(uint16_t cmdCode) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::sendCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/sendCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1760,9 +1796,9 @@ void LeptonFLiR::sendCommand(uint16_t cmdCode) {
 #endif
 }
 
-void LeptonFLiR::sendCommand(uint16_t cmdCode, uint16_t value) {
+void /*LeptonFLiR::*/sendCommand_u16(uint16_t cmdCode, uint16_t value) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::sendCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/sendCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1779,9 +1815,9 @@ void LeptonFLiR::sendCommand(uint16_t cmdCode, uint16_t value) {
 #endif
 }
 
-void LeptonFLiR::sendCommand(uint16_t cmdCode, uint32_t value) {
+void /*LeptonFLiR::*/sendCommand_u32(uint16_t cmdCode, uint32_t value) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::sendCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/sendCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1798,9 +1834,9 @@ void LeptonFLiR::sendCommand(uint16_t cmdCode, uint32_t value) {
 #endif
 }
 
-void LeptonFLiR::sendCommand(uint16_t cmdCode, uint16_t *dataWords, int dataLength) {
+void /*LeptonFLiR::*/sendCommand_array(uint16_t cmdCode, uint16_t *dataWords, int dataLength) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::sendCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/sendCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1817,9 +1853,9 @@ void LeptonFLiR::sendCommand(uint16_t cmdCode, uint16_t *dataWords, int dataLeng
 #endif
 }
 
-void LeptonFLiR::receiveCommand(uint16_t cmdCode, uint16_t *value) {
+void /*LeptonFLiR::*/receiveCommand_u16(uint16_t cmdCode, uint16_t *value) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::receiveCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/receiveCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1839,9 +1875,9 @@ void LeptonFLiR::receiveCommand(uint16_t cmdCode, uint16_t *value) {
 #endif
 }
 
-void LeptonFLiR::receiveCommand(uint16_t cmdCode, uint32_t *value) {
+void /*LeptonFLiR::*/receiveCommand_u32(uint16_t cmdCode, uint32_t *value) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::receiveCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/receiveCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1861,9 +1897,9 @@ void LeptonFLiR::receiveCommand(uint16_t cmdCode, uint32_t *value) {
 #endif
 }
 
-void LeptonFLiR::receiveCommand(uint16_t cmdCode, uint16_t *readWords, int maxLength) {
+void /*LeptonFLiR::*/receiveCommand_array(uint16_t cmdCode, uint16_t *readWords, int maxLength) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("  LeptonFLiR::receiveCommand cmdCode: 0x");
+    Serial.print("  /*LeptonFLiR::*/receiveCommand cmdCode: 0x");
     Serial.println(cmdCode, HEX);
 #endif
 
@@ -1883,9 +1919,9 @@ void LeptonFLiR::receiveCommand(uint16_t cmdCode, uint16_t *readWords, int maxLe
 #endif
 }
 
-int LeptonFLiR::writeCmdRegister(uint16_t cmdCode, uint16_t *dataWords, int dataLength) {
+int /*LeptonFLiR::*/writeCmdRegister(uint16_t cmdCode, uint16_t *dataWords, int dataLength) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("    LeptonFLiR::writeCmdRegister cmdCode: 0x");
+    Serial.print("    /*LeptonFLiR::*/writeCmdRegister cmdCode: 0x");
     Serial.print(cmdCode, HEX);
     Serial.print(", dataWords[");
     Serial.print(dataLength);
@@ -1934,7 +1970,7 @@ int LeptonFLiR::writeCmdRegister(uint16_t cmdCode, uint16_t *dataWords, int data
     return i2cWire_endTransmission();
 }
 
-int LeptonFLiR::readDataRegister(uint16_t *readWords, int maxLength) {
+int /*LeptonFLiR::*/readDataRegister(uint16_t *readWords, int maxLength) {
     i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS);
     i2cWire_write16(LEP_I2C_DATA_LENGTH_REG);
     if (i2cWire_endTransmission())
@@ -1972,7 +2008,7 @@ int LeptonFLiR::readDataRegister(uint16_t *readWords, int maxLength) {
         }
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-        Serial.print("      LeptonFLiR::readDataRegister readWords[");
+        Serial.print("      /*LeptonFLiR::*/readDataRegister readWords[");
         if (origWordsRead == origReadLength && origReadLength == origMaxLength) {
             Serial.print(origWordsRead);
         }
@@ -2011,9 +2047,9 @@ int LeptonFLiR::readDataRegister(uint16_t *readWords, int maxLength) {
     return (_lastI2CError = readLength ? 4 : 0);
 }
 
-int LeptonFLiR::writeRegister(uint16_t regAddress, uint16_t value) {
+int /*LeptonFLiR::*/writeRegister(uint16_t regAddress, uint16_t value) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("    LeptonFLiR::writeRegister regAddress: 0x");
+    Serial.print("    /*LeptonFLiR::*/writeRegister regAddress: 0x");
     Serial.print(regAddress, HEX);
     Serial.print(", value: 0x");
     Serial.println(value, HEX);
@@ -2025,9 +2061,9 @@ int LeptonFLiR::writeRegister(uint16_t regAddress, uint16_t value) {
     return i2cWire_endTransmission();
 }
 
-int LeptonFLiR::readRegister(uint16_t regAddress, uint16_t *value) {
+int /*LeptonFLiR::*/readRegister(uint16_t regAddress, uint16_t *value) {
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("    LeptonFLiR::readRegister regAddress: 0x");
+    Serial.print("    /*LeptonFLiR::*/readRegister regAddress: 0x");
     Serial.println(regAddress, HEX);
 #endif
 
@@ -2046,7 +2082,7 @@ int LeptonFLiR::readRegister(uint16_t regAddress, uint16_t *value) {
     *value = i2cWire_read16();
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
-    Serial.print("      LeptonFLiR::readRegister retVal: 0x");
+    Serial.print("      /*LeptonFLiR::*/readRegister retVal: 0x");
     Serial.println(*value, HEX);
 #endif
 
@@ -2054,58 +2090,71 @@ int LeptonFLiR::readRegister(uint16_t regAddress, uint16_t *value) {
 }
 
 #ifdef LEPFLIR_USE_SOFTWARE_I2C
-bool __attribute__((noinline)) i2c_start(uint8_t addr);
+uint8_t __attribute__((noinline)) i2c_start(uint8_t addr);
 void __attribute__((noinline)) i2c_stop(void) asm("ass_i2c_stop");
-bool __attribute__((noinline)) i2c_write(uint8_t value) asm("ass_i2c_write");
-uint8_t __attribute__((noinline)) i2c_read(bool last);
+uint8_t __attribute__((noinline)) i2c_write(uint8_t value) asm("ass_i2c_write");
+uint8_t __attribute__((noinline)) i2c_read(uint8_t last);
 #endif
 
-void LeptonFLiR::i2cWire_beginTransmission(uint8_t addr) {
+void /*LeptonFLiR::*/i2cWire_beginTransmission(uint8_t addr) {
     _lastI2CError = 0;
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    _i2cWire->beginTransmission(addr);
+    // _i2cWire->beginTransmission(addr);
+    critical_i2c_lock();
+    TwoWire_beginTransmission(addr);
 #else
     i2c_start(addr);
 #endif
 }
 
-uint8_t LeptonFLiR::i2cWire_endTransmission(void) {
+uint8_t /*LeptonFLiR::*/i2cWire_endTransmission(void) {
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    return (_lastI2CError = _i2cWire->endTransmission());
+    // return (_lastI2CError = _i2cWire->endTransmission());
+    _lastI2CError = TwoWire_endTransmission();
+    critical_i2c_unlock();
+    return _lastI2CError;
 #else
     i2c_stop();
     return (_lastI2CError = 0);
 #endif
 }
 
-uint8_t LeptonFLiR::i2cWire_requestFrom(uint8_t addr, uint8_t len) {
+uint8_t /*LeptonFLiR::*/i2cWire_requestFrom(uint8_t addr, uint8_t len) {
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    return _i2cWire->requestFrom(addr, len);
+    critical_i2c_lock();
+    uint8_t ret = TwoWire_requestFrom(addr, len);
+    critical_i2c_unlock();
+    // return _i2cWire->requestFrom(addr, len);
+    return ret;
 #else
     i2c_start(addr | 0x01);
     return (_readBytes = len);
 #endif
 }
 
-size_t LeptonFLiR::i2cWire_write(uint8_t data) {
+size_t /*LeptonFLiR::*/i2cWire_write(uint8_t data) {
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    return _i2cWire->write(data);
+    uint8_t ret = TwoWire_write(data);
+    // return _i2cWire->write(data);
+    return ret;
 #else
     return (size_t)i2c_write(data);
 #endif
 }
 
-size_t LeptonFLiR::i2cWire_write16(uint16_t data) {
+size_t /*LeptonFLiR::*/i2cWire_write16(uint16_t data) {
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    return _i2cWire->write(highByte(data)) + _i2cWire->write(lowByte(data));
+    // return _i2cWire->write(highByte(data)) + _i2cWire->write(lowByte(data));
+    return TwoWire_write(highByte(data)) + TwoWire_write(lowByte(data));
 #else
     return (size_t)i2c_write(highByte(data)) + (size_t)i2c_write(lowByte(data));
 #endif
 }
 
-uint8_t LeptonFLiR::i2cWire_read(void) {
+uint8_t /*LeptonFLiR::*/i2cWire_read(void) {
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    return (uint8_t)(_i2cWire->read() & 0xFF);
+    return (uint8_t)(TwoWire_read() & 0xFF);
+    // return (uint8_t)(_i2cWire->read() & 0xFF);
 #else
     if (_readBytes > 1) {
         _readByes -= 1;
@@ -2118,9 +2167,10 @@ uint8_t LeptonFLiR::i2cWire_read(void) {
 #endif
 }
 
-uint16_t LeptonFLiR::i2cWire_read16(void) {
+uint16_t /*LeptonFLiR::*/i2cWire_read16(void) {
 #ifndef LEPFLIR_USE_SOFTWARE_I2C
-    return ((uint16_t)(_i2cWire->read() & 0xFF) << 8) | (uint16_t)(_i2cWire->read() & 0xFF);
+    return ((uint16_t)(TwoWire_read() & 0xFF) << 8) | (uint16_t)(TwoWire_read() & 0xFF);
+    // return ((uint16_t)(_i2cWire->read() & 0xFF) << 8) | (uint16_t)(_i2cWire->read() & 0xFF);
 #else
     if (_readBytes > 2) {
         readBytes -= 2;
@@ -2135,7 +2185,7 @@ uint16_t LeptonFLiR::i2cWire_read16(void) {
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
 
-void LeptonFLiR::printModuleInfo() {
+void /*LeptonFLiR::*/printModuleInfo() {
     char buffer[80];
 
     Serial.println(""); Serial.println(" ~~~ LeptonFLiR Module Info ~~~");
