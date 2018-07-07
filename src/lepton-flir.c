@@ -39,7 +39,7 @@
 #define LEPFLIR_SPI_FRAME_PACKET_SIZE           164 // 2B ID + 2B CRC + 160B for 80x1 14bpp/8bppAGC thermal image data or telemetry data
 #define LEPFLIR_SPI_FRAME_PACKET_SIZE16         82
 
-static uint32_t BUFFER_LENGTH = 0;
+static int BUFFER_LENGTH = 0;
 
 static inline uint8_t lowByte(uint16_t p)
 {
@@ -1055,7 +1055,7 @@ void i2cWire_read16_set_callback(uint16_t(*callback)(void))
     i2cWire_read16 = callback;
 }
 
-void i2cWire_set_buffer_length(uint32_t length)
+void i2cWire_set_buffer_length(int length)
 {
     BUFFER_LENGTH = length;
 }

@@ -141,7 +141,7 @@ typedef enum {
     void i2cWire_write16_set_callback(size_t(*callback)(uint16_t data));
     void i2cWire_read_set_callback(uint8_t(*callback)(void));
     void i2cWire_read16_set_callback(uint16_t(*callback)(void));
-    void i2cWire_set_buffer_length(uint32_t length);
+    void i2cWire_set_buffer_length(int length);
     void millis_set_callback(unsigned long(*callback)(void));
     void delay_set_callback(void (*callback)(unsigned long));
 
