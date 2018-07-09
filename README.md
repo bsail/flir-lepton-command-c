@@ -1,6 +1,9 @@
 C Library for the Lepton FLiR Thermal Camera Module.
 ===============
 
+[![Build Status](https://img.shields.io/travis/bsail/flir-lepton-command-c/master.svg)](https://travis-ci.org/bsail/flir-lepton-command-c)
+[![Coverage Status](https://img.shields.io/coveralls/github/bsail/flir-lepton-command-c/master.svg)](https://coveralls.io/github/bsail/flir-lepton-command-c?branch=master)
+
 Fork of original library by [NachtRaveVL](https://github.com/NachtRaveVL/Lepton-FLiR-Arduino).
 
 Library to control a Lepton FLiR (forward looking infrared) thermal camera module.
