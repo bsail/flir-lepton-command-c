@@ -960,11 +960,11 @@ const char *getTemperatureSymbol()
 {
   switch (_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
-    return "°C";
+    return "C";
   case LeptonFLiR_TemperatureMode_Fahrenheit:
-    return "°F";
+    return "F";
   case LeptonFLiR_TemperatureMode_Kelvin:
-    return "°K";
+    return "K";
   default:
     return "";
   }
