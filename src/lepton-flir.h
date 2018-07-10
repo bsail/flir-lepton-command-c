@@ -54,7 +54,7 @@ struct lepton_callbacks {
 };
 
 struct lepton_communication {
-  struct lepton_callbacks * callbacks;
+  struct lepton_callbacks callbacks;
   LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
   LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
   uint8_t _lastLepResult;         // Last lep result
@@ -78,32 +78,32 @@ struct lepton_communication {
     // SYS module commands
 
 struct lepton_sys {
-  void (*sys_getCameraStatus_internal)(LEP_SYS_CAM_STATUS * status,struct lepton_communication * communication);
-  LEP_SYS_CAM_STATUS_STATES (*sys_getCameraStatus)(struct lepton_communication * communication);
-  void (*sys_getFlirSerialNumber)(char *buffer, int maxLength /* = 16 */,struct lepton_communication * communication ); // maxLength must at least be 16, recommended 20
-  void (*sys_getCustomerSerialNumber)(char *buffer, int maxLength /* = 64 */ ,struct lepton_communication * communication); // maxLength must at least be 64, recommended 80
-  uint32_t (*sys_getCameraUptime)(struct lepton_communication * communication); // (milliseconds)
-  float (*sys_getAuxTemperature)(struct lepton_communication * communication);  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-  float (*sys_getFPATemperature)(struct lepton_communication * communication);  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-  void (*sys_setTelemetryEnabled)(uint8_t enabled,struct lepton_communication * communication); // def:enabled
-  uint8_t (*sys_getTelemetryEnabled)(struct lepton_communication * communication);
-  void (*sys_runFFCNormalization)(struct lepton_communication * communication);
+  void (*sys_getCameraStatus_internal)(LEP_SYS_CAM_STATUS * status,void * driver);
+  LEP_SYS_CAM_STATUS_STATES (*sys_getCameraStatus)(void * driver);
+  void (*sys_getFlirSerialNumber)(char *buffer, int maxLength /* = 16 */,void * driver ); // maxLength must at least be 16, recommended 20
+  void (*sys_getCustomerSerialNumber)(char *buffer, int maxLength /* = 64 */ ,void * driver); // maxLength must at least be 64, recommended 80
+  uint32_t (*sys_getCameraUptime)(void * driver); // (milliseconds)
+  float (*sys_getAuxTemperature)(void * driver);  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
+  float (*sys_getFPATemperature)(void * driver);  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
+  void (*sys_setTelemetryEnabled)(uint8_t enabled,void * driver); // def:enabled
+  uint8_t (*sys_getTelemetryEnabled)(void * driver);
+  void (*sys_runFFCNormalization)(void * driver);
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
-  void (*sys_runPingCamera)(struct lepton_communication * communication);       // return put into lastLepResult
-  void (*sys_setTelemetryLocation)(LEP_SYS_TELEMETRY_LOCATION location, struct lepton_communication * communication); // def:LEP_TELEMETRY_LOCATION_FOOTER
-  LEP_SYS_TELEMETRY_LOCATION (*sys_getTelemetryLocation)(struct lepton_communication * communication);
-  void (*sys_runFrameAveraging)(struct lepton_communication * communication);
-  void (*sys_setNumFramesToAverage)(LEP_SYS_FRAME_AVERAGE average, struct lepton_communication * communication); // def:LEP_SYS_FA_DIV_8
-  LEP_SYS_FRAME_AVERAGE (*sys_getNumFramesToAverage)(struct lepton_communication * communication);
-  void (*sys_getSceneStatistics)(LEP_SYS_SCENE_STATISTICS * statistics, struct lepton_communication * communication);
-  void (*sys_setSceneRegion)(LEP_SYS_SCENE_ROI * region, struct lepton_communication * communication); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
-  void (*sys_getSceneRegion)(LEP_SYS_SCENE_ROI * region, struct lepton_communication * communication);
-  uint16_t (*sys_getThermalShutdownCount)(struct lepton_communication * communication); // min:0 max:65535 default:270 (pixels)
-  void (*sys_setShutterPosition)(LEP_SYS_SHUTTER_POSITION position, struct lepton_communication * communication); // def:LEP_SYS_SHUTTER_POSITION_UNKNOWN
-  LEP_SYS_SHUTTER_POSITION (*sys_getShutterPosition)(struct lepton_communication * communication);
-  void (*sys_setFFCShutterMode)(LEP_SYS_FFC_SHUTTER_MODE * mode, struct lepton_communication * communication); // see LEP_SYS_FFC_SHUTTER_MODE for defs
-  void (*sys_getFFCShutterMode)(LEP_SYS_FFC_SHUTTER_MODE * mode, struct lepton_communication * communication);
-  LEP_SYS_FFC_STATUS (*sys_getFFCNormalizationStatus)(struct lepton_communication * communication); // def:LEP_SYS_FFC_STATUS_READY
+  void (*sys_runPingCamera)(void * driver);       // return put into lastLepResult
+  void (*sys_setTelemetryLocation)(LEP_SYS_TELEMETRY_LOCATION location, void * driver); // def:LEP_TELEMETRY_LOCATION_FOOTER
+  LEP_SYS_TELEMETRY_LOCATION (*sys_getTelemetryLocation)(void * driver);
+  void (*sys_runFrameAveraging)(void * driver);
+  void (*sys_setNumFramesToAverage)(LEP_SYS_FRAME_AVERAGE average, void * driver); // def:LEP_SYS_FA_DIV_8
+  LEP_SYS_FRAME_AVERAGE (*sys_getNumFramesToAverage)(void * driver);
+  void (*sys_getSceneStatistics)(LEP_SYS_SCENE_STATISTICS * statistics, void * driver);
+  void (*sys_setSceneRegion)(LEP_SYS_SCENE_ROI * region, void * driver); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
+  void (*sys_getSceneRegion)(LEP_SYS_SCENE_ROI * region, void * driver);
+  uint16_t (*sys_getThermalShutdownCount)(void * driver); // min:0 max:65535 default:270 (pixels)
+  void (*sys_setShutterPosition)(LEP_SYS_SHUTTER_POSITION position, void * driver); // def:LEP_SYS_SHUTTER_POSITION_UNKNOWN
+  LEP_SYS_SHUTTER_POSITION (*sys_getShutterPosition)(void * driver);
+  void (*sys_setFFCShutterMode)(LEP_SYS_FFC_SHUTTER_MODE * mode, void * driver); // see LEP_SYS_FFC_SHUTTER_MODE for defs
+  void (*sys_getFFCShutterMode)(LEP_SYS_FFC_SHUTTER_MODE * mode, void * driver);
+  LEP_SYS_FFC_STATUS (*sys_getFFCNormalizationStatus)(void * driver); // def:LEP_SYS_FFC_STATUS_READY
 #endif
 };
 
@@ -111,44 +111,44 @@ struct lepton_sys {
     // AGC module commands
 
 struct lepton_agc {
-  void (*agc_setAGCEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
-  uint8_t (*agc_getAGCEnabled)(struct lepton_communication * communication);
-  void (*agc_setAGCPolicy)(LEP_AGC_POLICY policy, struct lepton_communication * communication); // def:LEP_AGC_HEQ
-  LEP_AGC_POLICY (*agc_getAGCPolicy)(struct lepton_communication * communication);
-  void (*agc_setHEQScaleFactor)(LEP_AGC_HEQ_SCALE_FACTOR factor, struct lepton_communication * communication); // def:LEP_AGC_SCALE_TO_8_BITS
-  LEP_AGC_HEQ_SCALE_FACTOR (*agc_getHEQScaleFactor)(struct lepton_communication * communication);
-  void (*agc_setAGCCalcEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
-  uint8_t (*agc_getAGCCalcEnabled)(struct lepton_communication * communication);
+  void (*agc_setAGCEnabled)(uint8_t enabled, void * driver); // def:disabled
+  uint8_t (*agc_getAGCEnabled)(void * driver);
+  void (*agc_setAGCPolicy)(LEP_AGC_POLICY policy, void * driver); // def:LEP_AGC_HEQ
+  LEP_AGC_POLICY (*agc_getAGCPolicy)(void * driver);
+  void (*agc_setHEQScaleFactor)(LEP_AGC_HEQ_SCALE_FACTOR factor, void * driver); // def:LEP_AGC_SCALE_TO_8_BITS
+  LEP_AGC_HEQ_SCALE_FACTOR (*agc_getHEQScaleFactor)(void * driver);
+  void (*agc_setAGCCalcEnabled)(uint8_t enabled, void * driver); // def:disabled
+  uint8_t (*agc_getAGCCalcEnabled)(void * driver);
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
-  void (*agc_setHistogramRegion)(LEP_AGC_HISTOGRAM_ROI * region, struct lepton_communication * communication); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
-  void (*agc_getHistogramRegion)(LEP_AGC_HISTOGRAM_ROI * region, struct lepton_communication * communication);
-  void (*agc_getHistogramStatistics)(LEP_AGC_HISTOGRAM_STATISTICS * statistics, struct lepton_communication * communication); // min:{0,0,0,0} max:{0x3FFF,0x3FFF,0x3FFF,4800} (pixels)
-  void (*agc_setHistogramClipPercent)(uint16_t percent, struct lepton_communication * communication); // def:0
-  uint16_t (*agc_getHistogramClipPercent)(struct lepton_communication * communication);
-  void (*agc_setHistogramTailSize)(uint16_t size, struct lepton_communication * communication); // def:0
-  uint16_t (*agc_getHistogramTailSize)(struct lepton_communication * communication);
-  void (*agc_setLinearMaxGain)(uint16_t gain, struct lepton_communication * communication); // def:1
-  uint16_t (*agc_getLinearMaxGain)(struct lepton_communication * communication);
-  void (*agc_setLinearMidpoint)(uint16_t midpoint, struct lepton_communication * communication); // min:0 max:256 def:128
-  uint16_t (*agc_getLinearMidpoint)(struct lepton_communication * communication);
-  void (*agc_setLinearDampeningFactor)(uint16_t factor, struct lepton_communication * communication); // def:1
-  uint16_t (*agc_getLinearDampeningFactor)(struct lepton_communication * communication);
-  void (*agc_setHEQDampeningFactor)(uint16_t factor, struct lepton_communication * communication); // min:0 max:256 def:64
-  uint16_t (*agc_getHEQDampeningFactor)(struct lepton_communication * communication);
-  void (*agc_setHEQMaxGain)(uint16_t gain, struct lepton_communication * communication); // def:1
-  uint16_t (*agc_getHEQMaxGain)(struct lepton_communication * communication);
-  void (*agc_setHEQClipLimitHigh)(uint16_t limit, struct lepton_communication * communication); // min:0 max:4800 def:4800 (pixels)
-  uint16_t (*agc_getHEQClipLimitHigh)(struct lepton_communication * communication);
-  void (*agc_setHEQClipLimitLow)(uint16_t limit, struct lepton_communication * communication); // min:0 max:1024 def:512 (pixels)
-  uint16_t (*agc_getHEQClipLimitLow)(struct lepton_communication * communication);
-  void (*agc_setHEQBinExtension)(uint16_t extension, struct lepton_communication * communication); // def:0
-  uint16_t (*agc_getHEQBinExtension)(struct lepton_communication * communication);
-  void (*agc_setHEQMidpoint)(uint16_t midpoint, struct lepton_communication * communication); // min:0 max:256 def:128
-  uint16_t (*agc_getHEQMidpoint)(struct lepton_communication * communication);
-  void (*agc_setHEQEmptyCounts)(uint16_t counts, struct lepton_communication * communication); // min:0 max:0x3FFF def:2
-  uint16_t (*agc_getHEQEmptyCounts)(struct lepton_communication * communication);
-  void (*agc_setHEQNormalizationFactor)(uint16_t factor, struct lepton_communication * communication); // def:1
-  uint16_t (*agc_getHEQNormalizationFactor)(struct lepton_communication * communication);
+  void (*agc_setHistogramRegion)(LEP_AGC_HISTOGRAM_ROI * region, void * driver); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
+  void (*agc_getHistogramRegion)(LEP_AGC_HISTOGRAM_ROI * region, void * driver);
+  void (*agc_getHistogramStatistics)(LEP_AGC_HISTOGRAM_STATISTICS * statistics, void * driver); // min:{0,0,0,0} max:{0x3FFF,0x3FFF,0x3FFF,4800} (pixels)
+  void (*agc_setHistogramClipPercent)(uint16_t percent, void * driver); // def:0
+  uint16_t (*agc_getHistogramClipPercent)(void * driver);
+  void (*agc_setHistogramTailSize)(uint16_t size, void * driver); // def:0
+  uint16_t (*agc_getHistogramTailSize)(void * driver);
+  void (*agc_setLinearMaxGain)(uint16_t gain, void * driver); // def:1
+  uint16_t (*agc_getLinearMaxGain)(void * driver);
+  void (*agc_setLinearMidpoint)(uint16_t midpoint, void * driver); // min:0 max:256 def:128
+  uint16_t (*agc_getLinearMidpoint)(void * driver);
+  void (*agc_setLinearDampeningFactor)(uint16_t factor, void * driver); // def:1
+  uint16_t (*agc_getLinearDampeningFactor)(void * driver);
+  void (*agc_setHEQDampeningFactor)(uint16_t factor, void * driver); // min:0 max:256 def:64
+  uint16_t (*agc_getHEQDampeningFactor)(void * driver);
+  void (*agc_setHEQMaxGain)(uint16_t gain, void * driver); // def:1
+  uint16_t (*agc_getHEQMaxGain)(void * driver);
+  void (*agc_setHEQClipLimitHigh)(uint16_t limit, void * driver); // min:0 max:4800 def:4800 (pixels)
+  uint16_t (*agc_getHEQClipLimitHigh)(void * driver);
+  void (*agc_setHEQClipLimitLow)(uint16_t limit, void * driver); // min:0 max:1024 def:512 (pixels)
+  uint16_t (*agc_getHEQClipLimitLow)(void * driver);
+  void (*agc_setHEQBinExtension)(uint16_t extension, void * driver); // def:0
+  uint16_t (*agc_getHEQBinExtension)(void * driver);
+  void (*agc_setHEQMidpoint)(uint16_t midpoint, void * driver); // min:0 max:256 def:128
+  uint16_t (*agc_getHEQMidpoint)(void * driver);
+  void (*agc_setHEQEmptyCounts)(uint16_t counts, void * driver); // min:0 max:0x3FFF def:2
+  uint16_t (*agc_getHEQEmptyCounts)(void * driver);
+  void (*agc_setHEQNormalizationFactor)(uint16_t factor, void * driver); // def:1
+  uint16_t (*agc_getHEQNormalizationFactor)(void * driver);
 #endif
 };
 
@@ -156,26 +156,26 @@ struct lepton_agc {
     // VID module commands
 
 struct lepton_vid {
-  void (*vid_setPolarity)(LEP_VID_POLARITY polarity, struct lepton_communication * communication); // def:LEP_VID_WHITE_HOT
-  LEP_VID_POLARITY (*vid_getPolarity)(struct lepton_communication * communication);
-  void (*vid_setPseudoColorLUT)(LEP_VID_PCOLOR_LUT table, struct lepton_communication * communication); // def:LEP_VID_FUSION_LUT
-  LEP_VID_PCOLOR_LUT (*vid_getPseudoColorLUT)(struct lepton_communication * communication);
-  void (*vid_setFocusCalcEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
-  uint8_t (*vid_getFocusCalcEnabled)(struct lepton_communication * communication);
-  void (*vid_setFreezeEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
-  uint8_t (*vid_getFreezeEnabled)(struct lepton_communication * communication);
+  void (*vid_setPolarity)(LEP_VID_POLARITY polarity, void * driver); // def:LEP_VID_WHITE_HOT
+  LEP_VID_POLARITY (*vid_getPolarity)(void * driver);
+  void (*vid_setPseudoColorLUT)(LEP_VID_PCOLOR_LUT table, void * driver); // def:LEP_VID_FUSION_LUT
+  LEP_VID_PCOLOR_LUT (*vid_getPseudoColorLUT)(void * driver);
+  void (*vid_setFocusCalcEnabled)(uint8_t enabled, void * driver); // def:disabled
+  uint8_t (*vid_getFocusCalcEnabled)(void * driver);
+  void (*vid_setFreezeEnabled)(uint8_t enabled, void * driver); // def:disabled
+  uint8_t (*vid_getFreezeEnabled)(void * driver);
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
-  void (*vid_setUserColorLUT)(LEP_VID_LUT_BUFFER * table, struct lepton_communication * communication); // These two methods may not work as intended, possibly leaving the I2C bus on the
-  void (*vid_getUserColorLUT)(LEP_VID_LUT_BUFFER * table, struct lepton_communication * communication); // FLiR in a non-responding state. A full power cycle may be needed to reset.
-  void (*vid_setFocusRegion)(LEP_VID_FOCUS_ROI * region, struct lepton_communication * communication); // min:1,1/end>beg+1, max:78,58/beg<end-1 def:{1,1,78,58} (pixels)
-  void (*vid_getFocusRegion)(LEP_VID_FOCUS_ROI * region, struct lepton_communication * communication);
-  void (*vid_setFocusThreshold)(uint32_t threshold, struct lepton_communication * communication); // def:30
-  uint32_t (*vid_getFocusThreshold)(struct lepton_communication * communication);
-  uint32_t (*vid_getFocusMetric)(struct lepton_communication * communication);
-  void (*vid_setSceneBasedNUCEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:enabled
-  uint8_t (*vid_getSceneBasedNUCEnabled)(struct lepton_communication * communication);
-  void (*vid_setGamma)(uint32_t gamma, struct lepton_communication * communication); // def:58
-  uint32_t (*vid_getGamma)(struct lepton_communication * communication);
+  void (*vid_setUserColorLUT)(LEP_VID_LUT_BUFFER * table, void * driver); // These two methods may not work as intended, possibly leaving the I2C bus on the
+  void (*vid_getUserColorLUT)(LEP_VID_LUT_BUFFER * table, void * driver); // FLiR in a non-responding state. A full power cycle may be needed to reset.
+  void (*vid_setFocusRegion)(LEP_VID_FOCUS_ROI * region, void * driver); // min:1,1/end>beg+1, max:78,58/beg<end-1 def:{1,1,78,58} (pixels)
+  void (*vid_getFocusRegion)(LEP_VID_FOCUS_ROI * region, void * driver);
+  void (*vid_setFocusThreshold)(uint32_t threshold, void * driver); // def:30
+  uint32_t (*vid_getFocusThreshold)(void * driver);
+  uint32_t (*vid_getFocusMetric)(void * driver);
+  void (*vid_setSceneBasedNUCEnabled)(uint8_t enabled, void * driver); // def:enabled
+  uint8_t (*vid_getSceneBasedNUCEnabled)(void * driver);
+  void (*vid_setGamma)(uint32_t gamma, void * driver); // def:58
+  uint32_t (*vid_getGamma)(void * driver);
 #endif
 };
 

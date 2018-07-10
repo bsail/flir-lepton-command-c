@@ -53,13 +53,14 @@ void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
                      struct lepton_driver * driver)
 {
   driver->communication._storageMode = LeptonFLiR_ImageStorageMode_Count;
-  driver->callbacks._lastI2CError = driver->communication._lastLepResult = 0;
-  lepton_communication_init(&(driver->communication),&(driver->callbacks));
+  driver->communication._storageMode = storageMode;
+  driver->communication._tempMode = tempMode;
+  driver->communication._lastLepResult = 0;
+  driver->communication.callbacks._lastI2CError = 0;;
+  lepton_communication_init(&(driver->communication));
   lepton_sys_init(&(driver->sys));
   lepton_agc_init(&(driver->agc));
   lepton_vid_init(&(driver->vid));
-  driver->communication._storageMode = storageMode;
-  driver->communication._tempMode = tempMode;
 }
 
 LeptonFLiR_ImageStorageMode getImageStorageMode(struct lepton_driver * driver)
@@ -239,7 +240,7 @@ const char *getTemperatureSymbol(struct lepton_driver * driver)
 
 uint8_t getLastI2CError(struct lepton_driver * driver)
 {
-  return driver->callbacks._lastI2CError;
+  return driver->communication.callbacks._lastI2CError;
 }
 
 LEP_RESULT getLastLepResult(struct lepton_driver * driver)
@@ -346,39 +347,39 @@ static const char *textForLepResult(LEP_RESULT errorCode)
 void
 lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_beginTransmission = callback;
+  driver->communication.callbacks.i2cWire_beginTransmission = callback;
 }
 
 void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_endTransmission = callback;
+  driver->communication.callbacks.i2cWire_endTransmission = callback;
 }
 
 void
 lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)
                                         (uint8_t, uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_requestFrom = callback;
+  driver->communication.callbacks.i2cWire_requestFrom = callback;
 }
 
 void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_write = callback;
+  driver->communication.callbacks.i2cWire_write = callback;
 }
 
 void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_write16 = callback;
+  driver->communication.callbacks.i2cWire_write16 = callback;
 }
 
 void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_read = callback;
+  driver->communication.callbacks.i2cWire_read = callback;
 }
 
 void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  driver->callbacks.i2cWire_read16 = callback;
+  driver->communication.callbacks.i2cWire_read16 = callback;
 }
 
 void lepton_i2cWire_set_buffer_length(int length, struct lepton_driver * driver)
@@ -388,10 +389,10 @@ void lepton_i2cWire_set_buffer_length(int length, struct lepton_driver * driver)
 
 void lepton_millis_set_callback(unsigned long (*callback) (void), struct lepton_driver * driver)
 {
-  driver->callbacks.millis_callback = callback;
+  driver->communication.callbacks.millis_callback = callback;
 }
 
 void lepton_delay_set_callback(void (*callback) (unsigned long), struct lepton_driver * driver)
 {
-  driver->callbacks.delay_callback = callback;
+  driver->communication.callbacks.delay_callback = callback;
 }
