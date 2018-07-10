@@ -40,6 +40,19 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
+struct lepton_callbacks {
+  void (*i2cWire_beginTransmission) (uint8_t addr, struct lepton_callbacks * this);
+  uint8_t(*i2cWire_endTransmission) (struct lepton_callbacks * this);
+  uint8_t(*i2cWire_requestFrom) (uint8_t addr, uint8_t len, struct lepton_callbacks * this);
+  size_t(*i2cWire_write) (uint8_t data, struct lepton_callbacks * this);
+  size_t(*i2cWire_write16) (uint16_t data, struct lepton_callbacks * this);
+  uint8_t(*i2cWire_read) (struct lepton_callbacks * this);
+  uint16_t(*i2cWire_read16) (struct lepton_callbacks * this);
+  unsigned long (*millis_callback) (void);
+  void (*delay_callback) (unsigned long);
+  uint8_t _lastI2CError;          // Last i2c error
+};
+
 #ifndef ENABLED
 #define ENABLED  0x1
 #endif
@@ -122,15 +135,15 @@ void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode
                      /* = LeptonFLiR_TemperatureMode_Celsius */ );
 
 void
-lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t addr));
-void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (void));
+lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t addr, struct lepton_callbacks * this));
+void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks * this));
 void
 lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)
-                                        (uint8_t addr, uint8_t len));
-void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t data));
-void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t data));
-void lepton_i2cWire_read_set_callback(uint8_t(*callback) (void));
-void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (void));
+                                        (uint8_t addr, uint8_t len, struct lepton_callbacks * this));
+void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t data, struct lepton_callbacks * this));
+void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t data, struct lepton_callbacks * this));
+void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks * this));
+void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks * this));
 void lepton_i2cWire_set_buffer_length(int length);
 void lepton_millis_set_callback(unsigned long (*callback) (void));
 void lepton_delay_set_callback(void (*callback) (unsigned long));
@@ -293,7 +306,6 @@ uint16_t temperatureToKelvin100(float temperature);
 const char *getTemperatureSymbol();
 
 uint8_t getLastI2CError();
-void setLastI2CError(uint8_t error);
 LEP_RESULT getLastLepResult();
 
 extern void wordsToHexString(uint16_t * dataWords, int dataLength, char *buffer,
