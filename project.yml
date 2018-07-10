@@ -10,14 +10,14 @@
   :use_test_preprocessor: TRUE
   :use_auxiliary_dependencies: TRUE
   :build_root: build
-#  :release_build: TRUE
+  # :release_build: TRUE
   :test_file_prefix: test_
   :which_ceedling: vendor/ceedling
   :default_tasks:
     - test:all
 
-#:release_build:
-#  :output: MyApp.out
+# :release_build:
+#  :output: lepton.a
 #  :use_assembly: FALSE
 
 :environment:
@@ -33,6 +33,16 @@
     - src/**
   :support:
     - test/support
+
+:flags:
+  :test:
+    :compile:
+      :*:       # add '--O1' to compilation of main.c as part of test builds including main.c
+        - -std=c99
+  :gcov:
+    :compile:
+      :*:       # add '--O1' to compilation of main.c as part of test builds including main.c
+        - -std=c99
 
 :defines:
   # in order to add common defines:
@@ -52,7 +62,10 @@
   :enforce_strict_ordering: TRUE
   :plugins:
     - :ignore
+    - :ignore_arg
+    - :array
     - :callback
+    - :return_thru_ptr
   :treat_as:
     uint8:    HEX8
     uint16:   HEX16
@@ -63,7 +76,15 @@
 :gcov:
     :html_report_type: basic
 
-#:tools:
+:tools:
+  :gcov_linker:
+    :executable: gcc
+    :arguments:
+      - -fprofile-arcs
+      - -ftest-coverage
+      - ${1}
+      - -o ${2}
+      - -lm
 # Ceedling defaults to using gcc for compiling, linking, etc.
 # As [:tools] is blank, gcc will be used (so long as it's in your system path)
 # See documentation to configure a given toolchain for use
@@ -82,11 +103,15 @@
     - *common_libraries
   :release:
     - *common_libraries
+  :gcov:
+    - *common_libraries
 
 :plugins:
   :load_paths:
     - vendor/ceedling/plugins
   :enabled:
+    # - stdout_gtestlike_tests_report
     - stdout_pretty_tests_report
     - module_generator
+    - gcov
 ...
