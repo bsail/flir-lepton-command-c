@@ -107,10 +107,57 @@ struct lepton_sys {
 #endif
 };
 
+
+    // AGC module commands
+
+struct lepton_agc {
+  void (*agc_setAGCEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
+  uint8_t (*agc_getAGCEnabled)(struct lepton_communication * communication);
+  void (*agc_setAGCPolicy)(LEP_AGC_POLICY policy, struct lepton_communication * communication); // def:LEP_AGC_HEQ
+  LEP_AGC_POLICY (*agc_getAGCPolicy)(struct lepton_communication * communication);
+  void (*agc_setHEQScaleFactor)(LEP_AGC_HEQ_SCALE_FACTOR factor, struct lepton_communication * communication); // def:LEP_AGC_SCALE_TO_8_BITS
+  LEP_AGC_HEQ_SCALE_FACTOR (*agc_getHEQScaleFactor)(struct lepton_communication * communication);
+  void (*agc_setAGCCalcEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
+  uint8_t (*agc_getAGCCalcEnabled)(struct lepton_communication * communication);
+#ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
+  void (*agc_setHistogramRegion)(LEP_AGC_HISTOGRAM_ROI * region, struct lepton_communication * communication); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
+  void (*agc_getHistogramRegion)(LEP_AGC_HISTOGRAM_ROI * region, struct lepton_communication * communication);
+  void (*agc_getHistogramStatistics)(LEP_AGC_HISTOGRAM_STATISTICS * statistics, struct lepton_communication * communication); // min:{0,0,0,0} max:{0x3FFF,0x3FFF,0x3FFF,4800} (pixels)
+  void (*agc_setHistogramClipPercent)(uint16_t percent, struct lepton_communication * communication); // def:0
+  uint16_t (*agc_getHistogramClipPercent)(struct lepton_communication * communication);
+  void (*agc_setHistogramTailSize)(uint16_t size, struct lepton_communication * communication); // def:0
+  uint16_t (*agc_getHistogramTailSize)(struct lepton_communication * communication);
+  void (*agc_setLinearMaxGain)(uint16_t gain, struct lepton_communication * communication); // def:1
+  uint16_t (*agc_getLinearMaxGain)(struct lepton_communication * communication);
+  void (*agc_setLinearMidpoint)(uint16_t midpoint, struct lepton_communication * communication); // min:0 max:256 def:128
+  uint16_t (*agc_getLinearMidpoint)(struct lepton_communication * communication);
+  void (*agc_setLinearDampeningFactor)(uint16_t factor, struct lepton_communication * communication); // def:1
+  uint16_t (*agc_getLinearDampeningFactor)(struct lepton_communication * communication);
+  void (*agc_setHEQDampeningFactor)(uint16_t factor, struct lepton_communication * communication); // min:0 max:256 def:64
+  uint16_t (*agc_getHEQDampeningFactor)(struct lepton_communication * communication);
+  void (*agc_setHEQMaxGain)(uint16_t gain, struct lepton_communication * communication); // def:1
+  uint16_t (*agc_getHEQMaxGain)(struct lepton_communication * communication);
+  void (*agc_setHEQClipLimitHigh)(uint16_t limit, struct lepton_communication * communication); // min:0 max:4800 def:4800 (pixels)
+  uint16_t (*agc_getHEQClipLimitHigh)(struct lepton_communication * communication);
+  void (*agc_setHEQClipLimitLow)(uint16_t limit, struct lepton_communication * communication); // min:0 max:1024 def:512 (pixels)
+  uint16_t (*agc_getHEQClipLimitLow)(struct lepton_communication * communication);
+  void (*agc_setHEQBinExtension)(uint16_t extension, struct lepton_communication * communication); // def:0
+  uint16_t (*agc_getHEQBinExtension)(struct lepton_communication * communication);
+  void (*agc_setHEQMidpoint)(uint16_t midpoint, struct lepton_communication * communication); // min:0 max:256 def:128
+  uint16_t (*agc_getHEQMidpoint)(struct lepton_communication * communication);
+  void (*agc_setHEQEmptyCounts)(uint16_t counts, struct lepton_communication * communication); // min:0 max:0x3FFF def:2
+  uint16_t (*agc_getHEQEmptyCounts)(struct lepton_communication * communication);
+  void (*agc_setHEQNormalizationFactor)(uint16_t factor, struct lepton_communication * communication); // def:1
+  uint16_t (*agc_getHEQNormalizationFactor)(struct lepton_communication * communication);
+#endif
+};
+
+
 struct lepton_driver {
   struct lepton_callbacks callbacks;
   struct lepton_communication communication;
   struct lepton_sys sys;
+  struct lepton_agc agc;
 };
 
 #ifndef ENABLED
@@ -150,20 +197,6 @@ int getImageWidth();
 int getImageHeight();
 int getImageBpp();              // Bytes per pixel
 
-    // AGC module commands
-
-void agc_setAGCEnabled(uint8_t enabled); // def:disabled
-uint8_t agc_getAGCEnabled();
-
-void agc_setAGCPolicy(LEP_AGC_POLICY policy); // def:LEP_AGC_HEQ
-LEP_AGC_POLICY agc_getAGCPolicy();
-
-void agc_setHEQScaleFactor(LEP_AGC_HEQ_SCALE_FACTOR factor); // def:LEP_AGC_SCALE_TO_8_BITS
-LEP_AGC_HEQ_SCALE_FACTOR agc_getHEQScaleFactor();
-
-void agc_setAGCCalcEnabled(uint8_t enabled); // def:disabled
-uint8_t agc_getAGCCalcEnabled();
-
     // VID module commands
 
 void vid_setPolarity(LEP_VID_POLARITY polarity); // def:LEP_VID_WHITE_HOT
@@ -181,50 +214,6 @@ uint8_t vid_getFreezeEnabled();
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
 
     // AGC extended module commands
-
-void agc_setHistogramRegion(LEP_AGC_HISTOGRAM_ROI * region); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
-void agc_getHistogramRegion(LEP_AGC_HISTOGRAM_ROI * region);
-
-void agc_getHistogramStatistics(LEP_AGC_HISTOGRAM_STATISTICS * statistics); // min:{0,0,0,0} max:{0x3FFF,0x3FFF,0x3FFF,4800} (pixels)
-
-void agc_setHistogramClipPercent(uint16_t percent); // def:0
-uint16_t agc_getHistogramClipPercent();
-
-void agc_setHistogramTailSize(uint16_t size); // def:0
-uint16_t agc_getHistogramTailSize();
-
-void agc_setLinearMaxGain(uint16_t gain); // def:1
-uint16_t agc_getLinearMaxGain();
-
-void agc_setLinearMidpoint(uint16_t midpoint); // min:0 max:256 def:128
-uint16_t agc_getLinearMidpoint();
-
-void agc_setLinearDampeningFactor(uint16_t factor); // def:1
-uint16_t agc_getLinearDampeningFactor();
-
-void agc_setHEQDampeningFactor(uint16_t factor); // min:0 max:256 def:64
-uint16_t agc_getHEQDampeningFactor();
-
-void agc_setHEQMaxGain(uint16_t gain); // def:1
-uint16_t agc_getHEQMaxGain();
-
-void agc_setHEQClipLimitHigh(uint16_t limit); // min:0 max:4800 def:4800 (pixels)
-uint16_t agc_getHEQClipLimitHigh();
-
-void agc_setHEQClipLimitLow(uint16_t limit); // min:0 max:1024 def:512 (pixels)
-uint16_t agc_getHEQClipLimitLow();
-
-void agc_setHEQBinExtension(uint16_t extension); // def:0
-uint16_t agc_getHEQBinExtension();
-
-void agc_setHEQMidpoint(uint16_t midpoint); // min:0 max:256 def:128
-uint16_t agc_getHEQMidpoint();
-
-void agc_setHEQEmptyCounts(uint16_t counts); // min:0 max:0x3FFF def:2
-uint16_t agc_getHEQEmptyCounts();
-
-void agc_setHEQNormalizationFactor(uint16_t factor); // def:1
-uint16_t agc_getHEQNormalizationFactor();
 
     // SYS extended module commands
 
@@ -260,7 +249,6 @@ LEP_RESULT getLastLepResult();
 
 void wordsToHexString(uint16_t * dataWords, int dataLength, char *buffer,
                              int maxLength);
-extern float kelvin100ToCelsius(uint16_t kelvin100);
 extern float kelvin100ToFahrenheit(uint16_t kelvin100);
 extern float kelvin100ToKelvin(uint16_t kelvin100);
 extern uint16_t celsiusToKelvin100(float celsius);

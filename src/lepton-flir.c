@@ -28,11 +28,11 @@
 #include "lepton-flir.h"
 #include "lepton-communication.h"
 #include "lepton-sys.h"
+#include "lepton-agc.h"
 #include <math.h>
 
 static struct lepton_callbacks callbacks;
 static struct lepton_communication communication;
-static struct lepton_sys lepton_sys_storage;
 
 #define true 1
 #define false 0
@@ -57,8 +57,8 @@ void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
   communication._storageMode = LeptonFLiR_ImageStorageMode_Count;
   callbacks._lastI2CError = communication._lastLepResult = 0;
   lepton_communication_init(&communication,&callbacks);
-  driver->sys = &lepton_sys_storage;
-  lepton_sys_init(driver->sys);
+  lepton_sys_init(&(driver->sys));
+  lepton_agc_init(&(driver->agc));
   communication._storageMode = storageMode;
   communication._tempMode = tempMode;
 }
@@ -123,67 +123,6 @@ int getImageBpp()
   }
 }
 
-void agc_setAGCEnabled(uint8_t enabled)
-{
-  communication.sendCommand_u32(communication.cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) enabled,&communication);
-}
-
-uint8_t agc_getAGCEnabled()
-{
-  uint32_t enabled;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET),
-                     &enabled,&communication);
-  return enabled;
-}
-
-void agc_setAGCPolicy(LEP_AGC_POLICY policy)
-{
-  communication.sendCommand_u32(communication.cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) policy,&communication);
-}
-
-LEP_AGC_POLICY agc_getAGCPolicy()
-{
-  uint32_t policy;
-  communication.receiveCommand_u32(communication.cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_GET),
-                     &policy,&communication);
-  return (LEP_AGC_POLICY) policy;
-}
-
-void agc_setHEQScaleFactor(LEP_AGC_HEQ_SCALE_FACTOR factor)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) factor,&communication);
-}
-
-LEP_AGC_HEQ_SCALE_FACTOR agc_getHEQScaleFactor()
-{
-  uint32_t factor;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_GET),
-                     &factor,&communication);
-  return (LEP_AGC_HEQ_SCALE_FACTOR) factor;
-}
-
-void agc_setAGCCalcEnabled(uint8_t enabled)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) enabled,&communication);
-}
-
-uint8_t agc_getAGCCalcEnabled()
-{
-  uint32_t enabled;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET),
-                     &enabled,&communication);
-  return enabled;
-}
-
 void vid_setPolarity(LEP_VID_POLARITY polarity)
 {
   communication.sendCommand_u32(communication.cmdCode
@@ -246,238 +185,6 @@ uint8_t vid_getFreezeEnabled()
 }
 
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
-
-void agc_setHistogramRegion(LEP_AGC_HISTOGRAM_ROI * region)
-{
-  if (!region)
-    return;
-  communication.sendCommand_array(communication.cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2,&communication);
-}
-
-void agc_getHistogramRegion(LEP_AGC_HISTOGRAM_ROI * region)
-{
-  if (!region)
-    return;
-  communication.receiveCommand_array(communication.cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2,&communication);
-}
-
-void agc_getHistogramStatistics(LEP_AGC_HISTOGRAM_STATISTICS * statistics)
-{
-  if (!statistics)
-    return;
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_AGC_STATISTICS, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) statistics,
-                       sizeof(LEP_AGC_HISTOGRAM_STATISTICS) / 2,&communication);
-}
-
-void agc_setHistogramClipPercent(uint16_t percent)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,
-                   LEP_I2C_COMMAND_TYPE_SET), percent,&communication);
-}
-
-uint16_t agc_getHistogramClipPercent()
-{
-  uint16_t percent;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,
-                      LEP_I2C_COMMAND_TYPE_GET), &percent,&communication);
-  return percent;
-}
-
-void agc_setHistogramTailSize(uint16_t size)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_SET),
-                  size,&communication);
-}
-
-uint16_t agc_getHistogramTailSize()
-{
-  uint16_t size;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HISTOGRAM_TAIL_SIZE,
-                      LEP_I2C_COMMAND_TYPE_GET), &size,&communication);
-  return size;
-}
-
-void agc_setLinearMaxGain(uint16_t gain)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET),
-                  gain,&communication);
-}
-
-uint16_t agc_getLinearMaxGain()
-{
-  uint16_t gain;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET),
-                     &gain,&communication);
-  return gain;
-}
-
-void agc_setLinearMidpoint(uint16_t midpoint)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET),
-                  midpoint,&communication);
-}
-
-uint16_t agc_getLinearMidpoint()
-{
-  uint16_t midpoint;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET),
-                     &midpoint,&communication);
-  return midpoint;
-}
-
-void agc_setLinearDampeningFactor(uint16_t factor)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,
-                   LEP_I2C_COMMAND_TYPE_SET), factor,&communication);
-}
-
-uint16_t agc_getLinearDampeningFactor()
-{
-  uint16_t factor;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,
-                      LEP_I2C_COMMAND_TYPE_GET), &factor,&communication);
-  return factor;
-}
-
-void agc_setHEQDampeningFactor(uint16_t factor)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET),
-                  factor,&communication);
-}
-
-uint16_t agc_getHEQDampeningFactor()
-{
-  uint16_t factor;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_DAMPENING_FACTOR,
-                      LEP_I2C_COMMAND_TYPE_GET), &factor,&communication);
-  return factor;
-}
-
-void agc_setHEQMaxGain(uint16_t gain)
-{
-  communication.sendCommand_u16(communication.cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET),
-                  gain,&communication);
-}
-
-uint16_t agc_getHEQMaxGain()
-{
-  uint16_t gain;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET),
-                     &gain,&communication);
-  return gain;
-}
-
-void agc_setHEQClipLimitHigh(uint16_t limit)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_SET),
-                  limit,&communication);
-}
-
-uint16_t agc_getHEQClipLimitHigh()
-{
-  uint16_t limit;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH,
-                      LEP_I2C_COMMAND_TYPE_GET), &limit,&communication);
-  return limit;
-}
-
-void agc_setHEQClipLimitLow(uint16_t limit)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_SET),
-                  limit,&communication);
-}
-
-uint16_t agc_getHEQClipLimitLow()
-{
-  uint16_t limit;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_GET),
-                     &limit,&communication);
-  return limit;
-}
-
-void agc_setHEQBinExtension(uint16_t extension)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_SET),
-                  extension,&communication);
-}
-
-uint16_t agc_getHEQBinExtension()
-{
-  uint16_t extension;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_GET),
-                     &extension,&communication);
-  return extension;
-}
-
-void agc_setHEQMidpoint(uint16_t midpoint)
-{
-  communication.sendCommand_u16(communication.cmdCode(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET),
-                  midpoint,&communication);
-}
-
-uint16_t agc_getHEQMidpoint()
-{
-  uint16_t midpoint;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET),
-                     &midpoint,&communication);
-  return midpoint;
-}
-
-void agc_setHEQEmptyCounts(uint16_t counts)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_SET),
-                  counts,&communication);
-}
-
-uint16_t agc_getHEQEmptyCounts()
-{
-  uint16_t counts;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_GET),
-                     &counts,&communication);
-  return counts;
-}
-
-void agc_setHEQNormalizationFactor(uint16_t factor)
-{
-  communication.sendCommand_u16(communication.cmdCode
-                  (LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,
-                   LEP_I2C_COMMAND_TYPE_SET), factor,&communication);
-}
-
-uint16_t agc_getHEQNormalizationFactor()
-{
-  uint16_t factor;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,
-                      LEP_I2C_COMMAND_TYPE_GET), &factor,&communication);
-  return factor;
-}
 
 void vid_setUserColorLUT(LEP_VID_LUT_BUFFER * table)
 {
