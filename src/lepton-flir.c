@@ -27,10 +27,12 @@
 
 #include "lepton-flir.h"
 #include "lepton-communication.h"
+#include "lepton-sys.h"
 #include <math.h>
 
 static struct lepton_callbacks callbacks;
 static struct lepton_communication communication;
+static struct lepton_sys lepton_sys_storage;
 
 #define true 1
 #define false 0
@@ -48,16 +50,15 @@ static inline uint8_t highByte(uint16_t p)
 }
 
 
-void LeptonFLiR_LeptonFLiR()
+void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
+                     LeptonFLiR_TemperatureMode tempMode,
+                     struct lepton_driver * driver)
 {
   communication._storageMode = LeptonFLiR_ImageStorageMode_Count;
   callbacks._lastI2CError = communication._lastLepResult = 0;
   lepton_communication_init(&communication,&callbacks);
-}
-
-void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
-                     LeptonFLiR_TemperatureMode tempMode)
-{
+  driver->sys = &lepton_sys_storage;
+  lepton_sys_init(driver->sys);
   communication._storageMode = storageMode;
   communication._tempMode = tempMode;
 }
@@ -181,89 +182,6 @@ uint8_t agc_getAGCCalcEnabled()
                      (LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET),
                      &enabled,&communication);
   return enabled;
-}
-
-void sys_getCameraStatus_internal(LEP_SYS_CAM_STATUS * status)
-{
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_SYS_CAM_STATUS, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) (status), sizeof(LEP_SYS_CAM_STATUS) / 2,&communication);
-}
-
-LEP_SYS_CAM_STATUS_STATES sys_getCameraStatus()
-{
-  LEP_SYS_CAM_STATUS camStatus;
-  sys_getCameraStatus_internal(&camStatus);
-  return (LEP_SYS_CAM_STATUS_STATES) camStatus.camStatus;
-}
-
-void sys_getFlirSerialNumber(char *buffer, int maxLength)
-{
-  if (!buffer || maxLength < 16)
-    return;
-  uint16_t innerBuffer[4];
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_SYS_FLIR_SERIAL_NUMBER,
-                        LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 4,&communication);
-  wordsToHexString(innerBuffer, 4, buffer, maxLength);
-}
-
-void sys_getCustomerSerialNumber(char *buffer, int maxLength)
-{
-  if (!buffer || maxLength < 64)
-    return;
-  uint16_t innerBuffer[16];
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_SYS_CUST_SERIAL_NUMBER,
-                        LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 16,&communication);
-  wordsToHexString(innerBuffer, 16, buffer, maxLength);
-}
-
-uint32_t sys_getCameraUptime()
-{
-  uint32_t uptime = 0;
-  communication.receiveCommand_u32(communication.cmdCode(LEP_CID_SYS_CAM_UPTIME, LEP_I2C_COMMAND_TYPE_GET),
-                     &uptime,&communication);
-  return uptime;
-}
-
-float sys_getAuxTemperature()
-{
-  uint16_t kelvin100;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_SYS_AUX_TEMPERATURE_KELVIN,
-                      LEP_I2C_COMMAND_TYPE_GET), &kelvin100,&communication);
-  return kelvin100ToTemperature(kelvin100);
-}
-
-float sys_getFPATemperature()
-{
-  uint16_t kelvin100;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_SYS_FPA_TEMPERATURE_KELVIN,
-                      LEP_I2C_COMMAND_TYPE_GET), &kelvin100,&communication);
-  return kelvin100ToTemperature(kelvin100);
-}
-
-void sys_setTelemetryEnabled(uint8_t enabled)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_SYS_TELEMETRY_ENABLE_STATE,
-                   LEP_I2C_COMMAND_TYPE_SET), (uint32_t) enabled,&communication);
-}
-
-uint8_t sys_getTelemetryEnabled()
-{
-  uint32_t enabled;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_SYS_TELEMETRY_ENABLE_STATE,
-                      LEP_I2C_COMMAND_TYPE_GET), &enabled,&communication);
-  return enabled;
-}
-
-void sys_runFFCNormalization()
-{
-  communication.sendCommand_raw(communication.cmdCode(LEP_CID_SYS_RUN_FFC, LEP_I2C_COMMAND_TYPE_RUN),&communication);
 }
 
 void vid_setPolarity(LEP_VID_POLARITY polarity)
@@ -559,127 +477,6 @@ uint16_t agc_getHEQNormalizationFactor()
                      (LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,
                       LEP_I2C_COMMAND_TYPE_GET), &factor,&communication);
   return factor;
-}
-
-void sys_runPingCamera()
-{
-  communication.sendCommand_raw(communication.cmdCode(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN),&communication);
-}
-
-void sys_setTelemetryLocation(LEP_SYS_TELEMETRY_LOCATION location)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) location,&communication);
-}
-
-LEP_SYS_TELEMETRY_LOCATION sys_getTelemetryLocation()
-{
-  uint32_t location;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET),
-                     &location,&communication);
-  return (LEP_SYS_TELEMETRY_LOCATION) location;
-}
-
-void sys_runFrameAveraging()
-{
-  communication.sendCommand_raw(communication.cmdCode
-                  (LEP_CID_SYS_EXECTUE_FRAME_AVERAGE,
-                   LEP_I2C_COMMAND_TYPE_RUN),&communication);
-}
-
-void sys_setNumFramesToAverage(LEP_SYS_FRAME_AVERAGE average)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) average,&communication);
-}
-
-LEP_SYS_FRAME_AVERAGE sys_getNumFramesToAverage()
-{
-  uint32_t average;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE,
-                      LEP_I2C_COMMAND_TYPE_GET), &average,&communication);
-  return (LEP_SYS_FRAME_AVERAGE) average;
-}
-
-void sys_getSceneStatistics(LEP_SYS_SCENE_STATISTICS * statistics)
-{
-  if (!statistics)
-    return;
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_SYS_SCENE_STATISTICS, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) statistics,
-                       sizeof(LEP_SYS_SCENE_STATISTICS) / 2,&communication);
-}
-
-void sys_setSceneRegion(LEP_SYS_SCENE_ROI * region)
-{
-  if (!region)
-    return;
-  communication.sendCommand_array(communication.cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) region, sizeof(LEP_SYS_SCENE_ROI) / 2,&communication);
-}
-
-void sys_getSceneRegion(LEP_SYS_SCENE_ROI * region)
-{
-  if (!region)
-    return;
-  communication.receiveCommand_array(communication.cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) region, sizeof(LEP_SYS_SCENE_ROI) / 2,&communication);
-}
-
-uint16_t sys_getThermalShutdownCount()
-{
-  uint16_t count;
-  communication.receiveCommand_u16(communication.cmdCode
-                     (LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT,
-                      LEP_I2C_COMMAND_TYPE_GET), &count,&communication);
-  return count;
-}
-
-void sys_setShutterPosition(LEP_SYS_SHUTTER_POSITION position)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) position,&communication);
-}
-
-LEP_SYS_SHUTTER_POSITION sys_getShutterPosition()
-{
-  uint32_t position;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_GET),
-                     &position,&communication);
-  return (LEP_SYS_SHUTTER_POSITION) position;
-}
-
-void sys_setFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE * mode)
-{
-  if (!mode)
-    return;
-  communication.sendCommand_array(communication.cmdCode
-                    (LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2,&communication);
-}
-
-void sys_getFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE * mode)
-{
-  if (!mode)
-    return;
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2,&communication);
-}
-
-LEP_SYS_FFC_STATUS sys_getFFCNormalizationStatus()
-{
-  uint32_t status;
-  communication.receiveCommand_u32(communication.cmdCode(LEP_CID_SYS_FFC_STATUS, LEP_I2C_COMMAND_TYPE_GET),
-                     &status,&communication);
-  return (LEP_SYS_FFC_STATUS) status;
 }
 
 void vid_setUserColorLUT(LEP_VID_LUT_BUFFER * table)

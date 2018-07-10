@@ -148,6 +148,40 @@
 #define LEP_CID_AGC_HEQ_SCALE_FACTOR            (uint16_t)(LEP_AGC_MODULE_BASE + 0x0044)
 #define LEP_CID_AGC_CALC_ENABLE_STATE           (uint16_t)(LEP_AGC_MODULE_BASE + 0x0048)
 
+// Memory Footprint Note
+// Image storage mode affects the total memory footprint. Memory constrained boards
+// should take notice to the storage requirements. Note that the Lepton FLiR delivers
+// 14bpp thermal image data with AGC mode disabled and 8bpp thermal image data with AGC
+// mode enabled, therefore if using AGC mode always enabled it is more memory efficient
+// to use an 8bpp mode to begin with. Note that with telemetry enabled, memory cost
+// incurs an additional 164 uint8_ts for telemetry data storage.
+typedef enum {
+  // Full 16bpp image mode, 9600 uint8_ts for image data, 164 uint8_ts for read frame (9604 uint8_ts total, 9806 uint8_ts if aligned)
+  LeptonFLiR_ImageStorageMode_80x60_16bpp,
+  // Full 8bpp image mode, 4800 uint8_ts for image data, 164 uint8_ts for read frame (4964 uint8_ts total, 5006 uint8_ts if aligned)
+  LeptonFLiR_ImageStorageMode_80x60_8bpp,
+
+  // Halved 16bpp image mode, 2400 uint8_ts for image data, 328 uint8_ts for read frame (2728 uint8_ts total, 2782 uint8_ts if aligned)
+  LeptonFLiR_ImageStorageMode_40x30_16bpp,
+  // Halved 8bpp image mode, 1200 uint8_ts for image data, 328 uint8_ts for read frame (1528 uint8_ts total, 1814 uint8_ts if aligned)
+  LeptonFLiR_ImageStorageMode_40x30_8bpp,
+
+  // Quartered 16bpp image mode, 600 uint8_ts for image data, 656 uint8_ts for read frame (1256 uint8_ts total, 1446 uint8_ts if aligned)
+  LeptonFLiR_ImageStorageMode_20x15_16bpp,
+  // Quartered 8bpp image mode, 300 uint8_ts for image data, 656 uint8_ts for read frame (956 uint8_ts total, 1202 uint8_ts if aligned)
+  LeptonFLiR_ImageStorageMode_20x15_8bpp,
+
+  LeptonFLiR_ImageStorageMode_Count
+} LeptonFLiR_ImageStorageMode;
+
+typedef enum {
+  LeptonFLiR_TemperatureMode_Celsius,
+  LeptonFLiR_TemperatureMode_Fahrenheit,
+  LeptonFLiR_TemperatureMode_Kelvin,
+
+  LeptonFLiR_TemperatureMode_Count
+} LeptonFLiR_TemperatureMode;
+
 typedef enum {
   LEP_AGC_LINEAR = 0,
   LEP_AGC_HEQ,

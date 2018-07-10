@@ -53,39 +53,65 @@ struct lepton_callbacks {
   uint8_t _lastI2CError;          // Last i2c error
 };
 
-// Memory Footprint Note
-// Image storage mode affects the total memory footprint. Memory constrained boards
-// should take notice to the storage requirements. Note that the Lepton FLiR delivers
-// 14bpp thermal image data with AGC mode disabled and 8bpp thermal image data with AGC
-// mode enabled, therefore if using AGC mode always enabled it is more memory efficient
-// to use an 8bpp mode to begin with. Note that with telemetry enabled, memory cost
-// incurs an additional 164 uint8_ts for telemetry data storage.
-typedef enum {
-  // Full 16bpp image mode, 9600 uint8_ts for image data, 164 uint8_ts for read frame (9604 uint8_ts total, 9806 uint8_ts if aligned)
-  LeptonFLiR_ImageStorageMode_80x60_16bpp,
-  // Full 8bpp image mode, 4800 uint8_ts for image data, 164 uint8_ts for read frame (4964 uint8_ts total, 5006 uint8_ts if aligned)
-  LeptonFLiR_ImageStorageMode_80x60_8bpp,
+struct lepton_communication {
+  struct lepton_callbacks * callbacks;
+  LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
+  LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
+  uint8_t _lastLepResult;         // Last lep result
+  int BUFFER_LENGTH;
+  uint8_t (*waitCommandBegin)(int timeout, struct lepton_communication * this);
+  uint8_t (*waitCommandFinish)(int timeout, struct lepton_communication * this);
+  uint16_t (*cmdCode)(uint16_t cmdID, uint16_t cmdType);
+  void (*sendCommand_raw)(uint16_t cmdCode, struct lepton_communication * this);
+  void (*sendCommand_u16)(uint16_t cmdCode, uint16_t value, struct lepton_communication * this);
+  void (*sendCommand_u32)(uint16_t cmdCode, uint32_t value, struct lepton_communication * this);
+  void (*sendCommand_array)(uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this);
+  void (*receiveCommand_u16)(uint16_t cmdCode, uint16_t * value, struct lepton_communication * this);
+  void (*receiveCommand_u32)(uint16_t cmdCode, uint32_t * value, struct lepton_communication * this);
+  void (*receiveCommand_array)(uint16_t cmdCode, uint16_t * readWords, int maxLength, struct lepton_communication * this);
+  int (*writeCmdRegister)(uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this);
+  int (*readDataRegister)(uint16_t * readWords, int maxLength, struct lepton_communication * this);
+  int (*writeRegister)(uint16_t regAddress, uint16_t value, struct lepton_communication * this);
+  int (*readRegister)(uint16_t regAddress, uint16_t * value, struct lepton_communication * this);
+};
 
-  // Halved 16bpp image mode, 2400 uint8_ts for image data, 328 uint8_ts for read frame (2728 uint8_ts total, 2782 uint8_ts if aligned)
-  LeptonFLiR_ImageStorageMode_40x30_16bpp,
-  // Halved 8bpp image mode, 1200 uint8_ts for image data, 328 uint8_ts for read frame (1528 uint8_ts total, 1814 uint8_ts if aligned)
-  LeptonFLiR_ImageStorageMode_40x30_8bpp,
+    // SYS module commands
 
-  // Quartered 16bpp image mode, 600 uint8_ts for image data, 656 uint8_ts for read frame (1256 uint8_ts total, 1446 uint8_ts if aligned)
-  LeptonFLiR_ImageStorageMode_20x15_16bpp,
-  // Quartered 8bpp image mode, 300 uint8_ts for image data, 656 uint8_ts for read frame (956 uint8_ts total, 1202 uint8_ts if aligned)
-  LeptonFLiR_ImageStorageMode_20x15_8bpp,
+struct lepton_sys {
+  void (*sys_getCameraStatus_internal)(LEP_SYS_CAM_STATUS * status,struct lepton_communication * communication);
+  LEP_SYS_CAM_STATUS_STATES (*sys_getCameraStatus)(struct lepton_communication * communication);
+  void (*sys_getFlirSerialNumber)(char *buffer, int maxLength /* = 16 */,struct lepton_communication * communication ); // maxLength must at least be 16, recommended 20
+  void (*sys_getCustomerSerialNumber)(char *buffer, int maxLength /* = 64 */ ,struct lepton_communication * communication); // maxLength must at least be 64, recommended 80
+  uint32_t (*sys_getCameraUptime)(struct lepton_communication * communication); // (milliseconds)
+  float (*sys_getAuxTemperature)(struct lepton_communication * communication);  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
+  float (*sys_getFPATemperature)(struct lepton_communication * communication);  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
+  void (*sys_setTelemetryEnabled)(uint8_t enabled,struct lepton_communication * communication); // def:enabled
+  uint8_t (*sys_getTelemetryEnabled)(struct lepton_communication * communication);
+  void (*sys_runFFCNormalization)(struct lepton_communication * communication);
+#ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
+  void (*sys_runPingCamera)(struct lepton_communication * communication);       // return put into lastLepResult
+  void (*sys_setTelemetryLocation)(LEP_SYS_TELEMETRY_LOCATION location, struct lepton_communication * communication); // def:LEP_TELEMETRY_LOCATION_FOOTER
+  LEP_SYS_TELEMETRY_LOCATION (*sys_getTelemetryLocation)(struct lepton_communication * communication);
+  void (*sys_runFrameAveraging)(struct lepton_communication * communication);
+  void (*sys_setNumFramesToAverage)(LEP_SYS_FRAME_AVERAGE average, struct lepton_communication * communication); // def:LEP_SYS_FA_DIV_8
+  LEP_SYS_FRAME_AVERAGE (*sys_getNumFramesToAverage)(struct lepton_communication * communication);
+  void (*sys_getSceneStatistics)(LEP_SYS_SCENE_STATISTICS * statistics, struct lepton_communication * communication);
+  void (*sys_setSceneRegion)(LEP_SYS_SCENE_ROI * region, struct lepton_communication * communication); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
+  void (*sys_getSceneRegion)(LEP_SYS_SCENE_ROI * region, struct lepton_communication * communication);
+  uint16_t (*sys_getThermalShutdownCount)(struct lepton_communication * communication); // min:0 max:65535 default:270 (pixels)
+  void (*sys_setShutterPosition)(LEP_SYS_SHUTTER_POSITION position, struct lepton_communication * communication); // def:LEP_SYS_SHUTTER_POSITION_UNKNOWN
+  LEP_SYS_SHUTTER_POSITION (*sys_getShutterPosition)(struct lepton_communication * communication);
+  void (*sys_setFFCShutterMode)(LEP_SYS_FFC_SHUTTER_MODE * mode, struct lepton_communication * communication); // see LEP_SYS_FFC_SHUTTER_MODE for defs
+  void (*sys_getFFCShutterMode)(LEP_SYS_FFC_SHUTTER_MODE * mode, struct lepton_communication * communication);
+  LEP_SYS_FFC_STATUS (*sys_getFFCNormalizationStatus)(struct lepton_communication * communication); // def:LEP_SYS_FFC_STATUS_READY
+#endif
+};
 
-  LeptonFLiR_ImageStorageMode_Count
-} LeptonFLiR_ImageStorageMode;
-
-typedef enum {
-  LeptonFLiR_TemperatureMode_Celsius,
-  LeptonFLiR_TemperatureMode_Fahrenheit,
-  LeptonFLiR_TemperatureMode_Kelvin,
-
-  LeptonFLiR_TemperatureMode_Count
-} LeptonFLiR_TemperatureMode;
+struct lepton_driver {
+  struct lepton_callbacks callbacks;
+  struct lepton_communication communication;
+  struct lepton_sys sys;
+};
 
 #ifndef ENABLED
 #define ENABLED  0x1
@@ -100,17 +126,6 @@ typedef enum {
 #define LEPFLIR_SPI_FRAME_PACKET_SIZE           164 // 2B ID + 2B CRC + 160B for 80x1 14bpp/8bppAGC thermal image data or telemetry data
 #define LEPFLIR_SPI_FRAME_PACKET_SIZE16         82
 
-
-    // May use a different Wire instance than Wire. Some chipsets, such as Due/Zero/etc.,
-    // have a Wire1 class instance that uses the SDA1/SCL1 lines instead.
-    // Supported i2c baud rates are 100kHz, 400kHz, and 1000kHz.
-    // Supported SPI baud rates are 2.2MHz to 20MHz.
-void LeptonFLiR_LeptonFLiR( /*TwoWire& i2cWire = Wire, *//*uint8_t spiCSPin *//* = 53 */ );
-    // Called in setup()
-void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode
-                     /* = LeptonFLiR_ImageStorageMode_80x60_16bpp */ ,
-                     LeptonFLiR_TemperatureMode tempMode
-                     /* = LeptonFLiR_TemperatureMode_Celsius */ );
 
 void
 lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t addr, struct lepton_callbacks * this));
@@ -148,24 +163,6 @@ LEP_AGC_HEQ_SCALE_FACTOR agc_getHEQScaleFactor();
 
 void agc_setAGCCalcEnabled(uint8_t enabled); // def:disabled
 uint8_t agc_getAGCCalcEnabled();
-
-    // SYS module commands
-
-void sys_getCameraStatus_internal(LEP_SYS_CAM_STATUS * status);
-LEP_SYS_CAM_STATUS_STATES sys_getCameraStatus();
-
-void sys_getFlirSerialNumber(char *buffer, int maxLength /* = 16 */ ); // maxLength must at least be 16, recommended 20
-void sys_getCustomerSerialNumber(char *buffer, int maxLength /* = 64 */ ); // maxLength must at least be 64, recommended 80
-
-uint32_t sys_getCameraUptime(); // (milliseconds)
-
-float sys_getAuxTemperature();  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-float sys_getFPATemperature();  // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-
-void sys_setTelemetryEnabled(uint8_t enabled); // def:enabled
-uint8_t sys_getTelemetryEnabled();
-
-void sys_runFFCNormalization();
 
     // VID module commands
 
@@ -231,31 +228,6 @@ uint16_t agc_getHEQNormalizationFactor();
 
     // SYS extended module commands
 
-void sys_runPingCamera();       // return put into lastLepResult
-
-void sys_setTelemetryLocation(LEP_SYS_TELEMETRY_LOCATION location); // def:LEP_TELEMETRY_LOCATION_FOOTER
-LEP_SYS_TELEMETRY_LOCATION sys_getTelemetryLocation();
-
-void sys_runFrameAveraging();
-
-void sys_setNumFramesToAverage(LEP_SYS_FRAME_AVERAGE average); // def:LEP_SYS_FA_DIV_8
-LEP_SYS_FRAME_AVERAGE sys_getNumFramesToAverage();
-
-void sys_getSceneStatistics(LEP_SYS_SCENE_STATISTICS * statistics);
-
-void sys_setSceneRegion(LEP_SYS_SCENE_ROI * region); // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
-void sys_getSceneRegion(LEP_SYS_SCENE_ROI * region);
-
-uint16_t sys_getThermalShutdownCount(); // min:0 max:65535 default:270 (pixels)
-
-void sys_setShutterPosition(LEP_SYS_SHUTTER_POSITION position); // def:LEP_SYS_SHUTTER_POSITION_UNKNOWN
-LEP_SYS_SHUTTER_POSITION sys_getShutterPosition();
-
-void sys_setFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE * mode); // see LEP_SYS_FFC_SHUTTER_MODE for defs
-void sys_getFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE * mode);
-
-LEP_SYS_FFC_STATUS sys_getFFCNormalizationStatus(); // def:LEP_SYS_FFC_STATUS_READY
-
     // VID extended module commands
 
 void vid_setUserColorLUT(LEP_VID_LUT_BUFFER * table); // These two methods may not work as intended, possibly leaving the I2C bus on the
@@ -286,7 +258,7 @@ const char *getTemperatureSymbol();
 uint8_t getLastI2CError();
 LEP_RESULT getLastLepResult();
 
-extern void wordsToHexString(uint16_t * dataWords, int dataLength, char *buffer,
+void wordsToHexString(uint16_t * dataWords, int dataLength, char *buffer,
                              int maxLength);
 extern float kelvin100ToCelsius(uint16_t kelvin100);
 extern float kelvin100ToFahrenheit(uint16_t kelvin100);
@@ -294,5 +266,9 @@ extern float kelvin100ToKelvin(uint16_t kelvin100);
 extern uint16_t celsiusToKelvin100(float celsius);
 extern uint16_t fahrenheitToKelvin100(float fahrenheit);
 extern uint16_t kelvinToKelvin100(float kelvin);
+
+void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
+                     LeptonFLiR_TemperatureMode tempMode,
+                     struct lepton_driver * driver);
 
 #endif

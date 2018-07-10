@@ -1,6 +1,7 @@
 #include "unity.h"
 #include "lepton-flir.h"
 #include "mock_lepton-communication.h"
+#include "mock_lepton-sys.h"
 
 void setUp(void)
 {
