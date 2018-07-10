@@ -53,42 +53,6 @@ struct lepton_callbacks {
   uint8_t _lastI2CError;          // Last i2c error
 };
 
-#ifndef ENABLED
-#define ENABLED  0x1
-#endif
-#ifndef DISABLED
-#define DISABLED 0x0
-#endif
-
-typedef enum {
-  TelemetryData_FFCState_NeverCommanded,
-  TelemetryData_FFCState_InProgress,
-  TelemetryData_FFCState_Complete
-} TelemetryData_FFCState;
-
-typedef struct {
-  uint8_t revisionMajor;
-  uint8_t revisionMinor;
-  uint32_t cameraUptime;        // (milliseconds)
-  uint8_t ffcDesired;
-  TelemetryData_FFCState ffcState;
-  uint8_t agcEnabled;           // def:disabled
-  uint8_t shutdownImminent;
-  char serialNumber[24];
-  char softwareRevision[12];
-  uint32_t frameCounter;        // increments every 3rd frame, useful for determining new unique frame
-  uint16_t frameMean;
-  float fpaTemperature;         // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-  float housingTemperature;     // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-  uint32_t lastFFCTime;         // (milliseconds)
-  float fpaTempAtLastFFC;       // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-  float housingTempAtLastFFC;   // min:-273.15C max:382.20C (celsius), min:-459.67F max:719.96F (fahrenheit), min:0.00K max:655.35K (kelvin)
-  LEP_AGC_HISTOGRAM_ROI agcRegion; // min:0,0/end>beg, max:79,59/beg<end def:{0,0,79,59} (pixels)
-  uint16_t agcClipHigh;         // min:0 max:4800 def:4800 (pixels)
-  uint16_t agcClipLow;          // min:0 max:1024 def:512 (pixels)
-  uint16_t log2FFCFrames;
-} TelemetryData;
-
 // Memory Footprint Note
 // Image storage mode affects the total memory footprint. Memory constrained boards
 // should take notice to the storage requirements. Note that the Lepton FLiR delivers
@@ -122,6 +86,20 @@ typedef enum {
 
   LeptonFLiR_TemperatureMode_Count
 } LeptonFLiR_TemperatureMode;
+
+#ifndef ENABLED
+#define ENABLED  0x1
+#endif
+#ifndef DISABLED
+#define DISABLED 0x0
+#endif
+
+#define LEPFLIR_GEN_CMD_TIMEOUT         5000 // Timeout for commands to be processed
+#define LEPFLIR_SPI_MAX_SPEED           20000000 // Maximum SPI speed for FLiR module
+#define LEPFLIR_SPI_MIN_SPEED           2200000 // Minimum SPI speed for FLiR module
+#define LEPFLIR_SPI_FRAME_PACKET_SIZE           164 // 2B ID + 2B CRC + 160B for 80x1 14bpp/8bppAGC thermal image data or telemetry data
+#define LEPFLIR_SPI_FRAME_PACKET_SIZE16         82
+
 
     // May use a different Wire instance than Wire. Some chipsets, such as Due/Zero/etc.,
     // have a Wire1 class instance that uses the SDA1/SCL1 lines instead.
