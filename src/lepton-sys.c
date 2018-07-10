@@ -1,6 +1,9 @@
 #include "lepton-sys.h"
 #include "lepton-flir.h"
 #include "lepton-communication.h"
+#ifdef TEST
+#include <stdio.h>
+#endif
 
 void sys_getCameraStatus_internal(LEP_SYS_CAM_STATUS * status, void * driver)
 {

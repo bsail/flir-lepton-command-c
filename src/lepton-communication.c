@@ -1,4 +1,7 @@
 #include "lepton-communication.h"
+#ifdef TEST
+#include <stdio.h>
+#endif
 
 #define true 1
 #define false 0
@@ -162,7 +165,7 @@ void receiveCommand_array(uint16_t cmdCode, uint16_t * readWords, int maxLength,
 
 int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this)
 {
-  // In avr/libraries/Wire.h and avr/libraries/utility/twi.h, BUFFER_LENGTH controls
+  // In avr/libraries/Wire.h and avr/libraries/utility/twi.h, buffer_length controls
   // how many words can be written at once. Therefore, we loop around until all words
   // have been written out into their registers.
 
@@ -173,7 +176,7 @@ int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength, str
     if (this->callbacks.i2cWire_endTransmission(&(this->callbacks)))
       return this->callbacks._lastI2CError;
 
-    int maxLength = this->BUFFER_LENGTH / 2;
+    int maxLength = this->buffer_length / 2;
     int writeLength = min(maxLength, dataLength);
     uint16_t regAddress =
         dataLength <= 16 ? LEP_I2C_DATA_0_REG : LEP_I2C_DATA_BUFFER;
@@ -208,6 +211,12 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
     return this->callbacks._lastI2CError;
 
   int uint8_tsRead = this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2,&(this->callbacks));
+
+  #ifdef TEST
+  //printf("000:%d\n",uint8_tsRead);
+  #endif
+
+
   if (uint8_tsRead != 2) {
     while (uint8_tsRead-- > 0)
       this->callbacks.i2cWire_read(&(this->callbacks));
@@ -216,16 +225,20 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
 
   int readLength = this->callbacks.i2cWire_read16(&(this->callbacks));
 
+  #ifdef TEST
+  //printf("100:%d\n",readLength);
+  #endif
+
   if (readLength == 0)
     return (this->callbacks._lastI2CError = 4);
 
-  // In avr/libraries/Wire.h and avr/libraries/utility/twi.h, BUFFER_LENGTH controls
+  // In avr/libraries/Wire.h and avr/libraries/utility/twi.h, buffer_length controls
   // how many words can be read at once. Therefore, we loop around until all words
   // have been read out from their registers.
 
   uint8_tsRead =
       this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS,
-                          min(this->BUFFER_LENGTH, readLength),&(this->callbacks));
+                          min(this->buffer_length, readLength),&(this->callbacks));
 
   while (uint8_tsRead > 0 && readLength > 0) {
 
@@ -239,7 +252,7 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
     if (readLength > 0)
       uint8_tsRead +=
           this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS,
-                              min(this->BUFFER_LENGTH, readLength),&(this->callbacks));
+                              min(this->buffer_length, readLength),&(this->callbacks));
   }
 
   while (uint8_tsRead-- > 0)
@@ -247,7 +260,9 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
 
   while (maxLength-- > 0)
     *readWords++ = 0;
-
+  #ifdef TEST
+  //printf("200:%d\n",readLength);
+  #endif
   return (this->callbacks._lastI2CError = readLength ? 4 : 0);
 }
 

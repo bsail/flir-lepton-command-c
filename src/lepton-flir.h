@@ -58,7 +58,7 @@ struct lepton_communication {
   LeptonFLiR_ImageStorageMode _storageMode; // Image data storage mode
   LeptonFLiR_TemperatureMode _tempMode; // Temperature display mode
   uint8_t _lastLepResult;         // Last lep result
-  int BUFFER_LENGTH;
+  int buffer_length;
   uint8_t (*waitCommandBegin)(int timeout, struct lepton_communication * this);
   uint8_t (*waitCommandFinish)(int timeout, struct lepton_communication * this);
   uint16_t (*cmdCode)(uint16_t cmdID, uint16_t cmdType);

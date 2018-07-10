@@ -384,7 +384,7 @@ void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callb
 
 void lepton_i2cWire_set_buffer_length(int length, struct lepton_driver * driver)
 {
-  driver->communication.BUFFER_LENGTH = length;
+  driver->communication.buffer_length = length;
 }
 
 void lepton_millis_set_callback(unsigned long (*callback) (void), struct lepton_driver * driver)
