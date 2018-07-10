@@ -29,10 +29,8 @@
 #include "lepton-communication.h"
 #include "lepton-sys.h"
 #include "lepton-agc.h"
+#include "lepton-vid.h"
 #include <math.h>
-
-static struct lepton_callbacks callbacks;
-static struct lepton_communication communication;
 
 #define true 1
 #define false 0
@@ -54,28 +52,29 @@ void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
                      LeptonFLiR_TemperatureMode tempMode,
                      struct lepton_driver * driver)
 {
-  communication._storageMode = LeptonFLiR_ImageStorageMode_Count;
-  callbacks._lastI2CError = communication._lastLepResult = 0;
-  lepton_communication_init(&communication,&callbacks);
+  driver->communication._storageMode = LeptonFLiR_ImageStorageMode_Count;
+  driver->callbacks._lastI2CError = driver->communication._lastLepResult = 0;
+  lepton_communication_init(&(driver->communication),&(driver->callbacks));
   lepton_sys_init(&(driver->sys));
   lepton_agc_init(&(driver->agc));
-  communication._storageMode = storageMode;
-  communication._tempMode = tempMode;
+  lepton_vid_init(&(driver->vid));
+  driver->communication._storageMode = storageMode;
+  driver->communication._tempMode = tempMode;
 }
 
-LeptonFLiR_ImageStorageMode getImageStorageMode()
+LeptonFLiR_ImageStorageMode getImageStorageMode(struct lepton_driver * driver)
 {
-  return communication._storageMode;
+  return driver->communication._storageMode;
 }
 
-LeptonFLiR_TemperatureMode getTemperatureMode()
+LeptonFLiR_TemperatureMode getTemperatureMode(struct lepton_driver * driver)
 {
-  return communication._tempMode;
+  return driver->communication._tempMode;
 }
 
-int getImageWidth()
+int getImageWidth(struct lepton_driver * driver)
 {
-  switch (communication._storageMode) {
+  switch (driver->communication._storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
   case LeptonFLiR_ImageStorageMode_80x60_8bpp:
     return 80;
@@ -90,9 +89,9 @@ int getImageWidth()
   }
 }
 
-int getImageHeight()
+int getImageHeight(struct lepton_driver * driver)
 {
-  switch (communication._storageMode) {
+  switch (driver->communication._storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
   case LeptonFLiR_ImageStorageMode_80x60_8bpp:
     return 60;
@@ -107,9 +106,9 @@ int getImageHeight()
   }
 }
 
-int getImageBpp()
+int getImageBpp(struct lepton_driver * driver)
 {
-  switch (communication._storageMode) {
+  switch (driver->communication._storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
   case LeptonFLiR_ImageStorageMode_40x30_16bpp:
   case LeptonFLiR_ImageStorageMode_20x15_16bpp:
@@ -123,158 +122,6 @@ int getImageBpp()
   }
 }
 
-void vid_setPolarity(LEP_VID_POLARITY polarity)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) polarity,&communication);
-}
-
-LEP_VID_POLARITY vid_getPolarity()
-{
-  uint32_t polarity;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_GET),
-                     &polarity,&communication);
-  return (LEP_VID_POLARITY) polarity;
-}
-
-void vid_setPseudoColorLUT(LEP_VID_PCOLOR_LUT table)
-{
-  communication.sendCommand_u32(communication.cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) table,&communication);
-}
-
-LEP_VID_PCOLOR_LUT vid_getPseudoColorLUT()
-{
-  uint32_t table;
-  communication.receiveCommand_u32(communication.cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_GET),
-                     &table,&communication);
-  return (LEP_VID_PCOLOR_LUT) table;
-}
-
-void vid_setFocusCalcEnabled(uint8_t enabled)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_VID_FOCUS_CALC_ENABLE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) enabled,&communication);
-}
-
-uint8_t vid_getFocusCalcEnabled()
-{
-  uint32_t enabled;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_FOCUS_CALC_ENABLE, LEP_I2C_COMMAND_TYPE_GET),
-                     &enabled,&communication);
-  return enabled;
-}
-
-void vid_setFreezeEnabled(uint8_t enabled)
-{
-  communication.sendCommand_u32(communication.cmdCode(LEP_CID_VID_FREEZE_ENABLE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) enabled,&communication);
-}
-
-uint8_t vid_getFreezeEnabled()
-{
-  uint32_t enabled;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_FREEZE_ENABLE, LEP_I2C_COMMAND_TYPE_GET),
-                     &enabled,&communication);
-  return enabled;
-}
-
-#ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
-
-void vid_setUserColorLUT(LEP_VID_LUT_BUFFER * table)
-{
-  if (!table)
-    return;
-  communication.sendCommand_array(communication.cmdCode(LEP_CID_VID_LUT_TRANSFER, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) table, sizeof(LEP_VID_LUT_BUFFER) / 2,&communication);
-}
-
-void vid_getUserColorLUT(LEP_VID_LUT_BUFFER * table)
-{
-  if (!table)
-    return;
-  communication.receiveCommand_array(communication.cmdCode
-                       (LEP_CID_VID_LUT_TRANSFER, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) table, sizeof(LEP_VID_LUT_BUFFER) / 2,&communication);
-}
-
-void vid_setFocusRegion(LEP_VID_FOCUS_ROI * region)
-{
-  if (!region)
-    return;
-  communication.sendCommand_array(communication.cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) region, sizeof(LEP_VID_FOCUS_ROI) / 2,&communication);
-}
-
-void vid_getFocusRegion(LEP_VID_FOCUS_ROI * region)
-{
-  if (!region)
-    return;
-  communication.receiveCommand_array(communication.cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) region, sizeof(LEP_VID_FOCUS_ROI) / 2,&communication);
-}
-
-void vid_setFocusThreshold(uint32_t threshold)
-{
-  communication.sendCommand_u32(communication.cmdCode
-                  (LEP_CID_VID_FOCUS_THRESHOLD, LEP_I2C_COMMAND_TYPE_SET),
-                  threshold,&communication);
-}
-
-uint32_t vid_getFocusThreshold()
-{
-  uint32_t threshold;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_FOCUS_THRESHOLD, LEP_I2C_COMMAND_TYPE_GET),
-                     &threshold,&communication);
-  return threshold;
-}
-
-uint32_t vid_getFocusMetric()
-{
-  uint32_t metric;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_FOCUS_METRIC, LEP_I2C_COMMAND_TYPE_GET),
-                     &metric,&communication);
-  return metric;
-}
-
-void vid_setSceneBasedNUCEnabled(uint8_t enabled)
-{
-  communication.sendCommand_u32(communication.cmdCode(LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) enabled,&communication);
-}
-
-uint8_t vid_getSceneBasedNUCEnabled()
-{
-  uint32_t enabled;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_GET),
-                     &enabled,&communication);
-  return enabled;
-}
-
-void vid_setGamma(uint32_t gamma)
-{
-  communication.sendCommand_u32(communication.cmdCode(LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_SET),
-                  gamma,&communication);
-}
-
-uint32_t vid_getGamma()
-{
-  uint32_t gamma;
-  communication.receiveCommand_u32(communication.cmdCode
-                     (LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_GET),
-                     &gamma,&communication);
-  return gamma;
-}
-
-#endif
 
 static inline void uint8_tToHexString(uint8_t value, char *buffer)
 {
@@ -348,9 +195,9 @@ uint16_t kelvinToKelvin100(float kelvin)
   return (uint16_t) roundf(kelvin * 100.0f);
 }
 
-float kelvin100ToTemperature(uint16_t kelvin100)
+float kelvin100ToTemperature(uint16_t kelvin100, struct lepton_driver * driver)
 {
-  switch (communication._tempMode) {
+  switch (driver->communication._tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
     return kelvin100ToCelsius(kelvin100);
   case LeptonFLiR_TemperatureMode_Fahrenheit:
@@ -362,9 +209,9 @@ float kelvin100ToTemperature(uint16_t kelvin100)
   }
 }
 
-uint16_t temperatureToKelvin100(float temperature)
+uint16_t temperatureToKelvin100(float temperature, struct lepton_driver * driver)
 {
-  switch (communication._tempMode) {
+  switch (driver->communication._tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
     return celsiusToKelvin100(temperature);
   case LeptonFLiR_TemperatureMode_Fahrenheit:
@@ -376,9 +223,9 @@ uint16_t temperatureToKelvin100(float temperature)
   }
 }
 
-const char *getTemperatureSymbol()
+const char *getTemperatureSymbol(struct lepton_driver * driver)
 {
-  switch (communication._tempMode) {
+  switch (driver->communication._tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
     return "C";
   case LeptonFLiR_TemperatureMode_Fahrenheit:
@@ -390,14 +237,14 @@ const char *getTemperatureSymbol()
   }
 }
 
-uint8_t getLastI2CError()
+uint8_t getLastI2CError(struct lepton_driver * driver)
 {
-  return callbacks._lastI2CError;
+  return driver->callbacks._lastI2CError;
 }
 
-LEP_RESULT getLastLepResult()
+LEP_RESULT getLastLepResult(struct lepton_driver * driver)
 {
-  return (LEP_RESULT) communication._lastLepResult;
+  return (LEP_RESULT) driver->communication._lastLepResult;
 }
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
@@ -497,54 +344,54 @@ static const char *textForLepResult(LEP_RESULT errorCode)
 
 
 void
-lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t addr, struct lepton_callbacks * this))
+lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_beginTransmission = callback;
+  driver->callbacks.i2cWire_beginTransmission = callback;
 }
 
-void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks * this))
+void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_endTransmission = callback;
+  driver->callbacks.i2cWire_endTransmission = callback;
 }
 
 void
 lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)
-                                        (uint8_t addr, uint8_t len, struct lepton_callbacks * this))
+                                        (uint8_t, uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_requestFrom = callback;
+  driver->callbacks.i2cWire_requestFrom = callback;
 }
 
-void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t data, struct lepton_callbacks * this))
+void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_write = callback;
+  driver->callbacks.i2cWire_write = callback;
 }
 
-void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t data, struct lepton_callbacks * this))
+void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t, struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_write16 = callback;
+  driver->callbacks.i2cWire_write16 = callback;
 }
 
-void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks *))
+void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_read = callback;
+  driver->callbacks.i2cWire_read = callback;
 }
 
-void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks *))
+void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
 {
-  callbacks.i2cWire_read16 = callback;
+  driver->callbacks.i2cWire_read16 = callback;
 }
 
-void lepton_i2cWire_set_buffer_length(int length)
+void lepton_i2cWire_set_buffer_length(int length, struct lepton_driver * driver)
 {
-  communication.BUFFER_LENGTH = length;
+  driver->communication.BUFFER_LENGTH = length;
 }
 
-void lepton_millis_set_callback(unsigned long (*callback) (void))
+void lepton_millis_set_callback(unsigned long (*callback) (void), struct lepton_driver * driver)
 {
-  callbacks.millis_callback = callback;
+  driver->callbacks.millis_callback = callback;
 }
 
-void lepton_delay_set_callback(void (*callback) (unsigned long))
+void lepton_delay_set_callback(void (*callback) (unsigned long), struct lepton_driver * driver)
 {
-  callbacks.delay_callback = callback;
+  driver->callbacks.delay_callback = callback;
 }

@@ -153,11 +153,38 @@ struct lepton_agc {
 };
 
 
+    // VID module commands
+
+struct lepton_vid {
+  void (*vid_setPolarity)(LEP_VID_POLARITY polarity, struct lepton_communication * communication); // def:LEP_VID_WHITE_HOT
+  LEP_VID_POLARITY (*vid_getPolarity)(struct lepton_communication * communication);
+  void (*vid_setPseudoColorLUT)(LEP_VID_PCOLOR_LUT table, struct lepton_communication * communication); // def:LEP_VID_FUSION_LUT
+  LEP_VID_PCOLOR_LUT (*vid_getPseudoColorLUT)(struct lepton_communication * communication);
+  void (*vid_setFocusCalcEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
+  uint8_t (*vid_getFocusCalcEnabled)(struct lepton_communication * communication);
+  void (*vid_setFreezeEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:disabled
+  uint8_t (*vid_getFreezeEnabled)(struct lepton_communication * communication);
+#ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
+  void (*vid_setUserColorLUT)(LEP_VID_LUT_BUFFER * table, struct lepton_communication * communication); // These two methods may not work as intended, possibly leaving the I2C bus on the
+  void (*vid_getUserColorLUT)(LEP_VID_LUT_BUFFER * table, struct lepton_communication * communication); // FLiR in a non-responding state. A full power cycle may be needed to reset.
+  void (*vid_setFocusRegion)(LEP_VID_FOCUS_ROI * region, struct lepton_communication * communication); // min:1,1/end>beg+1, max:78,58/beg<end-1 def:{1,1,78,58} (pixels)
+  void (*vid_getFocusRegion)(LEP_VID_FOCUS_ROI * region, struct lepton_communication * communication);
+  void (*vid_setFocusThreshold)(uint32_t threshold, struct lepton_communication * communication); // def:30
+  uint32_t (*vid_getFocusThreshold)(struct lepton_communication * communication);
+  uint32_t (*vid_getFocusMetric)(struct lepton_communication * communication);
+  void (*vid_setSceneBasedNUCEnabled)(uint8_t enabled, struct lepton_communication * communication); // def:enabled
+  uint8_t (*vid_getSceneBasedNUCEnabled)(struct lepton_communication * communication);
+  void (*vid_setGamma)(uint32_t gamma, struct lepton_communication * communication); // def:58
+  uint32_t (*vid_getGamma)(struct lepton_communication * communication);
+#endif
+};
+
 struct lepton_driver {
   struct lepton_callbacks callbacks;
   struct lepton_communication communication;
   struct lepton_sys sys;
   struct lepton_agc agc;
+  struct lepton_vid vid;
 };
 
 #ifndef ENABLED
@@ -175,73 +202,32 @@ struct lepton_driver {
 
 
 void
-lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t addr, struct lepton_callbacks * this));
-void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks * this));
+lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver);
+void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver);
 void
 lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)
-                                        (uint8_t addr, uint8_t len, struct lepton_callbacks * this));
-void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t data, struct lepton_callbacks * this));
-void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t data, struct lepton_callbacks * this));
-void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks * this));
-void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks * this));
-void lepton_i2cWire_set_buffer_length(int length);
-void lepton_millis_set_callback(unsigned long (*callback) (void));
-void lepton_delay_set_callback(void (*callback) (unsigned long));
+                                        (uint8_t, uint8_t, struct lepton_callbacks *), struct lepton_driver * driver);
+void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver);
+void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t, struct lepton_callbacks *), struct lepton_driver * driver);
+void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver);
+void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver);
+void lepton_i2cWire_set_buffer_length(int length, struct lepton_driver * driver);
+void lepton_millis_set_callback(unsigned long (*callback) (void), struct lepton_driver * driver);
+void lepton_delay_set_callback(void (*callback) (unsigned long), struct lepton_driver * driver);
 
     // uint8_t getChipSelectPin();
-LeptonFLiR_ImageStorageMode getImageStorageMode();
-LeptonFLiR_TemperatureMode getTemperatureMode();
+LeptonFLiR_ImageStorageMode getImageStorageMode(struct lepton_driver * driver);
+LeptonFLiR_TemperatureMode getTemperatureMode(struct lepton_driver * driver);
 
     // Image descriptors
-int getImageWidth();
-int getImageHeight();
-int getImageBpp();              // Bytes per pixel
-
-    // VID module commands
-
-void vid_setPolarity(LEP_VID_POLARITY polarity); // def:LEP_VID_WHITE_HOT
-LEP_VID_POLARITY vid_getPolarity();
-
-void vid_setPseudoColorLUT(LEP_VID_PCOLOR_LUT table); // def:LEP_VID_FUSION_LUT
-LEP_VID_PCOLOR_LUT vid_getPseudoColorLUT();
-
-void vid_setFocusCalcEnabled(uint8_t enabled); // def:disabled
-uint8_t vid_getFocusCalcEnabled();
-
-void vid_setFreezeEnabled(uint8_t enabled); // def:disabled
-uint8_t vid_getFreezeEnabled();
-
-#ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
-
-    // AGC extended module commands
-
-    // SYS extended module commands
-
-    // VID extended module commands
-
-void vid_setUserColorLUT(LEP_VID_LUT_BUFFER * table); // These two methods may not work as intended, possibly leaving the I2C bus on the
-void vid_getUserColorLUT(LEP_VID_LUT_BUFFER * table); // FLiR in a non-responding state. A full power cycle may be needed to reset.
-
-void vid_setFocusRegion(LEP_VID_FOCUS_ROI * region); // min:1,1/end>beg+1, max:78,58/beg<end-1 def:{1,1,78,58} (pixels)
-void vid_getFocusRegion(LEP_VID_FOCUS_ROI * region);
-
-void vid_setFocusThreshold(uint32_t threshold); // def:30
-uint32_t vid_getFocusThreshold();
-
-uint32_t vid_getFocusMetric();
-
-void vid_setSceneBasedNUCEnabled(uint8_t enabled); // def:enabled
-uint8_t vid_getSceneBasedNUCEnabled();
-
-void vid_setGamma(uint32_t gamma); // def:58
-uint32_t vid_getGamma();
-
-#endif
+int getImageWidth(struct lepton_driver * driver);
+int getImageHeight(struct lepton_driver * driver);
+int getImageBpp(struct lepton_driver * driver);              // Bytes per pixel
 
     // Module represents temperatures as kelvin x 100 (in integer format). These methods
     // convert to and from the selected temperature mode.
-float kelvin100ToTemperature(uint16_t kelvin100);
-uint16_t temperatureToKelvin100(float temperature);
+float kelvin100ToTemperature(uint16_t kelvin100, struct lepton_driver * driver);
+uint16_t temperatureToKelvin100(float temperature, struct lepton_driver * driver);
 const char *getTemperatureSymbol();
 
 uint8_t getLastI2CError();
