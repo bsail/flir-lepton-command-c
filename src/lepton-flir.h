@@ -61,7 +61,6 @@ struct lepton_communication {
   int buffer_length;
   uint8_t (*waitCommandBegin)(int timeout, struct lepton_communication * this);
   uint8_t (*waitCommandFinish)(int timeout, struct lepton_communication * this);
-  uint16_t (*cmdCode)(uint16_t cmdID, uint16_t cmdType);
   void (*sendCommand_raw)(uint16_t cmdCode, struct lepton_communication * this);
   void (*sendCommand_u16)(uint16_t cmdCode, uint16_t value, struct lepton_communication * this);
   void (*sendCommand_u32)(uint16_t cmdCode, uint32_t value, struct lepton_communication * this);

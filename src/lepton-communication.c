@@ -299,7 +299,6 @@ void lepton_communication_init(struct lepton_communication * this)
 
   this->waitCommandBegin = &waitCommandBegin;
   this->waitCommandFinish = &waitCommandFinish;
-  this->cmdCode = &cmdCode;
   this->sendCommand_raw = &sendCommand_raw;
   this->sendCommand_u16 = &sendCommand_u16;
   this->sendCommand_u32 = &sendCommand_u32;
