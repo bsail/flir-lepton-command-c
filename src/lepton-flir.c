@@ -24,7 +24,7 @@
 
     Lepton-FLiR-Arduino - Version 0.9.91
 */
-
+#define LEPTON_FLIR_INTERNAL
 #include "lepton-flir.h"
 #include "lepton-communication.h"
 #include "lepton-sys.h"
@@ -37,52 +37,28 @@
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
-static inline uint8_t lowByte(uint16_t p)
-{
-  return (p & 0x00FF);
-}
-
-static inline uint8_t highByte(uint16_t p)
-{
-  return ((p & 0xFF00) >> 8);
-}
-
-uint16_t getStatusRegister(void * driver)
+uint16_t getStatusRegister(struct lepton_driver * driver)
 {
   uint16_t status;
-  ((struct lepton_driver *)driver)->communication.readRegister(LEP_I2C_STATUS_REG, &status, &(((struct lepton_driver *)driver)->communication));
+  readRegister(LEP_I2C_STATUS_REG, &status, &(driver->communication));
   return status;
 }
 
-void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
-                     LeptonFLiR_TemperatureMode tempMode,
-                     struct lepton_driver * driver)
-{
-  driver->communication._storageMode = LeptonFLiR_ImageStorageMode_Count;
-  driver->communication._storageMode = storageMode;
-  driver->communication._tempMode = tempMode;
-  driver->communication._lastLepResult = 0;
-  driver->communication.callbacks._lastI2CError = 0;;
-  driver->getStatusRegister = &getStatusRegister;
-  lepton_communication_init(&(driver->communication));
-  lepton_sys_init(&(driver->sys));
-  lepton_agc_init(&(driver->agc));
-  lepton_vid_init(&(driver->vid));
-}
+#ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
 
 LeptonFLiR_ImageStorageMode getImageStorageMode(struct lepton_driver * driver)
 {
-  return driver->communication._storageMode;
+  return driver->_storageMode;
 }
 
 LeptonFLiR_TemperatureMode getTemperatureMode(struct lepton_driver * driver)
 {
-  return driver->communication._tempMode;
+  return driver->_tempMode;
 }
 
 int getImageWidth(struct lepton_driver * driver)
 {
-  switch (driver->communication._storageMode) {
+  switch (driver->_storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
   case LeptonFLiR_ImageStorageMode_80x60_8bpp:
     return 80;
@@ -99,7 +75,7 @@ int getImageWidth(struct lepton_driver * driver)
 
 int getImageHeight(struct lepton_driver * driver)
 {
-  switch (driver->communication._storageMode) {
+  switch (driver->_storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
   case LeptonFLiR_ImageStorageMode_80x60_8bpp:
     return 60;
@@ -116,7 +92,7 @@ int getImageHeight(struct lepton_driver * driver)
 
 int getImageBpp(struct lepton_driver * driver)
 {
-  switch (driver->communication._storageMode) {
+  switch (driver->_storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
   case LeptonFLiR_ImageStorageMode_40x30_16bpp:
   case LeptonFLiR_ImageStorageMode_20x15_16bpp:
@@ -128,6 +104,20 @@ int getImageBpp(struct lepton_driver * driver)
   default:
     return 0;
   }
+}
+
+#endif
+
+#ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
+
+static inline uint8_t lowByte(uint16_t p)
+{
+  return (p & 0x00FF);
+}
+
+static inline uint8_t highByte(uint16_t p)
+{
+  return ((p & 0xFF00) >> 8);
 }
 
 
@@ -205,7 +195,7 @@ uint16_t kelvinToKelvin100(float kelvin)
 
 float kelvin100ToTemperature(uint16_t kelvin100, struct lepton_driver * driver)
 {
-  switch (driver->communication._tempMode) {
+  switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
     return kelvin100ToCelsius(kelvin100);
   case LeptonFLiR_TemperatureMode_Fahrenheit:
@@ -219,7 +209,7 @@ float kelvin100ToTemperature(uint16_t kelvin100, struct lepton_driver * driver)
 
 uint16_t temperatureToKelvin100(float temperature, struct lepton_driver * driver)
 {
-  switch (driver->communication._tempMode) {
+  switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
     return celsiusToKelvin100(temperature);
   case LeptonFLiR_TemperatureMode_Fahrenheit:
@@ -233,7 +223,7 @@ uint16_t temperatureToKelvin100(float temperature, struct lepton_driver * driver
 
 const char *getTemperatureSymbol(struct lepton_driver * driver)
 {
-  switch (driver->communication._tempMode) {
+  switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
     return "C";
   case LeptonFLiR_TemperatureMode_Fahrenheit:
@@ -244,6 +234,8 @@ const char *getTemperatureSymbol(struct lepton_driver * driver)
     return "";
   }
 }
+
+#endif
 
 uint8_t getLastI2CError(struct lepton_driver * driver)
 {
@@ -402,4 +394,59 @@ void lepton_millis_set_callback(unsigned long (*callback) (void), struct lepton_
 void lepton_delay_set_callback(void (*callback) (unsigned long), struct lepton_driver * driver)
 {
   driver->communication.callbacks.delay_callback = callback;
+}
+
+void LeptonFLiR_init(
+#ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
+  LeptonFLiR_ImageStorageMode storageMode,
+  LeptonFLiR_TemperatureMode tempMode,
+#endif
+  struct lepton_driver * driver)
+{
+  driver->getStatusRegister = &getStatusRegister;
+  driver->getLastI2CError = &getLastI2CError;
+  driver->getLastLepResult = &getLastLepResult;
+  driver->communication._lastLepResult = 0;
+  driver->communication.callbacks._lastI2CError = 0;
+#ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
+  driver->_storageMode = storageMode;
+  driver->_tempMode = tempMode;
+  driver->getImageStorageMode = &getImageStorageMode;
+  driver->getTemperatureMode = &getTemperatureMode;
+  driver->getImageWidth = &getImageWidth;
+  driver->getImageHeight = &getImageHeight;
+  driver->getImageBpp = &getImageBpp;
+#endif
+#ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
+  driver->misc.kelvin100ToTemperature = &kelvin100ToTemperature;
+  driver->misc.temperatureToKelvin100 = &temperatureToKelvin100;
+  driver->misc.getTemperatureSymbol = &getTemperatureSymbol;
+  driver->misc.wordsToHexString = &wordsToHexString;
+  driver->misc.kelvin100ToCelsius = &kelvin100ToCelsius;
+  driver->misc.kelvin100ToFahrenheit = &kelvin100ToFahrenheit;
+  driver->misc.kelvin100ToKelvin = &kelvin100ToKelvin;
+  driver->misc.celsiusToKelvin100 = &celsiusToKelvin100;
+  driver->misc.fahrenheitToKelvin100 = &fahrenheitToKelvin100;
+  driver->misc.kelvinToKelvin100 = &kelvinToKelvin100;
+#endif
+  driver->init.lepton_i2cWire_beginTransmission_set_callback = &lepton_i2cWire_beginTransmission_set_callback;
+  driver->init.lepton_i2cWire_endTransmission_set_callback = &lepton_i2cWire_endTransmission_set_callback;
+  driver->init.lepton_i2cWire_requestFrom_set_callback = &lepton_i2cWire_requestFrom_set_callback;
+  driver->init.lepton_i2cWire_write_set_callback = &lepton_i2cWire_write_set_callback;
+  driver->init.lepton_i2cWire_write16_set_callback = &lepton_i2cWire_write16_set_callback;
+  driver->init.lepton_i2cWire_read_set_callback = &lepton_i2cWire_read_set_callback;
+  driver->init.lepton_i2cWire_read16_set_callback = &lepton_i2cWire_read16_set_callback;
+  driver->init.lepton_i2cWire_set_buffer_length = &lepton_i2cWire_set_buffer_length;
+  driver->init.lepton_millis_set_callback = &lepton_millis_set_callback;
+  driver->init.lepton_delay_set_callback = &lepton_delay_set_callback;
+  lepton_communication_init(&(driver->communication));
+#ifndef LEPFLIR_EXCLUDE_SYS_FUNCS
+  lepton_sys_init(&(driver->sys));
+#endif
+#ifndef LEPFLIR_EXCLUDE_AGC_FUNCS
+  lepton_agc_init(&(driver->agc));
+#endif
+#ifndef LEPFLIR_EXCLUDE_VID_FUNCS
+  lepton_vid_init(&(driver->vid));
+#endif
 }

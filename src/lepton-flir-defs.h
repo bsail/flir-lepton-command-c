@@ -154,21 +154,21 @@
 // 14bpp thermal image data with AGC mode disabled and 8bpp thermal image data with AGC
 // mode enabled, therefore if using AGC mode always enabled it is more memory efficient
 // to use an 8bpp mode to begin with. Note that with telemetry enabled, memory cost
-// incurs an additional 164 uint8_ts for telemetry data storage.
+// incurs an additional 164 bytes for telemetry data storage.
 typedef enum {
-  // Full 16bpp image mode, 9600 uint8_ts for image data, 164 uint8_ts for read frame (9604 uint8_ts total, 9806 uint8_ts if aligned)
+  // Full 16bpp image mode, 9600 bytes for image data, 164 bytes for read frame (9604 bytes total, 9806 bytes if aligned)
   LeptonFLiR_ImageStorageMode_80x60_16bpp,
-  // Full 8bpp image mode, 4800 uint8_ts for image data, 164 uint8_ts for read frame (4964 uint8_ts total, 5006 uint8_ts if aligned)
+  // Full 8bpp image mode, 4800 bytes for image data, 164 bytes for read frame (4964 bytes total, 5006 bytes if aligned)
   LeptonFLiR_ImageStorageMode_80x60_8bpp,
 
-  // Halved 16bpp image mode, 2400 uint8_ts for image data, 328 uint8_ts for read frame (2728 uint8_ts total, 2782 uint8_ts if aligned)
+  // Halved 16bpp image mode, 2400 bytes for image data, 328 bytes for read frame (2728 bytes total, 2782 bytes if aligned)
   LeptonFLiR_ImageStorageMode_40x30_16bpp,
-  // Halved 8bpp image mode, 1200 uint8_ts for image data, 328 uint8_ts for read frame (1528 uint8_ts total, 1814 uint8_ts if aligned)
+  // Halved 8bpp image mode, 1200 bytes for image data, 328 bytes for read frame (1528 bytes total, 1814 bytes if aligned)
   LeptonFLiR_ImageStorageMode_40x30_8bpp,
 
-  // Quartered 16bpp image mode, 600 uint8_ts for image data, 656 uint8_ts for read frame (1256 uint8_ts total, 1446 uint8_ts if aligned)
+  // Quartered 16bpp image mode, 600 bytes for image data, 656 bytes for read frame (1256 bytes total, 1446 bytes if aligned)
   LeptonFLiR_ImageStorageMode_20x15_16bpp,
-  // Quartered 8bpp image mode, 300 uint8_ts for image data, 656 uint8_ts for read frame (956 uint8_ts total, 1202 uint8_ts if aligned)
+  // Quartered 8bpp image mode, 300 bytes for image data, 656 bytes for read frame (956 bytes total, 1202 bytes if aligned)
   LeptonFLiR_ImageStorageMode_20x15_8bpp,
 
   LeptonFLiR_ImageStorageMode_Count
