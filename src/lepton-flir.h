@@ -50,17 +50,29 @@ extern "C" {
 // Uncomment this define if wanting to exclude misc. functions from compilation.
 #define LEPFLIR_EXCLUDE_MISC_FUNCS   1
 
+// Explicitly suppress warning about LEPFLIR_EXCLUDE_MISC_FUNCS
+#define LEPFLIR_EXCLUDE_MISC_FUNCS_SUPPRESS_WARNING 1
+
 // Uncomment this define if wanting to exclude image statistics functions from compilation.
 #define LEPFLIR_EXCLUDE_IMAGE_FUNCS   1
 
 // Uncomment this define to enable debug output functions.
 // #define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
-#endif
 
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
 #ifdef LEPFLIR_EXCLUDE_IMAGE_FUNCS
 #error "LEPFLIR_EXCLUDE_IMAGE_FUNCS should be undefined"
 #endif
+#endif
+
+#ifndef LEPFLIR_EXCLUDE_SYS_FUNCS
+#ifdef LEPFLIR_EXCLUDE_MISC_FUNCS
+#ifndef LEPFLIR_EXCLUDE_MISC_FUNCS_SUPPRESS_WARNING
+#pragma message "It is recommended to undefine LEPFLIR_EXCLUDE_MISC_FUNCS"
+#endif
+#endif
+#endif
+
 #endif
 
 #include "lepton-flir-defs.h"
