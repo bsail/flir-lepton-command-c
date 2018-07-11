@@ -47,6 +47,12 @@ static inline uint8_t highByte(uint16_t p)
   return ((p & 0xFF00) >> 8);
 }
 
+uint16_t getStatusRegister(void * driver)
+{
+  uint16_t status;
+  ((struct lepton_driver *)driver)->communication.readRegister(LEP_I2C_STATUS_REG, &status, &(((struct lepton_driver *)driver)->communication));
+  return status;
+}
 
 void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
                      LeptonFLiR_TemperatureMode tempMode,
@@ -57,6 +63,7 @@ void LeptonFLiR_init(LeptonFLiR_ImageStorageMode storageMode,
   driver->communication._tempMode = tempMode;
   driver->communication._lastLepResult = 0;
   driver->communication.callbacks._lastI2CError = 0;;
+  driver->getStatusRegister = &getStatusRegister;
   lepton_communication_init(&(driver->communication));
   lepton_sys_init(&(driver->sys));
   lepton_agc_init(&(driver->agc));

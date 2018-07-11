@@ -179,6 +179,7 @@ struct lepton_vid {
 };
 
 struct lepton_driver {
+  uint16_t (*getStatusRegister)(void * driver);
   struct lepton_callbacks callbacks;
   struct lepton_communication communication;
   struct lepton_sys sys;

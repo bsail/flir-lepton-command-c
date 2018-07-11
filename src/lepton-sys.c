@@ -7,15 +7,14 @@
 
 void sys_getCameraStatus_internal(LEP_SYS_CAM_STATUS * status, void * driver)
 {
-  ((struct lepton_driver*)driver)->communication.receiveCommand_array(cmdCode
-                       (LEP_CID_SYS_CAM_STATUS, LEP_I2C_COMMAND_TYPE_GET),
+  ((struct lepton_driver*)driver)->communication.receiveCommand_array(cmdCode(LEP_CID_SYS_CAM_STATUS, LEP_I2C_COMMAND_TYPE_GET),
                        (uint16_t *) (status), sizeof(LEP_SYS_CAM_STATUS) / 2,&(((struct lepton_driver*)driver)->communication));
 }
 
 LEP_SYS_CAM_STATUS_STATES sys_getCameraStatus(void * driver)
 {
   LEP_SYS_CAM_STATUS camStatus;
-  sys_getCameraStatus_internal(&camStatus,&(((struct lepton_driver*)driver)->communication));
+  sys_getCameraStatus_internal(&camStatus,driver);
   return (LEP_SYS_CAM_STATUS_STATES) camStatus.camStatus;
 }
 
