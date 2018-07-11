@@ -1,6 +1,10 @@
 #ifndef _LEPTON_COMMUNICATION_H
 #define _LEPTON_COMMUNICATION_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <inttypes.h>
 #include "lepton-flir.h"
 
@@ -18,10 +22,10 @@ void sendCommand_array (uint16_t cmdCode, uint16_t * dataWords, int dataLength, 
 void receiveCommand_u16 (uint16_t cmdCode, uint16_t * value, struct lepton_communication * this);
 void receiveCommand_u32 (uint16_t cmdCode, uint32_t * value, struct lepton_communication * this);
 void receiveCommand_array (uint16_t cmdCode, uint16_t * readWords, int maxLength, struct lepton_communication * this);
-int writeCmdRegister (uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this);
-int readDataRegister (uint16_t * readWords, int maxLength, struct lepton_communication * this);
-int writeRegister (uint16_t regAddress, uint16_t value, struct lepton_communication * this);
-int readRegister (uint16_t regAddress, uint16_t * value, struct lepton_communication * this);
 void lepton_communication_init(struct lepton_communication * this);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _LEPTON_COMMUNICATION_H

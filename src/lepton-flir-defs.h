@@ -83,6 +83,10 @@
 #ifndef LeptonFLiRDefs_H
 #define LeptonFLiRDefs_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <inttypes.h>
 
 #define LEP_I2C_DEVICE_ADDRESS                  (uint8_t)0x2A
@@ -405,5 +409,9 @@ typedef enum {
   LEP_OPERATION_CANCELED = -126, /* Camera operation canceled */
   LEP_UNDEFINED_ERROR_CODE = -127 /* Undefined error */
 } LEP_RESULT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

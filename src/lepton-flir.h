@@ -28,6 +28,10 @@
 #ifndef LeptonFLiR_H
 #define LeptonFLiR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Library Setup
 
 #ifndef TEST
@@ -267,5 +271,9 @@ void LeptonFLiR_init(
   LeptonFLiR_TemperatureMode tempMode,
 #endif
   struct lepton_driver * driver);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

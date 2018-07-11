@@ -4,6 +4,7 @@
 #include "mock_lepton-sys.h"
 #include "mock_lepton-agc.h"
 #include "mock_lepton-vid.h"
+#include "mock_lepton-comm-internal.h"
 
 void setUp(void)
 {

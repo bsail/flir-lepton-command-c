@@ -1,6 +1,10 @@
 #ifndef _LEPTON_SYS_H
 #define _LEPTON_SYS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "lepton-flir.h"
 
 #ifndef TEST
@@ -13,6 +17,10 @@
 
 void lepton_sys_init(struct lepton_sys * this);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif // _LEPTON_SYS_H

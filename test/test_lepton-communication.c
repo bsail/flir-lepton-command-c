@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "lepton-communication.h"
+#include "mock_lepton-comm-internal.h"
 
 void setUp(void)
 {

@@ -1,6 +1,10 @@
 #ifndef _LEPTON_AGC_H
 #define _LEPTON_AGC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "lepton-flir.h"
 
 #ifndef TEST
@@ -13,6 +17,10 @@
 
 void lepton_agc_init(struct lepton_agc * this);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif // _LEPTON_AGC_H

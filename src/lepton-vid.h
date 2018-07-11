@@ -1,6 +1,10 @@
 #ifndef _LEPTON_VID_H
 #define _LEPTON_VID_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "lepton-flir.h"
 
 #ifndef TEST
@@ -13,6 +17,10 @@
 
 void lepton_vid_init(struct lepton_vid * this);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif // _LEPTON_VID_H
