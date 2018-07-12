@@ -79,22 +79,34 @@ void receiveCommand_u16(struct lepton_communication * this,uint16_t cmdCode,uint
 
 void receiveCommand_u32(struct lepton_communication * this,uint16_t cmdCode,uint32_t * value)
 {
-  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-    if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
-      if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-        readDataRegister(this,(uint16_t *) value,2);
+  if(this!=0) {
+    if(value!=0) {
+      if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+        if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
+          if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+            readDataRegister(this,(uint16_t *) value,2);
+          }
+        }
       }
+    } else {
+      this->_lastLepResult = LEP_UNDEFINED_ERROR_CODE;
     }
   }
 }
 
 void receiveCommand_array(struct lepton_communication * this,uint16_t cmdCode,uint16_t * readWords,int maxLength)
 {
-  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-    if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
-      if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-        readDataRegister(this,readWords,maxLength);
+  if(this!=0) {
+    if((readWords!=0)&&(maxLength!=0)) {
+      if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+        if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
+          if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+            readDataRegister(this,readWords,maxLength);
+          }
+        }
       }
+    } else {
+      this->_lastLepResult = LEP_UNDEFINED_ERROR_CODE;
     }
   }
 }
