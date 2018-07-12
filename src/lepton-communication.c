@@ -87,5 +87,6 @@ void receiveCommand_array(struct lepton_communication * this,uint16_t cmdCode,ui
 
 void lepton_communication_init(struct lepton_communication * this)
 {
-  this->_lastLepResult = 0;
+  if(this!=0)
+    this->_lastLepResult = 0;
 }

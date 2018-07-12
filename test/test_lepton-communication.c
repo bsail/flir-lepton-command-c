@@ -267,3 +267,45 @@ void test_receiveCommand_array_should_work(void)
   TEST_ASSERT_EQUAL_UINT16_ARRAY(value_orig,received_value,length);
 }
 
+void test_lepton_communication_init_null_pointer_should_not_segfault(void)
+{
+  lepton_communication_init(0);
+}
+
+void test_lepton_communication_init_should_work(void)
+{
+  struct lepton_communication comm;
+  comm._lastLepResult = 0x12;
+  lepton_communication_init(&comm);
+  TEST_ASSERT_EQUAL(0,comm._lastLepResult);
+}
+
+void test_cmdCode_GET_random_address(void)
+{
+  for(uint16_t i = 0;i < 20; ++i)
+  {
+    uint16_t random = rand()*rand();
+    uint16_t expected = random & 0x0FFC;
+    TEST_ASSERT_EQUAL_HEX16(expected,cmdCode(random,LEP_I2C_COMMAND_TYPE_GET));
+  }
+}
+
+void test_cmdCode_SET_random_address(void)
+{
+  for(uint16_t i = 0;i < 20; ++i)
+  {
+    uint16_t random = rand()*rand();
+    uint16_t expected = (random & 0x0FFC) + 0x01;
+    TEST_ASSERT_EQUAL_HEX16(expected,cmdCode(random,LEP_I2C_COMMAND_TYPE_SET));
+  }
+}
+
+void test_cmdCode_RUN_random_address(void)
+{
+  for(uint16_t i = 0;i < 20; ++i)
+  {
+    uint16_t random = rand()*rand();
+    uint16_t expected = (random & 0x0FFC) + 0x02;
+    TEST_ASSERT_EQUAL_HEX16(expected,cmdCode(random,LEP_I2C_COMMAND_TYPE_RUN));
+  }
+}
