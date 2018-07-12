@@ -5,77 +5,77 @@
 #include <stdio.h>
 #endif
 
-uint16_t cmdCode(uint16_t cmdID, uint16_t cmdType)
+uint16_t cmdCode(uint16_t cmdID,uint16_t cmdType)
 {
   return (cmdID & LEP_I2C_COMMAND_MODULE_ID_BIT_MASK) | (cmdID &
                                                          LEP_I2C_COMMAND_ID_BIT_MASK)
       | (cmdType & LEP_I2C_COMMAND_TYPE_BIT_MASK);
 }
 
-void sendCommand_raw(uint16_t cmdCode, struct lepton_communication * this)
+void sendCommand_raw(struct lepton_communication * this,uint16_t cmdCode)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeCmdRegister(cmdCode, NULL, 0,this) == 0) {
-      waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeCmdRegister(this,cmdCode,NULL,0) == 0) {
+      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
     }
   }
 }
 
-void sendCommand_u16(uint16_t cmdCode, uint16_t value, struct lepton_communication * this)
+void sendCommand_u16(struct lepton_communication * this,uint16_t cmdCode,uint16_t value)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeCmdRegister(cmdCode, &value, 1,this) == 0) {
-      waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeCmdRegister(this,cmdCode,&value,1) == 0) {
+      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
     }
   }
 }
 
-void sendCommand_u32(uint16_t cmdCode, uint32_t value, struct lepton_communication * this)
+void sendCommand_u32(struct lepton_communication * this,uint16_t cmdCode,uint32_t value)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeCmdRegister(cmdCode, (uint16_t *) & value, 2,this) == 0) {
-      waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeCmdRegister(this,cmdCode,(uint16_t *) & value,2) == 0) {
+      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
     }
   }
 }
 
-void sendCommand_array(uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this)
+void sendCommand_array(struct lepton_communication * this,uint16_t cmdCode,uint16_t * dataWords,int dataLength)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeCmdRegister(cmdCode, dataWords, dataLength,this) == 0) {
-      waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeCmdRegister(this,cmdCode,dataWords,dataLength) == 0) {
+      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
     }
   }
 }
 
-void receiveCommand_u16(uint16_t cmdCode, uint16_t * value, struct lepton_communication * this)
+void receiveCommand_u16(struct lepton_communication * this,uint16_t cmdCode,uint16_t * value)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeRegister(LEP_I2C_COMMAND_REG, cmdCode,this) == 0) {
-      if (waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-        readDataRegister(value, 1,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
+      if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+        readDataRegister(this,value,1);
       }
     }
   }
 }
 
-void receiveCommand_u32(uint16_t cmdCode, uint32_t * value, struct lepton_communication * this)
+void receiveCommand_u32(struct lepton_communication * this,uint16_t cmdCode,uint32_t * value)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeRegister(LEP_I2C_COMMAND_REG, cmdCode,this) == 0) {
-      if (waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-        readDataRegister((uint16_t *) value, 2,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
+      if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+        readDataRegister(this,(uint16_t *) value,2);
       }
     }
   }
 }
 
-void receiveCommand_array(uint16_t cmdCode, uint16_t * readWords, int maxLength, struct lepton_communication * this)
+void receiveCommand_array(struct lepton_communication * this,uint16_t cmdCode,uint16_t * readWords,int maxLength)
 {
-  if (waitCommandBegin(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-    if (writeRegister(LEP_I2C_COMMAND_REG, cmdCode,this) == 0) {
-      if (waitCommandFinish(LEPFLIR_GEN_CMD_TIMEOUT,this)) {
-        readDataRegister(readWords, maxLength,this);
+  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+    if (writeRegister(this,LEP_I2C_COMMAND_REG,cmdCode) == 0) {
+      if (waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+        readDataRegister(this,readWords,maxLength);
       }
     }
   }

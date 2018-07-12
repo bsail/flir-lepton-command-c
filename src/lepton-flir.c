@@ -41,7 +41,7 @@
 uint16_t getStatusRegister(struct lepton_driver * driver)
 {
   uint16_t status;
-  readRegister(LEP_I2C_STATUS_REG, &status, &(driver->communication));
+  readRegister(&(driver->communication),LEP_I2C_STATUS_REG, &status);
   return status;
 }
 
@@ -194,7 +194,7 @@ uint16_t kelvinToKelvin100(float kelvin)
   return (uint16_t) roundf(kelvin * 100.0f);
 }
 
-float kelvin100ToTemperature(uint16_t kelvin100, struct lepton_driver * driver)
+float kelvin100ToTemperature(struct lepton_driver * driver, uint16_t kelvin100)
 {
   switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
@@ -208,7 +208,7 @@ float kelvin100ToTemperature(uint16_t kelvin100, struct lepton_driver * driver)
   }
 }
 
-uint16_t temperatureToKelvin100(float temperature, struct lepton_driver * driver)
+uint16_t temperatureToKelvin100(struct lepton_driver * driver, float temperature)
 {
   switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
@@ -345,54 +345,54 @@ static const char *textForLepResult(LEP_RESULT errorCode)
 
 
 void
-lepton_i2cWire_beginTransmission_set_callback(void (*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
+lepton_i2cWire_beginTransmission_set_callback(struct lepton_driver * driver,void (*callback) (struct lepton_callbacks *,uint8_t))
 {
   driver->communication.callbacks.i2cWire_beginTransmission = callback;
 }
 
-void lepton_i2cWire_endTransmission_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
+void lepton_i2cWire_endTransmission_set_callback(struct lepton_driver * driver, uint8_t(*callback) (struct lepton_callbacks *))
 {
   driver->communication.callbacks.i2cWire_endTransmission = callback;
 }
 
 void
-lepton_i2cWire_requestFrom_set_callback(uint8_t(*callback)
-                                        (uint8_t, uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
+lepton_i2cWire_requestFrom_set_callback(struct lepton_driver * driver, uint8_t(*callback)
+                                        (struct lepton_callbacks *,uint8_t, uint8_t))
 {
   driver->communication.callbacks.i2cWire_requestFrom = callback;
 }
 
-void lepton_i2cWire_write_set_callback(size_t(*callback) (uint8_t, struct lepton_callbacks *), struct lepton_driver * driver)
+void lepton_i2cWire_write_set_callback(struct lepton_driver * driver, size_t(*callback) (struct lepton_callbacks *, uint8_t))
 {
   driver->communication.callbacks.i2cWire_write = callback;
 }
 
-void lepton_i2cWire_write16_set_callback(size_t(*callback) (uint16_t, struct lepton_callbacks *), struct lepton_driver * driver)
+void lepton_i2cWire_write16_set_callback(struct lepton_driver * driver, size_t(*callback) (struct lepton_callbacks *, uint16_t))
 {
   driver->communication.callbacks.i2cWire_write16 = callback;
 }
 
-void lepton_i2cWire_read_set_callback(uint8_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
+void lepton_i2cWire_read_set_callback(struct lepton_driver * driver, uint8_t(*callback) (struct lepton_callbacks *))
 {
   driver->communication.callbacks.i2cWire_read = callback;
 }
 
-void lepton_i2cWire_read16_set_callback(uint16_t(*callback) (struct lepton_callbacks *), struct lepton_driver * driver)
+void lepton_i2cWire_read16_set_callback(struct lepton_driver * driver, uint16_t(*callback) (struct lepton_callbacks *))
 {
   driver->communication.callbacks.i2cWire_read16 = callback;
 }
 
-void lepton_i2cWire_set_buffer_length(int length, struct lepton_driver * driver)
+void lepton_i2cWire_set_buffer_length(struct lepton_driver * driver, int length)
 {
   driver->communication.buffer_length = length;
 }
 
-void lepton_millis_set_callback(unsigned long (*callback) (void), struct lepton_driver * driver)
+void lepton_millis_set_callback(struct lepton_driver * driver, unsigned long (*callback) (void))
 {
   driver->communication.callbacks.millis_callback = callback;
 }
 
-void lepton_delay_set_callback(void (*callback) (unsigned long), struct lepton_driver * driver)
+void lepton_delay_set_callback(struct lepton_driver * driver, void (*callback) (unsigned long))
 {
   driver->communication.callbacks.delay_callback = callback;
 }

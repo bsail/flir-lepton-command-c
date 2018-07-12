@@ -6,11 +6,11 @@
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
-uint8_t waitCommandBegin(int timeout, struct lepton_communication * this)
+uint8_t waitCommandBegin(struct lepton_communication * this, int timeout)
 {
   this->_lastLepResult = 0;
   uint16_t status;
-  if (readRegister(LEP_I2C_STATUS_REG, &status, this))
+  if (readRegister(this, LEP_I2C_STATUS_REG, &status))
     return false;
 
   if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK))
@@ -22,7 +22,7 @@ uint8_t waitCommandBegin(int timeout, struct lepton_communication * this)
          && (timeout <= 0 || this->callbacks.millis_callback() < endTime)) {
     this->callbacks.delay_callback(1);
 
-    if (readRegister(LEP_I2C_STATUS_REG, &status, this))
+    if (readRegister(this,LEP_I2C_STATUS_REG, &status))
       return false;
   }
 
@@ -34,10 +34,10 @@ uint8_t waitCommandBegin(int timeout, struct lepton_communication * this)
   }
 }
 
-uint8_t waitCommandFinish(int timeout, struct lepton_communication * this)
+uint8_t waitCommandFinish(struct lepton_communication * this,int timeout)
 {
   uint16_t status;
-  if (readRegister(LEP_I2C_STATUS_REG, &status, this))
+  if (readRegister(this,LEP_I2C_STATUS_REG, &status))
     return false;
 
   if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK)) {
@@ -53,7 +53,7 @@ uint8_t waitCommandFinish(int timeout, struct lepton_communication * this)
          && (timeout <= 0 || this->callbacks.millis_callback() < endTime)) {
     this->callbacks.delay_callback(1);
 
-    if (readRegister(LEP_I2C_STATUS_REG, &status, this))
+    if (readRegister(this,LEP_I2C_STATUS_REG, &status))
       return false;
   }
 
@@ -68,16 +68,16 @@ uint8_t waitCommandFinish(int timeout, struct lepton_communication * this)
   }
 }
 
-int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this)
+int writeCmdRegister(struct lepton_communication * this,uint16_t cmdCode, uint16_t * dataWords, int dataLength)
 {
   // In avr/libraries/Wire.h and avr/libraries/utility/twi.h, buffer_length controls
   // how many words can be written at once. Therefore, we loop around until all words
   // have been written out into their registers.
 
   if (dataWords && dataLength) {
-    this->callbacks.i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS,&(this->callbacks));
-    this->callbacks.i2cWire_write16(LEP_I2C_DATA_LENGTH_REG,&(this->callbacks));
-    this->callbacks.i2cWire_write16(dataLength,&(this->callbacks));
+    this->callbacks.i2cWire_beginTransmission(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS);
+    this->callbacks.i2cWire_write16(&(this->callbacks),LEP_I2C_DATA_LENGTH_REG);
+    this->callbacks.i2cWire_write16(&(this->callbacks),dataLength);
     if (this->callbacks.i2cWire_endTransmission(&(this->callbacks)))
       return this->callbacks._lastI2CError;
 
@@ -87,11 +87,11 @@ int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength, str
         dataLength <= 16 ? LEP_I2C_DATA_0_REG : LEP_I2C_DATA_BUFFER;
 
     while (dataLength > 0) {
-      this->callbacks.i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS,&(this->callbacks));
-      this->callbacks.i2cWire_write16(regAddress,&(this->callbacks));
+      this->callbacks.i2cWire_beginTransmission(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS);
+      this->callbacks.i2cWire_write16(&(this->callbacks),regAddress);
 
       while (writeLength-- > 0)
-        this->callbacks.i2cWire_write16(*dataWords++,&(this->callbacks));
+        this->callbacks.i2cWire_write16(&(this->callbacks),*dataWords++);
 
       if (this->callbacks.i2cWire_endTransmission(&(this->callbacks)))
         return this->callbacks._lastI2CError;
@@ -102,20 +102,20 @@ int writeCmdRegister(uint16_t cmdCode, uint16_t * dataWords, int dataLength, str
     }
   }
 
-  this->callbacks.i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS,&(this->callbacks));
-  this->callbacks.i2cWire_write16(LEP_I2C_COMMAND_REG,&(this->callbacks));
-  this->callbacks.i2cWire_write16(cmdCode,&(this->callbacks));
+  this->callbacks.i2cWire_beginTransmission(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS);
+  this->callbacks.i2cWire_write16(&(this->callbacks),LEP_I2C_COMMAND_REG);
+  this->callbacks.i2cWire_write16(&(this->callbacks),cmdCode);
   return this->callbacks.i2cWire_endTransmission(&(this->callbacks));
 }
 
-int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communication * this)
+int readDataRegister(struct lepton_communication * this, uint16_t * readWords, int maxLength)
 {
-  this->callbacks.i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS,&(this->callbacks));
-  this->callbacks.i2cWire_write16(LEP_I2C_DATA_LENGTH_REG,&(this->callbacks));
+  this->callbacks.i2cWire_beginTransmission(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS);
+  this->callbacks.i2cWire_write16(&(this->callbacks),LEP_I2C_DATA_LENGTH_REG);
   if (this->callbacks.i2cWire_endTransmission(&(this->callbacks)))
     return this->callbacks._lastI2CError;
 
-  int uint8_tsRead = this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2,&(this->callbacks));
+  int uint8_tsRead = this->callbacks.i2cWire_requestFrom(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS, 2);
 
   #ifdef TEST
   //printf("000:%d\n",uint8_tsRead);
@@ -142,8 +142,8 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
   // have been read out from their registers.
 
   uint8_tsRead =
-      this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS,
-                          min(this->buffer_length, readLength),&(this->callbacks));
+      this->callbacks.i2cWire_requestFrom(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS,
+                          min(this->buffer_length, readLength));
 
   while (uint8_tsRead > 0 && readLength > 0) {
 
@@ -156,8 +156,8 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
 
     if (readLength > 0)
       uint8_tsRead +=
-          this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS,
-                              min(this->buffer_length, readLength),&(this->callbacks));
+          this->callbacks.i2cWire_requestFrom(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS,
+                              min(this->buffer_length, readLength));
   }
 
   while (uint8_tsRead-- > 0)
@@ -171,22 +171,22 @@ int readDataRegister(uint16_t * readWords, int maxLength, struct lepton_communic
   return (this->callbacks._lastI2CError = readLength ? 4 : 0);
 }
 
-int writeRegister(uint16_t regAddress, uint16_t value, struct lepton_communication * this)
+int writeRegister(struct lepton_communication * this, uint16_t regAddress, uint16_t value)
 {
-  this->callbacks.i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS,&(this->callbacks));
-  this->callbacks.i2cWire_write16(regAddress,&(this->callbacks));
-  this->callbacks.i2cWire_write16(value,&(this->callbacks));
+  this->callbacks.i2cWire_beginTransmission(&(this->callbacks), LEP_I2C_DEVICE_ADDRESS);
+  this->callbacks.i2cWire_write16(&(this->callbacks), regAddress);
+  this->callbacks.i2cWire_write16(&(this->callbacks), value);
   return this->callbacks.i2cWire_endTransmission(&(this->callbacks));
 }
 
-int readRegister(uint16_t regAddress, uint16_t * value, struct lepton_communication * this)
+int readRegister(struct lepton_communication * this, uint16_t regAddress, uint16_t * value)
 {
-  this->callbacks.i2cWire_beginTransmission(LEP_I2C_DEVICE_ADDRESS,&(this->callbacks));
-  this->callbacks.i2cWire_write16(regAddress,&(this->callbacks));
+  this->callbacks.i2cWire_beginTransmission(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS);
+  this->callbacks.i2cWire_write16(&(this->callbacks),regAddress);
   if (this->callbacks.i2cWire_endTransmission(&(this->callbacks)))
     return this->callbacks._lastI2CError;
 
-  int uint8_tsRead = this->callbacks.i2cWire_requestFrom(LEP_I2C_DEVICE_ADDRESS, 2,&(this->callbacks));
+  int uint8_tsRead = this->callbacks.i2cWire_requestFrom(&(this->callbacks),LEP_I2C_DEVICE_ADDRESS, 2);
   if (uint8_tsRead != 2) {
     while (uint8_tsRead-- > 0)
       this->callbacks.i2cWire_read(&(this->callbacks));

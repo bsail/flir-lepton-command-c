@@ -14,12 +14,12 @@ extern "C" {
 #endif
 #endif
 
-uint8_t waitCommandBegin(int timeout, struct lepton_communication * this);
-uint8_t waitCommandFinish(int timeout, struct lepton_communication * this);
-int writeCmdRegister (uint16_t cmdCode, uint16_t * dataWords, int dataLength, struct lepton_communication * this);
-int readDataRegister (uint16_t * readWords, int maxLength, struct lepton_communication * this);
-int writeRegister (uint16_t regAddress, uint16_t value, struct lepton_communication * this);
-int readRegister (uint16_t regAddress, uint16_t * value, struct lepton_communication * this);
+uint8_t waitCommandBegin(struct lepton_communication * this,int timeout);
+uint8_t waitCommandFinish(struct lepton_communication * this,int timeout);
+int writeCmdRegister (struct lepton_communication * this,uint16_t cmdCode, uint16_t * dataWords, int dataLength);
+int readDataRegister (struct lepton_communication * this,uint16_t * readWords, int maxLength);
+int writeRegister (struct lepton_communication * this,uint16_t regAddress, uint16_t value);
+int readRegister (struct lepton_communication * this,uint16_t regAddress, uint16_t * value);
 
 #ifdef __cplusplus
 }

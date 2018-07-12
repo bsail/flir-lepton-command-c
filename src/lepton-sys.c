@@ -9,61 +9,53 @@
 
 #ifndef LEPFLIR_EXCLUDE_SYS_FUNCS
 
-static void getCameraStatus_internal(LEP_SYS_CAM_STATUS * status, struct lepton_driver * driver)
+static void getCameraStatus_internal(struct lepton_driver * driver,LEP_SYS_CAM_STATUS * status)
 {
-  receiveCommand_array(cmdCode(LEP_CID_SYS_CAM_STATUS, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) (status), sizeof(LEP_SYS_CAM_STATUS) / 2,&(driver->communication));
+  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_CAM_STATUS,LEP_I2C_COMMAND_TYPE_GET),(uint16_t *) (status),sizeof(LEP_SYS_CAM_STATUS) / 2);
 }
 
 LEP_SYS_CAM_STATUS_STATES getCameraStatus(struct lepton_driver * driver)
 {
   LEP_SYS_CAM_STATUS camStatus;
-  getCameraStatus_internal(&camStatus,driver);
+  getCameraStatus_internal(driver,&camStatus);
   return (LEP_SYS_CAM_STATUS_STATES) camStatus.camStatus;
 }
 
-void getFlirSerialNumber(char *buffer, int maxLength, struct lepton_driver * driver)
+void getFlirSerialNumber(struct lepton_driver * driver,char *buffer,int maxLength)
 {
   if (!buffer || maxLength < 16)
     return;
   uint16_t innerBuffer[4];
-  receiveCommand_array(cmdCode
-                       (LEP_CID_SYS_FLIR_SERIAL_NUMBER,
-                        LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 4,&(driver->communication));
+  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_FLIR_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET),innerBuffer,4);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
-  driver->misc.wordsToHexString(innerBuffer, 4, buffer, maxLength);
+  driver->misc.wordsToHexString(innerBuffer,4,buffer,maxLength);
 #endif
 }
 
-void getCustomerSerialNumber(char *buffer, int maxLength, struct lepton_driver * driver)
+void getCustomerSerialNumber(struct lepton_driver * driver,char *buffer,int maxLength)
 {
   if (!buffer || maxLength < 64)
     return;
   uint16_t innerBuffer[16];
-  receiveCommand_array(cmdCode
-                       (LEP_CID_SYS_CUST_SERIAL_NUMBER,
-                        LEP_I2C_COMMAND_TYPE_GET), innerBuffer, 16,&(driver->communication));
+  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_CUST_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET),innerBuffer,16);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
-  driver->misc.wordsToHexString(innerBuffer, 16, buffer, maxLength);
+  driver->misc.wordsToHexString(innerBuffer,16,buffer,maxLength);
 #endif
 }
 
 uint32_t getCameraUptime(struct lepton_driver * driver)
 {
   uint32_t uptime = 0;
-  receiveCommand_u32(cmdCode(LEP_CID_SYS_CAM_UPTIME, LEP_I2C_COMMAND_TYPE_GET),
-                     &uptime,&(driver->communication));
+  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_CAM_UPTIME,LEP_I2C_COMMAND_TYPE_GET),&uptime);
   return uptime;
 }
 
 float getAuxTemperature(struct lepton_driver * driver)
 {
   uint16_t kelvin100;
-  receiveCommand_u16(cmdCode
-                     (LEP_CID_SYS_AUX_TEMPERATURE_KELVIN,
-                      LEP_I2C_COMMAND_TYPE_GET), &kelvin100,&(driver->communication));
+  receiveCommand_u16(&(driver->communication),cmdCode(LEP_CID_SYS_AUX_TEMPERATURE_KELVIN,LEP_I2C_COMMAND_TYPE_GET),&kelvin100);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
-  return driver->misc.kelvin100ToTemperature(kelvin100,driver);
+  return driver->misc.kelvin100ToTemperature(driver,kelvin100);
 #else
   return kelvin100*1.0;
 #endif
@@ -72,157 +64,125 @@ float getAuxTemperature(struct lepton_driver * driver)
 float getFPATemperature(struct lepton_driver * driver)
 {
   uint16_t kelvin100;
-  receiveCommand_u16(cmdCode
-                     (LEP_CID_SYS_FPA_TEMPERATURE_KELVIN,
-                      LEP_I2C_COMMAND_TYPE_GET), &kelvin100,&(driver->communication));
+  receiveCommand_u16(&(driver->communication),cmdCode(LEP_CID_SYS_FPA_TEMPERATURE_KELVIN,LEP_I2C_COMMAND_TYPE_GET),&kelvin100);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
-  return driver->misc.kelvin100ToTemperature(kelvin100,driver);
+  return driver->misc.kelvin100ToTemperature(driver,kelvin100);
 #else
   return kelvin100*1.0;
 #endif
 }
 
-void setTelemetryEnabled(uint8_t enabled, struct lepton_driver * driver)
+void setTelemetryEnabled(struct lepton_driver * driver,uint8_t enabled)
 {
-  sendCommand_u32(cmdCode
-                  (LEP_CID_SYS_TELEMETRY_ENABLE_STATE,
-                   LEP_I2C_COMMAND_TYPE_SET), (uint32_t) enabled,&(driver->communication));
+  sendCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE,LEP_I2C_COMMAND_TYPE_SET),(uint32_t) enabled);
 }
 
 uint8_t getTelemetryEnabled(struct lepton_driver * driver)
 {
   uint32_t enabled;
-  receiveCommand_u32(cmdCode
-                     (LEP_CID_SYS_TELEMETRY_ENABLE_STATE,
-                      LEP_I2C_COMMAND_TYPE_GET), &enabled,&(driver->communication));
+  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE,LEP_I2C_COMMAND_TYPE_GET),&enabled);
   return enabled;
 }
 
 void runFFCNormalization(struct lepton_driver * driver)
 {
-  sendCommand_raw(cmdCode(LEP_CID_SYS_RUN_FFC, LEP_I2C_COMMAND_TYPE_RUN),&(driver->communication));
+  sendCommand_raw(&(driver->communication),cmdCode(LEP_CID_SYS_RUN_FFC,LEP_I2C_COMMAND_TYPE_RUN));
 }
 
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
 
 void runPingCamera(struct lepton_driver * driver)
 {
-  sendCommand_raw(cmdCode(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN),&(driver->communication));
+  sendCommand_raw(&(driver->communication),cmdCode(LEP_CID_SYS_PING,LEP_I2C_COMMAND_TYPE_RUN));
 }
 
-void setTelemetryLocation(LEP_SYS_TELEMETRY_LOCATION location, struct lepton_driver * driver)
+void setTelemetryLocation(struct lepton_driver * driver,LEP_SYS_TELEMETRY_LOCATION location)
 {
-  sendCommand_u32(cmdCode
-                  (LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) location,&(driver->communication));
+  sendCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION,LEP_I2C_COMMAND_TYPE_SET),(uint32_t) location);
 }
 
 LEP_SYS_TELEMETRY_LOCATION getTelemetryLocation(struct lepton_driver * driver)
 {
   uint32_t location;
-  receiveCommand_u32(cmdCode
-                     (LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET),
-                     &location,&(driver->communication));
+  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION,LEP_I2C_COMMAND_TYPE_GET),&location);
   return (LEP_SYS_TELEMETRY_LOCATION) location;
 }
 
 void runFrameAveraging(struct lepton_driver * driver)
 {
-  sendCommand_raw(cmdCode
-                  (LEP_CID_SYS_EXECTUE_FRAME_AVERAGE,
-                   LEP_I2C_COMMAND_TYPE_RUN),&(driver->communication));
+  sendCommand_raw(&(driver->communication),cmdCode(LEP_CID_SYS_EXECTUE_FRAME_AVERAGE,LEP_I2C_COMMAND_TYPE_RUN));
 }
 
-void setNumFramesToAverage(LEP_SYS_FRAME_AVERAGE average, struct lepton_driver * driver)
+void setNumFramesToAverage(struct lepton_driver * driver,LEP_SYS_FRAME_AVERAGE average)
 {
-  sendCommand_u32(cmdCode
-                  (LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) average,&(driver->communication));
+  sendCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE,LEP_I2C_COMMAND_TYPE_SET),(uint32_t) average);
 }
 
 LEP_SYS_FRAME_AVERAGE getNumFramesToAverage(struct lepton_driver * driver)
 {
   uint32_t average;
-  receiveCommand_u32(cmdCode
-                     (LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE,
-                      LEP_I2C_COMMAND_TYPE_GET), &average,&(driver->communication));
+  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE,LEP_I2C_COMMAND_TYPE_GET),&average);
   return (LEP_SYS_FRAME_AVERAGE) average;
 }
 
-void getSceneStatistics(LEP_SYS_SCENE_STATISTICS * statistics, struct lepton_driver * driver)
+void getSceneStatistics(struct lepton_driver * driver,LEP_SYS_SCENE_STATISTICS * statistics)
 {
   if (!statistics)
     return;
-  receiveCommand_array(cmdCode
-                       (LEP_CID_SYS_SCENE_STATISTICS, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) statistics,
-                       sizeof(LEP_SYS_SCENE_STATISTICS) / 2,&(driver->communication));
+  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_SCENE_STATISTICS,LEP_I2C_COMMAND_TYPE_GET),(uint16_t *) statistics,sizeof(LEP_SYS_SCENE_STATISTICS) / 2);
 }
 
-void setSceneRegion(LEP_SYS_SCENE_ROI * region, struct lepton_driver * driver)
+void setSceneRegion(struct lepton_driver * driver,LEP_SYS_SCENE_ROI * region)
 {
   if (!region)
     return;
-  sendCommand_array(cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) region, sizeof(LEP_SYS_SCENE_ROI) / 2,&(driver->communication));
+  sendCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_SCENE_ROI,LEP_I2C_COMMAND_TYPE_SET),(uint16_t *) region,sizeof(LEP_SYS_SCENE_ROI) / 2);
 }
 
-void getSceneRegion(LEP_SYS_SCENE_ROI * region, struct lepton_driver * driver)
+void getSceneRegion(struct lepton_driver * driver,LEP_SYS_SCENE_ROI * region)
 {
   if (!region)
     return;
-  receiveCommand_array(cmdCode(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) region, sizeof(LEP_SYS_SCENE_ROI) / 2,&(driver->communication));
+  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_SCENE_ROI,LEP_I2C_COMMAND_TYPE_GET),(uint16_t *) region,sizeof(LEP_SYS_SCENE_ROI) / 2);
 }
 
 uint16_t getThermalShutdownCount(struct lepton_driver * driver)
 {
   uint16_t count;
-  receiveCommand_u16(cmdCode
-                     (LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT,
-                      LEP_I2C_COMMAND_TYPE_GET), &count,&(driver->communication));
+  receiveCommand_u16(&(driver->communication),cmdCode(LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT,LEP_I2C_COMMAND_TYPE_GET),&count);
   return count;
 }
 
-void setShutterPosition(LEP_SYS_SHUTTER_POSITION position, struct lepton_driver * driver)
+void setShutterPosition(struct lepton_driver * driver,LEP_SYS_SHUTTER_POSITION position)
 {
-  sendCommand_u32(cmdCode
-                  (LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_SET),
-                  (uint32_t) position,&(driver->communication));
+  sendCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_SHUTTER_POSITION,LEP_I2C_COMMAND_TYPE_SET),(uint32_t) position);
 }
 
 LEP_SYS_SHUTTER_POSITION getShutterPosition(struct lepton_driver * driver)
 {
   uint32_t position;
-  receiveCommand_u32(cmdCode
-                     (LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_GET),
-                     &position,&(driver->communication));
+  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_SHUTTER_POSITION,LEP_I2C_COMMAND_TYPE_GET),&position);
   return (LEP_SYS_SHUTTER_POSITION) position;
 }
 
-void setFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE * mode, struct lepton_driver * driver)
+void setFFCShutterMode(struct lepton_driver * driver,LEP_SYS_FFC_SHUTTER_MODE * mode)
 {
   if (!mode)
     return;
-  sendCommand_array(cmdCode
-                    (LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint16_t *) mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2,&(driver->communication));
+  sendCommand_array(&(driver->communication),cmdCode  (LEP_CID_SYS_FFC_SHUTTER_MODE,LEP_I2C_COMMAND_TYPE_SET),(uint16_t *) mode,sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2);
 }
 
-void getFFCShutterMode(LEP_SYS_FFC_SHUTTER_MODE * mode, struct lepton_driver * driver)
+void getFFCShutterMode(struct lepton_driver * driver,LEP_SYS_FFC_SHUTTER_MODE * mode)
 {
   if (!mode)
     return;
-  receiveCommand_array(cmdCode
-                       (LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_GET),
-                       (uint16_t *) mode, sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2,&(driver->communication));
+  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_FFC_SHUTTER_MODE,LEP_I2C_COMMAND_TYPE_GET),(uint16_t *) mode,sizeof(LEP_SYS_FFC_SHUTTER_MODE) / 2);
 }
 
 LEP_SYS_FFC_STATUS getFFCNormalizationStatus(struct lepton_driver * driver)
 {
   uint32_t status;
-  receiveCommand_u32(cmdCode(LEP_CID_SYS_FFC_STATUS, LEP_I2C_COMMAND_TYPE_GET),
-                     &status,&(driver->communication));
+  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_FFC_STATUS,LEP_I2C_COMMAND_TYPE_GET),&status);
   return (LEP_SYS_FFC_STATUS) status;
 }
 
