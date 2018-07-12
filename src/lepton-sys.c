@@ -16,9 +16,13 @@ static void getCameraStatus_internal(struct lepton_driver * driver,LEP_SYS_CAM_S
 
 LEP_SYS_CAM_STATUS_STATES getCameraStatus(struct lepton_driver * driver)
 {
-  LEP_SYS_CAM_STATUS camStatus;
-  getCameraStatus_internal(driver,&camStatus);
-  return (LEP_SYS_CAM_STATUS_STATES) camStatus.camStatus;
+  LEP_SYS_CAM_STATUS_STATES ret = LEP_SYSTEM_COMMUNICATION_ERROR;
+  if(driver!=0) {
+    LEP_SYS_CAM_STATUS camStatus;
+    getCameraStatus_internal(driver,&camStatus);
+    ret = (LEP_SYS_CAM_STATUS_STATES) camStatus.camStatus;
+  }
+  return ret;
 }
 
 void getFlirSerialNumber(struct lepton_driver * driver,char *buffer,int maxLength)

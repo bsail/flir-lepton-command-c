@@ -19,6 +19,12 @@ void lepton_sys_init(struct lepton_sys * this);
 
 #endif
 
+#ifdef TEST
+
+LEP_SYS_CAM_STATUS_STATES getCameraStatus(struct lepton_driver * driver);
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif
