@@ -111,6 +111,20 @@ void test_sendCommand_array_should_not_work_on_null_pointer_dataWords(void)
   TEST_ASSERT_EQUAL_INT(LEP_UNDEFINED_ERROR_CODE,comm._lastLepResult);
 }
 
+void test_sendCommand_array_should_not_work_on_zero_length(void)
+{
+  uint16_t code = 0xAB;
+  uint8_t length = 10;
+  uint16_t *array = (uint16_t*) malloc(length*sizeof(uint16_t));
+  for(uint8_t i =0;i<length;++i)
+    array[i] = rand()*rand();
+  struct lepton_communication comm;
+  comm._lastLepResult = 0;
+
+  sendCommand_array(&comm,code,array,0);
+  TEST_ASSERT_EQUAL_INT(LEP_UNDEFINED_ERROR_CODE,comm._lastLepResult);
+}
+
 void test_receiveCommand_u16_should_not_work_on_null_pointer_this(void)
 {
   uint16_t code = 0xAB;
