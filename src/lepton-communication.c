@@ -14,36 +14,44 @@ uint16_t cmdCode(uint16_t cmdID,uint16_t cmdType)
 
 void sendCommand_raw(struct lepton_communication * this,uint16_t cmdCode)
 {
-  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-    if (writeCmdRegister(this,cmdCode,NULL,0) == 0) {
-      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+  if(this!=0) {
+    if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+      if (writeCmdRegister(this,cmdCode,NULL,0) == 0) {
+        waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+      }
     }
   }
 }
 
 void sendCommand_u16(struct lepton_communication * this,uint16_t cmdCode,uint16_t value)
 {
-  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-    if (writeCmdRegister(this,cmdCode,&value,1) == 0) {
-      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+  if(this!=0) {
+    if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+      if (writeCmdRegister(this,cmdCode,&value,1) == 0) {
+        waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+      }
     }
   }
 }
 
 void sendCommand_u32(struct lepton_communication * this,uint16_t cmdCode,uint32_t value)
 {
-  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-    if (writeCmdRegister(this,cmdCode,(uint16_t *) & value,2) == 0) {
-      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+  if(this!=0) {
+    if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+      if (writeCmdRegister(this,cmdCode,(uint16_t *) & value,2) == 0) {
+        waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+      }
     }
   }
 }
 
 void sendCommand_array(struct lepton_communication * this,uint16_t cmdCode,uint16_t * dataWords,int dataLength)
 {
-  if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
-    if (writeCmdRegister(this,cmdCode,dataWords,dataLength) == 0) {
-      waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+  if(this!=0) {
+    if (waitCommandBegin(this,LEPFLIR_GEN_CMD_TIMEOUT)) {
+      if (writeCmdRegister(this,cmdCode,dataWords,dataLength) == 0) {
+        waitCommandFinish(this,LEPFLIR_GEN_CMD_TIMEOUT);
+      }
     }
   }
 }
