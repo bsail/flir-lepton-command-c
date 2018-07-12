@@ -88,7 +88,7 @@ void test_sendCommand_array_should_work(void)
   sendCommand_array(&comm,code,array, length);
 }
 
-void test_sendCommand_array_should_not_work_on_null_pointer(void)
+void test_sendCommand_array_should_not_work_on_null_pointer_this(void)
 {
   uint16_t code = 0xAB;
 
@@ -100,9 +100,56 @@ void test_sendCommand_array_should_not_work_on_null_pointer(void)
   sendCommand_array(0,code,array,length);
 }
 
+void test_sendCommand_array_should_not_work_on_null_pointer_dataWords(void)
+{
+  uint16_t code = 0xAB;
+  uint8_t length = 10;
+  struct lepton_communication comm;
+  comm._lastLepResult = 0;
 
+  sendCommand_array(&comm,code,0,length);
+  TEST_ASSERT_EQUAL_INT(LEP_UNDEFINED_ERROR_CODE,comm._lastLepResult);
+}
 
+void test_receiveCommand_u16_should_not_work_on_null_pointer_this(void)
+{
+  uint16_t code = 0xAB;
 
+  uint16_t value = 0;
+
+  receiveCommand_u16(0,code,&value);
+}
+
+void test_receiveCommand_u16_should_not_work_on_null_pointer_value(void)
+{
+  uint16_t code = 0xAB;
+  struct lepton_communication comm;
+  comm._lastLepResult = 0;
+
+  receiveCommand_u16(&comm,code,0);
+  TEST_ASSERT_EQUAL_INT(LEP_UNDEFINED_ERROR_CODE,comm._lastLepResult);
+}
+
+void test_receiveCommand_u16_should_work(void)
+{
+  uint16_t code = 0xAB;
+  struct lepton_communication comm;
+  comm._lastLepResult = 0;
+  const uint16_t value_orig = 0x1234;
+  uint16_t value = 0x1234;
+  uint16_t received_value = 0;
+
+  waitCommandBegin_ExpectAndReturn(&comm,LEPFLIR_GEN_CMD_TIMEOUT,1);
+  writeRegister_ExpectAndReturn(&comm,LEP_I2C_COMMAND_REG,code,0);
+  waitCommandFinish_ExpectAndReturn(&comm,LEPFLIR_GEN_CMD_TIMEOUT,1);
+
+  readDataRegister_ExpectAndReturn(&comm,&received_value,1,0);
+  readDataRegister_ReturnThruPtr_readWords(&value);
+
+  receiveCommand_u16(&comm,code,&received_value);
+
+  TEST_ASSERT_EQUAL(value_orig,received_value);
+}
 
 
 

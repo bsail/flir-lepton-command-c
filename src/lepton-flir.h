@@ -94,7 +94,7 @@ struct lepton_callbacks {
 
 struct lepton_communication {
   struct lepton_callbacks callbacks;
-  uint8_t _lastLepResult;         // Last lep result
+  int8_t _lastLepResult;         // Last lep result
   int buffer_length;
 };
 
@@ -159,7 +159,7 @@ struct lepton_agc {
   uint16_t (*getLinearDampeningFactor)(struct lepton_driver * driver);
   void (*setHEQDampeningFactor)(struct lepton_driver * driver, uint16_t factor); // min:0 max:256 def:64
   uint16_t (*getHEQDampeningFactor)(struct lepton_driver * driver);
-  void (*setHEQMaxGain)(uint16_t gain, struct lepton_driver * driver); // def:1
+  void (*setHEQMaxGain)(struct lepton_driver * driver, uint16_t gain); // def:1
   uint16_t (*getHEQMaxGain)(struct lepton_driver * driver);
   void (*setHEQClipLimitHigh)(struct lepton_driver * driver, uint16_t limit); // min:0 max:4800 def:4800 (pixels)
   uint16_t (*getHEQClipLimitHigh)(struct lepton_driver * driver);
