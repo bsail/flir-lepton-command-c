@@ -284,6 +284,14 @@ void LeptonFLiR_init(
 #endif
   struct lepton_driver * driver);
 
+#ifdef LEPTON_FLIR_INTERNAL
+enum transmission_mode {
+  u16 = 0,
+  u32,
+  array
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif
