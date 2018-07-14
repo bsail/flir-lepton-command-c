@@ -122,9 +122,7 @@ uint16_t getHistogramClipPercent(struct lepton_driver *driver)
 void setHistogramTailSize(struct lepton_driver *driver, uint16_t size)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE,
-                            LEP_I2C_COMMAND_TYPE_SET), size);
+    set_common(driver,u16,LEP_CID_AGC_HISTOGRAM_TAIL_SIZE,&size, 2);
   }
 }
 
@@ -132,9 +130,7 @@ uint16_t getHistogramTailSize(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t size;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE,
-                               LEP_I2C_COMMAND_TYPE_GET), &size);
+    get_common(driver,u16,LEP_CID_AGC_HISTOGRAM_TAIL_SIZE,&size, 2);
     return size;
   }
 }

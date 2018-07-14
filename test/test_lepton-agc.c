@@ -270,10 +270,34 @@ void test_setHistogramTailSize_null_driver_pointer(void)
   setHistogramTailSize(0,0);
 }
 
+void test_setHistogramTailSize_should_work(void)
+{
+  uint16_t size = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,size);
+
+  setHistogramTailSize(&driver,size);
+}
+
 void test_getHistogramTailSize_null_driver_pointer(void)
 {
   getHistogramTailSize(0);
 }
+
+void test_getHistogramTailSize_should_work(void)
+{
+  uint16_t size = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HISTOGRAM_TAIL_SIZE, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&size);
+
+  TEST_ASSERT_EQUAL(size,getHistogramTailSize(&driver));
+}
+
 
 void test_setLinearMaxGain_null_driver_pointer(void)
 {
