@@ -38,7 +38,7 @@ void getFlirSerialNumber(struct lepton_driver * driver,char *buffer,int maxLengt
   if (!buffer || maxLength < 16)
     return;
   uint16_t innerBuffer[4];
-  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_FLIR_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET),innerBuffer,4);
+  get_common(driver,array,LEP_CID_SYS_FLIR_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET,innerBuffer,4);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
   driver->misc.wordsToHexString(innerBuffer,4,buffer,maxLength);
 #endif

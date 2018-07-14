@@ -1,7 +1,10 @@
 #include "unity.h"
 #include "lepton-sys.h"
 #include "lepton-flir-defs.h"
-#include "mock_lepton-flir.h"
+#include "lepton-flir.h"
+#include "mock_lepton-agc.h"
+#include "mock_lepton-vid.h"
+#include "mock_lepton-comm-internal.h"
 #include "mock_lepton-communication.h"
 #include <string.h>
 
@@ -9,7 +12,10 @@ struct lepton_driver driver;
 
 void setUp(void)
 {
-  // memset(&driver,0,sizeof(driver));
+  lepton_communication_init_Ignore();
+  lepton_agc_init_Ignore();
+  lepton_vid_init_Ignore();
+  LeptonFLiR_init(LeptonFLiR_ImageStorageMode_80x60_16bpp,LeptonFLiR_TemperatureMode_Kelvin,&driver);
 }
 
 void tearDown(void)
@@ -136,11 +142,32 @@ void test_getFFCNormalizationStatus_should_not_segfault_null_pointer(void)
   getFFCNormalizationStatus(0);
 }
 
+void test_getFlirSerialNumber_null_buffer(void)
+{
+  getFlirSerialNumber(&driver,0,16);
+}
 
+void test_getFlirSerialNumber_small_buffer(void)
+{
+  char buffer[10];
+  getFlirSerialNumber(&driver,buffer,10);
+}
 
+void test_getFlirSerialNumber_should_work(void)
+{
+  char buffer[16];
+  char *result = "0123456789ABCDEF";
+  uint16_t buf[4] = {0x0123,0x4567,0x89AB,0xCDEF};
+  uint16_t code = 0xAB;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_FLIR_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_array_Expect(&(driver.communication),code,0,4);
+  receiveCommand_array_IgnoreArg_readWords();
+  receiveCommand_array_ReturnMemThruPtr_readWords(buf,4*sizeof(buf[0]));
 
+  getFlirSerialNumber(&driver,buffer,16);
 
-
+  TEST_ASSERT_EQUAL_MEMORY(result,buffer,16);
+}
 
 
 
