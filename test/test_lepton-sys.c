@@ -392,6 +392,105 @@ void test_getThermalShutdownCount_should_work(void)
   TEST_ASSERT_EQUAL(value, getThermalShutdownCount(&driver));
 }
 
+void test_setTelemetryEnabled_should_work(void)
+{
+  uint8_t enabled = rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET,
+                          code);
+  sendCommand_u32_Expect(&(driver.communication),
+                    code, enabled);
+  setTelemetryEnabled(&driver,enabled);
+}
 
+void test_setNumFramesToAverage_should_work(void)
+{
+  LEP_SYS_FRAME_AVERAGE average = rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_SET,
+                          code);
+  sendCommand_u32_Expect(&(driver.communication),
+                    code, average);
+  setNumFramesToAverage(&driver,average);
+}
 
+void test_setTelemetryLocation_should_work(void)
+{
+  LEP_SYS_TELEMETRY_LOCATION location = rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_SET,
+                          code);
+  sendCommand_u32_Expect(&(driver.communication),
+                    code, location);
+  setTelemetryLocation(&driver,location);
+}
 
+void test_setShutterPosition_should_work(void)
+{
+  LEP_SYS_SHUTTER_POSITION position = rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_SET,
+                          code);
+  sendCommand_u32_Expect(&(driver.communication),
+                    code, position);
+  setShutterPosition(&driver,position);
+}
+
+void test_setFFCShutterMode_should_work(void)
+{
+  LEP_SYS_FFC_SHUTTER_MODE mode;
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_SET,
+                          code);
+  sendCommand_array_Expect(&(driver.communication),
+                    code, (uint16_t*)&mode,16);
+  setFFCShutterMode(&driver,&mode);
+}
+
+void test_setFFCShutterMode_null_pointer_mode(void)
+{
+  setFFCShutterMode(&driver,0);
+}
+
+void test_setSceneRegion_null_pointer_region(void)
+{
+  setSceneRegion(&driver,0);
+}
+
+void test_setSceneRegion_should_work(void)
+{
+  LEP_SYS_SCENE_ROI region;
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_SET,
+                          code);
+  sendCommand_array_Expect(&(driver.communication),
+                    code, (uint16_t*)&region,4);
+  setSceneRegion(&driver,&region);
+}
+
+void test_runFFCNormalization_should_work(void)
+{
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_RUN_FFC, LEP_I2C_COMMAND_TYPE_RUN,code);
+  sendCommand_raw_Expect(&(driver.communication),
+                    code);
+  runFFCNormalization(&driver);
+}
+
+void test_runPingCamera_should_work(void)
+{
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_PING, LEP_I2C_COMMAND_TYPE_RUN,code);
+  sendCommand_raw_Expect(&(driver.communication),
+                    code);
+  runPingCamera(&driver);
+}
+
+void test_runFrameAveraging_should_work(void)
+{
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_EXECTUE_FRAME_AVERAGE, LEP_I2C_COMMAND_TYPE_RUN,code);
+  sendCommand_raw_Expect(&(driver.communication),
+                    code);
+  runFrameAveraging(&driver);
+}
