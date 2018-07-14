@@ -313,3 +313,21 @@ void test_getShutterPosition_should_work(void)
   TEST_ASSERT_EQUAL(LEP_SYS_SHUTTER_POSITION_CLOSED, getShutterPosition(&driver));
 }
 
+void test_getFFCNormalizationStatus_should_work(void)
+{
+  uint8_t code = 0xAB;
+  uint32_t value = LEP_SYS_FFC_STATUS_BUSY;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_FFC_STATUS, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_u32_Expect(&(driver.communication), code, 0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL(LEP_SYS_FFC_STATUS_BUSY, getFFCNormalizationStatus(&driver));
+}
+
+
+
+
+
+
+

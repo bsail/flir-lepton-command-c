@@ -259,9 +259,8 @@ LEP_SYS_SHUTTER_POSITION getShutterPosition(struct lepton_driver *driver)
 {
   uint32_t position;
   if (driver != 0) {
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_SHUTTER_POSITION,
-                               LEP_I2C_COMMAND_TYPE_GET), &position);
+    get_common(driver, u32, LEP_CID_SYS_SHUTTER_POSITION, LEP_I2C_COMMAND_TYPE_GET,
+               (uint16_t *) & position, 4);
   }
   return (LEP_SYS_SHUTTER_POSITION) position;
 }
@@ -296,9 +295,8 @@ LEP_SYS_FFC_STATUS getFFCNormalizationStatus(struct lepton_driver *driver)
 {
   uint32_t status;
   if (driver != 0) {
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_FFC_STATUS,
-                               LEP_I2C_COMMAND_TYPE_GET), &status);
+    get_common(driver, u32, LEP_CID_SYS_FFC_STATUS, LEP_I2C_COMMAND_TYPE_GET,
+               (uint16_t *) & status, 4);
   }
   return (LEP_SYS_FFC_STATUS) status;
 }
