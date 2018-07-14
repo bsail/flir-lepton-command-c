@@ -100,9 +100,8 @@ float getFPATemperature(struct lepton_driver *driver)
 {
   uint16_t kelvin100 = 0;
   if (driver != 0) {
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_FPA_TEMPERATURE_KELVIN,
-                               LEP_I2C_COMMAND_TYPE_GET), &kelvin100);
+    get_common(driver, u16, LEP_CID_SYS_FPA_TEMPERATURE_KELVIN, LEP_I2C_COMMAND_TYPE_GET,
+               (uint16_t *) & kelvin100, 2);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
     return driver->misc.kelvin100ToTemperature(driver, kelvin100);
 #else

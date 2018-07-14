@@ -251,3 +251,16 @@ void test_getAuxTemperature_should_work(void)
   receiveCommand_u16_ReturnThruPtr_value(&value);
   TEST_ASSERT_EQUAL_FLOAT(123.45, getAuxTemperature(&driver));
 }
+
+void test_getFPATemperature_should_work(void)
+{
+  uint8_t code = 0xAB;
+  uint16_t value = 12345;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_FPA_TEMPERATURE_KELVIN,
+                          LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_u16_Expect(&(driver.communication), code, 0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL_FLOAT(123.45, getFPATemperature(&driver));
+}
