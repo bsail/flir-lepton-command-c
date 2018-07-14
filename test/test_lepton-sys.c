@@ -289,3 +289,15 @@ void test_getTelemetryLocation_should_work(void)
   TEST_ASSERT_EQUAL(LEP_TELEMETRY_LOCATION_FOOTER, getTelemetryLocation(&driver));
 }
 
+void test_getNumFramesToAverage_should_work(void)
+{
+  uint8_t code = 0xAB;
+  LEP_SYS_FRAME_AVERAGE value = LEP_SYS_FA_DIV_128;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_u32_Expect(&(driver.communication), code, 0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL(LEP_SYS_FA_DIV_128, getNumFramesToAverage(&driver));
+}
+

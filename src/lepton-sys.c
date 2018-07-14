@@ -162,7 +162,7 @@ LEP_SYS_TELEMETRY_LOCATION getTelemetryLocation(struct lepton_driver *driver)
 {
   uint32_t location;
   if (driver != 0) {
-get_common(driver, u32, LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET,
+    get_common(driver, u32, LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET,
                (uint16_t *) & location, 4);
   }
   return (LEP_SYS_TELEMETRY_LOCATION) location;
@@ -191,9 +191,8 @@ LEP_SYS_FRAME_AVERAGE getNumFramesToAverage(struct lepton_driver *driver)
 {
   uint32_t average;
   if (driver != 0) {
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE,
-                               LEP_I2C_COMMAND_TYPE_GET), &average);
+    get_common(driver, u32, LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_GET,
+               (uint16_t *) & average, 4);
   }
   return (LEP_SYS_FRAME_AVERAGE) average;
 }
