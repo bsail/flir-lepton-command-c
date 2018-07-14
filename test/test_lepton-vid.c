@@ -13,5 +13,5 @@ void tearDown(void)
 
 void test_lepton_vid_NeedToImplement(void)
 {
-    TEST_IGNORE_MESSAGE("Need to Implement lepton-vid");
+  TEST_IGNORE_MESSAGE("Need to Implement lepton-vid");
 }

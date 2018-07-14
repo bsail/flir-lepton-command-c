@@ -38,10 +38,10 @@
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
-uint16_t getStatusRegister(struct lepton_driver * driver)
+uint16_t getStatusRegister(struct lepton_driver *driver)
 {
   uint16_t status;
-  readRegister(&(driver->communication),LEP_I2C_STATUS_REG, &status);
+  readRegister(&(driver->communication), LEP_I2C_STATUS_REG, &status);
   return status;
 }
 
@@ -57,7 +57,7 @@ LeptonFLiR_TemperatureMode getTemperatureMode(struct lepton_driver * driver)
   return driver->_tempMode;
 }
 
-int getImageWidth(struct lepton_driver * driver)
+int getImageWidth(struct lepton_driver *driver)
 {
   switch (driver->_storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
@@ -74,7 +74,7 @@ int getImageWidth(struct lepton_driver * driver)
   }
 }
 
-int getImageHeight(struct lepton_driver * driver)
+int getImageHeight(struct lepton_driver *driver)
 {
   switch (driver->_storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
@@ -91,7 +91,7 @@ int getImageHeight(struct lepton_driver * driver)
   }
 }
 
-int getImageBpp(struct lepton_driver * driver)
+int getImageBpp(struct lepton_driver *driver)
 {
   switch (driver->_storageMode) {
   case LeptonFLiR_ImageStorageMode_80x60_16bpp:
@@ -120,7 +120,6 @@ static inline uint8_t highByte(uint16_t p)
 {
   return ((p & 0xFF00) >> 8);
 }
-
 
 static inline void uint8_tToHexString(uint8_t value, char *buffer)
 {
@@ -194,7 +193,7 @@ uint16_t kelvinToKelvin100(float kelvin)
   return (uint16_t) roundf(kelvin * 100.0f);
 }
 
-float kelvin100ToTemperature(struct lepton_driver * driver, uint16_t kelvin100)
+float kelvin100ToTemperature(struct lepton_driver *driver, uint16_t kelvin100)
 {
   switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
@@ -208,7 +207,8 @@ float kelvin100ToTemperature(struct lepton_driver * driver, uint16_t kelvin100)
   }
 }
 
-uint16_t temperatureToKelvin100(struct lepton_driver * driver, float temperature)
+uint16_t temperatureToKelvin100(struct lepton_driver * driver,
+                                float temperature)
 {
   switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
@@ -222,7 +222,7 @@ uint16_t temperatureToKelvin100(struct lepton_driver * driver, float temperature
   }
 }
 
-const char *getTemperatureSymbol(struct lepton_driver * driver)
+const char *getTemperatureSymbol(struct lepton_driver *driver)
 {
   switch (driver->_tempMode) {
   case LeptonFLiR_TemperatureMode_Celsius:
@@ -343,66 +343,86 @@ static const char *textForLepResult(LEP_RESULT errorCode)
 
 #endif
 
-
 void
-lepton_i2cWire_beginTransmission_set_callback(struct lepton_driver * driver,void (*callback) (struct lepton_callbacks *,uint8_t))
+lepton_i2cWire_beginTransmission_set_callback(struct lepton_driver *driver,
+                                              void (*callback) (struct
+                                                                lepton_callbacks
+                                                                *, uint8_t))
 {
   driver->communication.callbacks.i2cWire_beginTransmission = callback;
 }
 
-void lepton_i2cWire_endTransmission_set_callback(struct lepton_driver * driver, uint8_t(*callback) (struct lepton_callbacks *))
+void lepton_i2cWire_endTransmission_set_callback(struct lepton_driver *driver,
+                                                 uint8_t(*callback) (struct
+                                                                     lepton_callbacks
+                                                                     *))
 {
   driver->communication.callbacks.i2cWire_endTransmission = callback;
 }
 
 void
-lepton_i2cWire_requestFrom_set_callback(struct lepton_driver * driver, uint8_t(*callback)
-                                        (struct lepton_callbacks *,uint8_t, uint8_t))
+lepton_i2cWire_requestFrom_set_callback(struct lepton_driver *driver,
+                                        uint8_t(*callback)
+                                         (struct lepton_callbacks *, uint8_t,
+                                          uint8_t))
 {
   driver->communication.callbacks.i2cWire_requestFrom = callback;
 }
 
-void lepton_i2cWire_write_set_callback(struct lepton_driver * driver, size_t(*callback) (struct lepton_callbacks *, uint8_t))
+void lepton_i2cWire_write_set_callback(struct lepton_driver *driver,
+                                       size_t(*callback) (struct
+                                                          lepton_callbacks *,
+                                                          uint8_t))
 {
   driver->communication.callbacks.i2cWire_write = callback;
 }
 
-void lepton_i2cWire_write16_set_callback(struct lepton_driver * driver, size_t(*callback) (struct lepton_callbacks *, uint16_t))
+void lepton_i2cWire_write16_set_callback(struct lepton_driver *driver,
+                                         size_t(*callback) (struct
+                                                            lepton_callbacks *,
+                                                            uint16_t))
 {
   driver->communication.callbacks.i2cWire_write16 = callback;
 }
 
-void lepton_i2cWire_read_set_callback(struct lepton_driver * driver, uint8_t(*callback) (struct lepton_callbacks *))
+void lepton_i2cWire_read_set_callback(struct lepton_driver *driver,
+                                      uint8_t(*callback) (struct
+                                                          lepton_callbacks *))
 {
   driver->communication.callbacks.i2cWire_read = callback;
 }
 
-void lepton_i2cWire_read16_set_callback(struct lepton_driver * driver, uint16_t(*callback) (struct lepton_callbacks *))
+void lepton_i2cWire_read16_set_callback(struct lepton_driver *driver,
+                                        uint16_t(*callback) (struct
+                                                             lepton_callbacks
+                                                             *))
 {
   driver->communication.callbacks.i2cWire_read16 = callback;
 }
 
-void lepton_i2cWire_set_buffer_length(struct lepton_driver * driver, int length)
+void lepton_i2cWire_set_buffer_length(struct lepton_driver *driver, int length)
 {
   driver->communication.buffer_length = length;
 }
 
-void lepton_millis_set_callback(struct lepton_driver * driver, unsigned long (*callback) (void))
+void lepton_millis_set_callback(struct lepton_driver *driver,
+                                unsigned long (*callback) (void))
 {
   driver->communication.callbacks.millis_callback = callback;
 }
 
-void lepton_delay_set_callback(struct lepton_driver * driver, void (*callback) (unsigned long))
+void lepton_delay_set_callback(struct lepton_driver *driver,
+                               void (*callback) (unsigned long))
 {
   driver->communication.callbacks.delay_callback = callback;
 }
 
 void LeptonFLiR_init(
 #ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
-  LeptonFLiR_ImageStorageMode storageMode,
-  LeptonFLiR_TemperatureMode tempMode,
+                      LeptonFLiR_ImageStorageMode storageMode,
+                      LeptonFLiR_TemperatureMode tempMode,
 #endif
-  struct lepton_driver * driver)
+                      struct lepton_driver *driver)
 {
   driver->getStatusRegister = &getStatusRegister;
   driver->getLastI2CError = &getLastI2CError;
@@ -430,14 +450,22 @@ void LeptonFLiR_init(
   driver->misc.fahrenheitToKelvin100 = &fahrenheitToKelvin100;
   driver->misc.kelvinToKelvin100 = &kelvinToKelvin100;
 #endif
-  driver->init.lepton_i2cWire_beginTransmission_set_callback = &lepton_i2cWire_beginTransmission_set_callback;
-  driver->init.lepton_i2cWire_endTransmission_set_callback = &lepton_i2cWire_endTransmission_set_callback;
-  driver->init.lepton_i2cWire_requestFrom_set_callback = &lepton_i2cWire_requestFrom_set_callback;
-  driver->init.lepton_i2cWire_write_set_callback = &lepton_i2cWire_write_set_callback;
-  driver->init.lepton_i2cWire_write16_set_callback = &lepton_i2cWire_write16_set_callback;
-  driver->init.lepton_i2cWire_read_set_callback = &lepton_i2cWire_read_set_callback;
-  driver->init.lepton_i2cWire_read16_set_callback = &lepton_i2cWire_read16_set_callback;
-  driver->init.lepton_i2cWire_set_buffer_length = &lepton_i2cWire_set_buffer_length;
+  driver->init.lepton_i2cWire_beginTransmission_set_callback =
+      &lepton_i2cWire_beginTransmission_set_callback;
+  driver->init.lepton_i2cWire_endTransmission_set_callback =
+      &lepton_i2cWire_endTransmission_set_callback;
+  driver->init.lepton_i2cWire_requestFrom_set_callback =
+      &lepton_i2cWire_requestFrom_set_callback;
+  driver->init.lepton_i2cWire_write_set_callback =
+      &lepton_i2cWire_write_set_callback;
+  driver->init.lepton_i2cWire_write16_set_callback =
+      &lepton_i2cWire_write16_set_callback;
+  driver->init.lepton_i2cWire_read_set_callback =
+      &lepton_i2cWire_read_set_callback;
+  driver->init.lepton_i2cWire_read16_set_callback =
+      &lepton_i2cWire_read16_set_callback;
+  driver->init.lepton_i2cWire_set_buffer_length =
+      &lepton_i2cWire_set_buffer_length;
   driver->init.lepton_millis_set_callback = &lepton_millis_set_callback;
   driver->init.lepton_delay_set_callback = &lepton_delay_set_callback;
   lepton_communication_init(&(driver->communication));

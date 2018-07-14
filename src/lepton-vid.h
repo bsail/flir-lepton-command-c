@@ -15,12 +15,11 @@ extern "C" {
 
 #ifndef LEPFLIR_EXCLUDE_VID_FUNCS
 
-void lepton_vid_init(struct lepton_vid * this);
+  void lepton_vid_init(struct lepton_vid *this);
 
 #endif
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // _LEPTON_VID_H
+#endif                          // _LEPTON_VID_H

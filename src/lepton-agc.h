@@ -15,12 +15,11 @@ extern "C" {
 
 #ifndef LEPFLIR_EXCLUDE_AGC_FUNCS
 
-void lepton_agc_init(struct lepton_agc * this);
+  void lepton_agc_init(struct lepton_agc *this);
 
 #endif
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // _LEPTON_AGC_H
+#endif                          // _LEPTON_AGC_H
