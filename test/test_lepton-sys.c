@@ -325,8 +325,72 @@ void test_getFFCNormalizationStatus_should_work(void)
   TEST_ASSERT_EQUAL(LEP_SYS_FFC_STATUS_BUSY, getFFCNormalizationStatus(&driver));
 }
 
+void test_getSceneStatistics_statistics_null_pointer(void)
+{
+  getSceneStatistics(&driver,0);
+}
 
+void test_getSceneStatistics_should_work(void)
+{
+  uint32_t status = rand() * rand() * rand() * rand();
+  uint16_t code = rand() * rand();
+  LEP_SYS_SCENE_STATISTICS stats;
 
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_SCENE_STATISTICS, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_array_Expect(&(driver.communication), code,(uint16_t *)&stats,
+                              4);
+  getSceneStatistics(&driver,&stats);
+}
+
+void test_getSceneRegion_region_null_pointer(void)
+{
+  getSceneRegion(&driver,0);
+}
+
+void test_getSceneRegion_should_work(void)
+{
+  uint32_t status = rand() * rand() * rand() * rand();
+  uint16_t code = rand() * rand();
+  LEP_SYS_SCENE_ROI region;
+
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_SCENE_ROI, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_array_Expect(&(driver.communication), code,(uint16_t *)&region,
+                              4);
+  getSceneRegion(&driver,&region);
+}
+
+void test_getFFCShutterMode_mode_null_pointer(void)
+{
+  getFFCShutterMode(&driver,0);
+}
+
+void test_getFFCShutterMode_should_work(void)
+{
+  uint32_t status = rand() * rand() * rand() * rand();
+  uint16_t code = rand() * rand();
+  LEP_SYS_FFC_SHUTTER_MODE mode;
+
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_FFC_SHUTTER_MODE, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_array_Expect(&(driver.communication), code,(uint16_t *)&mode,
+                              16);
+  getFFCShutterMode(&driver,&mode);
+}
+
+void test_getThermalShutdownCount_should_work(void)
+{
+  uint8_t code = 0xAB;
+  uint16_t value = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT,
+                          LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_u16_Expect(&(driver.communication), code, 0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL(value, getThermalShutdownCount(&driver));
+}
 
 
 

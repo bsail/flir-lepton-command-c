@@ -203,10 +203,8 @@ void getSceneStatistics(struct lepton_driver *driver,
   if (driver != 0) {
     if (!statistics)
       return;
-    receiveCommand_array(&(driver->communication),
-                         cmdCode(LEP_CID_SYS_SCENE_STATISTICS,
-                                 LEP_I2C_COMMAND_TYPE_GET),
-                         (uint16_t *) statistics,
+    get_common(driver, array, LEP_CID_SYS_SCENE_STATISTICS,
+               LEP_I2C_COMMAND_TYPE_GET, (uint16_t *) statistics,
                          sizeof(LEP_SYS_SCENE_STATISTICS) / 2);
   }
 }
@@ -227,9 +225,8 @@ void getSceneRegion(struct lepton_driver *driver, LEP_SYS_SCENE_ROI * region)
   if (driver != 0) {
     if (!region)
       return;
-    receiveCommand_array(&(driver->communication),
-                         cmdCode(LEP_CID_SYS_SCENE_ROI,
-                                 LEP_I2C_COMMAND_TYPE_GET), (uint16_t *) region,
+    get_common(driver, array, LEP_CID_SYS_SCENE_ROI,
+               LEP_I2C_COMMAND_TYPE_GET, (uint16_t *) region,
                          sizeof(LEP_SYS_SCENE_ROI) / 2);
   }
 }
@@ -238,9 +235,8 @@ uint16_t getThermalShutdownCount(struct lepton_driver *driver)
 {
   uint16_t count;
   if (driver != 0) {
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT,
-                               LEP_I2C_COMMAND_TYPE_GET), &count);
+    get_common(driver, u16, LEP_CID_SYS_THERMAL_SHUTDOWN_COUNT, LEP_I2C_COMMAND_TYPE_GET,
+               &count, 2);
   }
   return count;
 }
