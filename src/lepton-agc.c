@@ -9,9 +9,7 @@
 void setAGCEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint32_t) enabled);
+    set_common(driver,u32,LEP_CID_AGC_ENABLE_STATE,(uint16_t *) &enabled, 4);
   }
 }
 
@@ -19,9 +17,7 @@ uint8_t getAGCEnabled(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t enabled;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_ENABLE_STATE,
-                               LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    get_common(driver,u32,LEP_CID_AGC_ENABLE_STATE,(uint16_t *) &enabled, 4);
     return enabled;
   }
 }
@@ -29,9 +25,7 @@ uint8_t getAGCEnabled(struct lepton_driver *driver)
 void setAGCPolicy(struct lepton_driver *driver, LEP_AGC_POLICY policy)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint32_t) policy);
+    set_common(driver,u32,LEP_CID_AGC_POLICY,(uint16_t *) &policy, 4);
   }
 }
 
@@ -39,9 +33,7 @@ LEP_AGC_POLICY getAGCPolicy(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t policy;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_GET),
-                       &policy);
+    get_common(driver,u32,LEP_CID_AGC_POLICY,(uint16_t *) &policy, 4);
     return (LEP_AGC_POLICY) policy;
   }
 }
@@ -50,9 +42,7 @@ void setHEQScaleFactor(struct lepton_driver *driver,
                        LEP_AGC_HEQ_SCALE_FACTOR factor)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_SCALE_FACTOR,
-                            LEP_I2C_COMMAND_TYPE_SET), (uint32_t) factor);
+    set_common(driver,u32,LEP_CID_AGC_HEQ_SCALE_FACTOR,(uint16_t *) &factor, 4);
   }
 }
 
@@ -60,9 +50,7 @@ LEP_AGC_HEQ_SCALE_FACTOR getHEQScaleFactor(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t factor;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_SCALE_FACTOR,
-                               LEP_I2C_COMMAND_TYPE_GET), &factor);
+    get_common(driver,u32,LEP_CID_AGC_HEQ_SCALE_FACTOR,(uint16_t *) &factor, 4);
     return (LEP_AGC_HEQ_SCALE_FACTOR) factor;
   }
 }

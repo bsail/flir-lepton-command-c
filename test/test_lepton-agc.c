@@ -27,9 +27,31 @@ void test_setAGCEnabled_null_driver_pointer(void)
   setAGCEnabled(0,0);
 }
 
+void test_setAGCEnabled_should_work(void)
+{
+  uint8_t enabled = rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u32_Expect(&(driver.communication),code,enabled);
+  setAGCEnabled(&driver,enabled);
+}
+
 void test_getAGCEnabled_null_driver_pointer(void)
 {
   getAGCEnabled(0);
+}
+
+void test_getAGCEnabled_should_work(void)
+{
+  uint8_t enabled = rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u32_Expect(&(driver.communication),code,0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value((uint32_t*)&enabled);
+
+  TEST_ASSERT_EQUAL(enabled,getAGCEnabled(&driver));
 }
 
 void test_setAGCPolicy_null_driver_pointer(void)
@@ -37,9 +59,32 @@ void test_setAGCPolicy_null_driver_pointer(void)
   setAGCPolicy(0,0);
 }
 
+void test_setAGCPolicy_should_work(void)
+{
+  LEP_AGC_POLICY policy = rand()*rand()*rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u32_Expect(&(driver.communication),code,policy);
+
+  setAGCPolicy(&driver,policy);
+}
+
 void test_getAGCPolicy_null_driver_pointer(void)
 {
   getAGCPolicy(0);
+}
+
+void test_getAGCPolicy_should_work(void)
+{
+  LEP_AGC_POLICY policy = rand()*rand()*rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u32_Expect(&(driver.communication),code,0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value((uint32_t*)&policy);
+
+  TEST_ASSERT_EQUAL(policy,getAGCPolicy(&driver));
 }
 
 void test_setHEQScaleFactor_null_driver_pointer(void)
@@ -47,9 +92,33 @@ void test_setHEQScaleFactor_null_driver_pointer(void)
   setHEQScaleFactor(0,0);
 }
 
+void test_setHEQScaleFactor_should_work(void)
+{
+  LEP_AGC_HEQ_SCALE_FACTOR factor = rand()*rand()*rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u32_Expect(&(driver.communication),code,factor);
+
+  setHEQScaleFactor(&driver,factor);
+}
+
+
 void test_getHEQScaleFactor_null_driver_pointer(void)
 {
   getHEQScaleFactor(0);
+}
+
+void test_getHEQScaleFactor_should_work(void)
+{
+  LEP_AGC_HEQ_SCALE_FACTOR factor = rand()*rand()*rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u32_Expect(&(driver.communication),code,0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value((uint32_t*)&factor);
+
+  TEST_ASSERT_EQUAL(factor,getHEQScaleFactor(&driver));
 }
 
 void test_setAGCCalcEnabled_null_driver_pointer(void)
