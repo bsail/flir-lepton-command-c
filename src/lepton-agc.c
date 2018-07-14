@@ -138,9 +138,7 @@ uint16_t getHistogramTailSize(struct lepton_driver *driver)
 void setLinearMaxGain(struct lepton_driver *driver, uint16_t gain)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_LINEAR_MAX_GAIN,
-                            LEP_I2C_COMMAND_TYPE_SET), gain);
+    set_common(driver,u16,LEP_CID_AGC_LINEAR_MAX_GAIN,&gain, 2);
   }
 }
 
@@ -148,9 +146,7 @@ uint16_t getLinearMaxGain(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t gain;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_LINEAR_MAX_GAIN,
-                               LEP_I2C_COMMAND_TYPE_GET), &gain);
+    get_common(driver,u16,LEP_CID_AGC_LINEAR_MAX_GAIN,&gain, 2);
     return gain;
   }
 }
@@ -158,9 +154,7 @@ uint16_t getLinearMaxGain(struct lepton_driver *driver)
 void setLinearMidpoint(struct lepton_driver *driver, uint16_t midpoint)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_LINEAR_MIDPOINT,
-                            LEP_I2C_COMMAND_TYPE_SET), midpoint);
+    set_common(driver,u16,LEP_CID_AGC_LINEAR_MIDPOINT,&midpoint, 2);
   }
 }
 
@@ -168,9 +162,7 @@ uint16_t getLinearMidpoint(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t midpoint;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_LINEAR_MIDPOINT,
-                               LEP_I2C_COMMAND_TYPE_GET), &midpoint);
+    get_common(driver,u16,LEP_CID_AGC_LINEAR_MIDPOINT,&midpoint, 2);
     return midpoint;
   }
 }
@@ -178,9 +170,7 @@ uint16_t getLinearMidpoint(struct lepton_driver *driver)
 void setLinearDampeningFactor(struct lepton_driver *driver, uint16_t factor)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,
-                            LEP_I2C_COMMAND_TYPE_SET), factor);
+    set_common(driver,u16,LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,&factor, 2);
   }
 }
 
@@ -188,9 +178,7 @@ uint16_t getLinearDampeningFactor(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t factor;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,
-                               LEP_I2C_COMMAND_TYPE_GET), &factor);
+    get_common(driver,u16,LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,&factor, 2);
     return factor;
   }
 }
@@ -198,9 +186,7 @@ uint16_t getLinearDampeningFactor(struct lepton_driver *driver)
 void setHEQDampeningFactor(struct lepton_driver *driver, uint16_t factor)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_DAMPENING_FACTOR,
-                            LEP_I2C_COMMAND_TYPE_SET), factor);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_DAMPENING_FACTOR,&factor, 2);
   }
 }
 
@@ -208,9 +194,7 @@ uint16_t getHEQDampeningFactor(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t factor;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_DAMPENING_FACTOR,
-                               LEP_I2C_COMMAND_TYPE_GET), &factor);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_DAMPENING_FACTOR,&factor, 2);
     return factor;
   }
 }
@@ -218,9 +202,7 @@ uint16_t getHEQDampeningFactor(struct lepton_driver *driver)
 void setHEQMaxGain(struct lepton_driver *driver, uint16_t gain)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET),
-                    gain);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_MAX_GAIN,&gain, 2);
   }
 }
 
@@ -228,9 +210,7 @@ uint16_t getHEQMaxGain(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t gain;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_MAX_GAIN,
-                               LEP_I2C_COMMAND_TYPE_GET), &gain);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_MAX_GAIN,&gain, 2);
     return gain;
   }
 }
@@ -238,9 +218,7 @@ uint16_t getHEQMaxGain(struct lepton_driver *driver)
 void setHEQClipLimitHigh(struct lepton_driver *driver, uint16_t limit)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH,
-                            LEP_I2C_COMMAND_TYPE_SET), limit);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH,&limit, 2);
   }
 }
 
@@ -248,9 +226,7 @@ uint16_t getHEQClipLimitHigh(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t limit;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH,
-                               LEP_I2C_COMMAND_TYPE_GET), &limit);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH,&limit, 2);
     return limit;
   }
 }
@@ -258,9 +234,7 @@ uint16_t getHEQClipLimitHigh(struct lepton_driver *driver)
 void setHEQClipLimitLow(struct lepton_driver *driver, uint16_t limit)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW,
-                            LEP_I2C_COMMAND_TYPE_SET), limit);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW,&limit, 2);
   }
 }
 
@@ -268,9 +242,7 @@ uint16_t getHEQClipLimitLow(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t limit;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW,
-                               LEP_I2C_COMMAND_TYPE_GET), &limit);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW,&limit, 2);
     return limit;
   }
 }
@@ -278,9 +250,7 @@ uint16_t getHEQClipLimitLow(struct lepton_driver *driver)
 void setHEQBinExtension(struct lepton_driver *driver, uint16_t extension)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_BIN_EXTENSION,
-                            LEP_I2C_COMMAND_TYPE_SET), extension);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_BIN_EXTENSION,&extension, 2);
   }
 }
 
@@ -288,9 +258,7 @@ uint16_t getHEQBinExtension(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t extension;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_BIN_EXTENSION,
-                               LEP_I2C_COMMAND_TYPE_GET), &extension);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_BIN_EXTENSION,&extension, 2);
     return extension;
   }
 }
@@ -298,9 +266,7 @@ uint16_t getHEQBinExtension(struct lepton_driver *driver)
 void setHEQMidpoint(struct lepton_driver *driver, uint16_t midpoint)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET),
-                    midpoint);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_MIDPOINT,&midpoint, 2);
   }
 }
 
@@ -308,9 +274,7 @@ uint16_t getHEQMidpoint(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t midpoint;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_MIDPOINT,
-                               LEP_I2C_COMMAND_TYPE_GET), &midpoint);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_MIDPOINT,&midpoint, 2);
     return midpoint;
   }
 }
@@ -318,9 +282,7 @@ uint16_t getHEQMidpoint(struct lepton_driver *driver)
 void setHEQEmptyCounts(struct lepton_driver *driver, uint16_t counts)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_EMPTY_COUNTS,
-                            LEP_I2C_COMMAND_TYPE_SET), counts);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_EMPTY_COUNTS,&counts, 2);
   }
 }
 
@@ -328,9 +290,7 @@ uint16_t getHEQEmptyCounts(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t counts;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_EMPTY_COUNTS,
-                               LEP_I2C_COMMAND_TYPE_GET), &counts);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_EMPTY_COUNTS,&counts, 2);
     return counts;
   }
 }
@@ -338,9 +298,7 @@ uint16_t getHEQEmptyCounts(struct lepton_driver *driver)
 void setHEQNormalizationFactor(struct lepton_driver *driver, uint16_t factor)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,
-                            LEP_I2C_COMMAND_TYPE_SET), factor);
+    set_common(driver,u16,LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,&factor, 2);
   }
 }
 
@@ -348,9 +306,7 @@ uint16_t getHEQNormalizationFactor(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t factor;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,
-                               LEP_I2C_COMMAND_TYPE_GET), &factor);
+    get_common(driver,u16,LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,&factor, 2);
     return factor;
   }
 }

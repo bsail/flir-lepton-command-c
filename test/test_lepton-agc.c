@@ -304,9 +304,32 @@ void test_setLinearMaxGain_null_driver_pointer(void)
   setLinearMaxGain(0,0);
 }
 
+void test_setLinearMaxGain_should_work(void)
+{
+  uint16_t gain = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,gain);
+
+  setLinearMaxGain(&driver,gain);
+}
+
 void test_getLinearMaxGain_null_driver_pointer(void)
 {
   getLinearMaxGain(0);
+}
+
+void test_getLinearMaxGain_should_work(void)
+{
+  uint16_t gain = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_LINEAR_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&gain);
+
+  TEST_ASSERT_EQUAL(gain,getLinearMaxGain(&driver));
 }
 
 void test_setLinearMidpoint_null_driver_pointer(void)
@@ -314,9 +337,32 @@ void test_setLinearMidpoint_null_driver_pointer(void)
   setLinearMidpoint(0,0);
 }
 
+void test_setLinearMidpoint_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setLinearMidpoint(&driver,value);
+}
+
 void test_getLinearMidpoint_null_driver_pointer(void)
 {
   getLinearMidpoint(0);
+}
+
+void test_getLinearMidpoint_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_LINEAR_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getLinearMidpoint(&driver));
 }
 
 void test_setLinearDampeningFactor_null_driver_pointer(void)
@@ -324,9 +370,32 @@ void test_setLinearDampeningFactor_null_driver_pointer(void)
   setLinearDampeningFactor(0,0);
 }
 
+void test_setLinearDampeningFactor_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setLinearDampeningFactor(&driver,value);
+}
+
 void test_getLinearDampeningFactor_null_driver_pointer(void)
 {
   getLinearDampeningFactor(0);
+}
+
+void test_getLinearDampeningFactor_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_LINEAR_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getLinearDampeningFactor(&driver));
 }
 
 void test_setHEQDampeningFactor_null_driver_pointer(void)
@@ -334,9 +403,32 @@ void test_setHEQDampeningFactor_null_driver_pointer(void)
   setHEQDampeningFactor(0,0);
 }
 
+void test_setHEQDampeningFactor_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQDampeningFactor(&driver,value);
+}
+
 void test_getHEQDampeningFactor_null_driver_pointer(void)
 {
   getHEQDampeningFactor(0);
+}
+
+void test_getHEQDampeningFactor_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_DAMPENING_FACTOR, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQDampeningFactor(&driver));
 }
 
 void test_setHEQMaxGain_null_driver_pointer(void)
@@ -344,14 +436,48 @@ void test_setHEQMaxGain_null_driver_pointer(void)
   setHEQMaxGain(0,0);
 }
 
+void test_setHEQMaxGain_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQMaxGain(&driver,value);
+}
+
 void test_getHEQMaxGain_null_driver_pointer(void)
 {
   getHEQMaxGain(0);
 }
 
+void test_getHEQMaxGain_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_MAX_GAIN, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQMaxGain(&driver));
+}
+
+
 void test_setHEQClipLimitHigh_null_driver_pointer(void)
 {
   setHEQClipLimitHigh(0,0);
+}
+
+void test_setHEQClipLimitHigh_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQClipLimitHigh(&driver,value);
 }
 
 void test_getHEQClipLimitHigh_null_driver_pointer(void)
@@ -359,9 +485,32 @@ void test_getHEQClipLimitHigh_null_driver_pointer(void)
   getHEQClipLimitHigh(0);
 }
 
+void test_getHEQClipLimitHigh_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQClipLimitHigh(&driver));
+}
+
 void test_setHEQClipLimitLow_null_driver_pointer(void)
 {
   setHEQClipLimitLow(0,0);
+}
+
+void test_setHEQClipLimitLow_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQClipLimitLow(&driver,value);
 }
 
 void test_getHEQClipLimitLow_null_driver_pointer(void)
@@ -369,9 +518,32 @@ void test_getHEQClipLimitLow_null_driver_pointer(void)
   getHEQClipLimitLow(0);
 }
 
+void test_getHEQClipLimitLow_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQClipLimitLow(&driver));
+}
+
 void test_setHEQBinExtension_null_driver_pointer(void)
 {
   setHEQBinExtension(0,0);
+}
+
+void test_setHEQBinExtension_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQBinExtension(&driver,value);
 }
 
 void test_getHEQBinExtension_null_driver_pointer(void)
@@ -379,9 +551,32 @@ void test_getHEQBinExtension_null_driver_pointer(void)
   getHEQBinExtension(0);
 }
 
+void test_getHEQBinExtension_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_BIN_EXTENSION, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQBinExtension(&driver));
+}
+
 void test_setHEQMidpoint_null_driver_pointer(void)
 {
   setHEQMidpoint(0,0);
+}
+
+void test_setHEQMidpoint_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQMidpoint(&driver,value);
 }
 
 void test_getHEQMidpoint_null_driver_pointer(void)
@@ -389,9 +584,32 @@ void test_getHEQMidpoint_null_driver_pointer(void)
   getHEQMidpoint(0);
 }
 
+void test_getHEQMidpoint_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_MIDPOINT, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQMidpoint(&driver));
+}
+
 void test_setHEQEmptyCounts_null_driver_pointer(void)
 {
   setHEQEmptyCounts(0,0);
+}
+
+void test_setHEQEmptyCounts_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQEmptyCounts(&driver,value);
 }
 
 void test_getHEQEmptyCounts_null_driver_pointer(void)
@@ -399,9 +617,32 @@ void test_getHEQEmptyCounts_null_driver_pointer(void)
   getHEQEmptyCounts(0);
 }
 
+void test_getHEQEmptyCounts_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_EMPTY_COUNTS, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQEmptyCounts(&driver));
+}
+
 void test_setHEQNormalizationFactor_null_driver_pointer(void)
 {
   setHEQNormalizationFactor(0,0);
+}
+
+void test_setHEQNormalizationFactor_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,value);
+
+  setHEQNormalizationFactor(&driver,value);
 }
 
 void test_getHEQNormalizationFactor_null_driver_pointer(void)
@@ -409,3 +650,15 @@ void test_getHEQNormalizationFactor_null_driver_pointer(void)
   getHEQNormalizationFactor(0);
 }
 
+void test_getHEQNormalizationFactor_should_work(void)
+{
+  uint16_t value = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&value);
+
+  TEST_ASSERT_EQUAL(value,getHEQNormalizationFactor(&driver));
+}
