@@ -20,6 +20,7 @@ uint8_t getAGCEnabled(struct lepton_driver *driver)
     get_common(driver,u32,LEP_CID_AGC_ENABLE_STATE,(uint16_t *) &enabled, 4);
     return enabled;
   }
+  return 0;
 }
 
 void setAGCPolicy(struct lepton_driver *driver, LEP_AGC_POLICY policy)
@@ -36,6 +37,7 @@ LEP_AGC_POLICY getAGCPolicy(struct lepton_driver *driver)
     get_common(driver,u32,LEP_CID_AGC_POLICY,(uint16_t *) &policy, 4);
     return (LEP_AGC_POLICY) policy;
   }
+  return 0;
 }
 
 void setHEQScaleFactor(struct lepton_driver *driver,
@@ -53,6 +55,7 @@ LEP_AGC_HEQ_SCALE_FACTOR getHEQScaleFactor(struct lepton_driver *driver)
     get_common(driver,u32,LEP_CID_AGC_HEQ_SCALE_FACTOR,(uint16_t *) &factor, 4);
     return (LEP_AGC_HEQ_SCALE_FACTOR) factor;
   }
+  return 0;
 }
 
 void setAGCCalcEnabled(struct lepton_driver *driver, uint8_t enabled)
@@ -69,6 +72,7 @@ uint8_t getAGCCalcEnabled(struct lepton_driver *driver)
     get_common(driver,u32,LEP_CID_AGC_CALC_ENABLE_STATE,(uint16_t *) &enabled, 4);
     return enabled;
   }
+  return 0;
 }
 
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
@@ -117,6 +121,7 @@ uint16_t getHistogramClipPercent(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,&percent, 2);
     return percent;
   }
+  return 0;
 }
 
 void setHistogramTailSize(struct lepton_driver *driver, uint16_t size)
@@ -133,6 +138,7 @@ uint16_t getHistogramTailSize(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HISTOGRAM_TAIL_SIZE,&size, 2);
     return size;
   }
+  return 0;
 }
 
 void setLinearMaxGain(struct lepton_driver *driver, uint16_t gain)
@@ -149,6 +155,7 @@ uint16_t getLinearMaxGain(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_LINEAR_MAX_GAIN,&gain, 2);
     return gain;
   }
+  return 0;
 }
 
 void setLinearMidpoint(struct lepton_driver *driver, uint16_t midpoint)
@@ -165,6 +172,7 @@ uint16_t getLinearMidpoint(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_LINEAR_MIDPOINT,&midpoint, 2);
     return midpoint;
   }
+  return 0;
 }
 
 void setLinearDampeningFactor(struct lepton_driver *driver, uint16_t factor)
@@ -181,6 +189,7 @@ uint16_t getLinearDampeningFactor(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_LINEAR_DAMPENING_FACTOR,&factor, 2);
     return factor;
   }
+  return 0;
 }
 
 void setHEQDampeningFactor(struct lepton_driver *driver, uint16_t factor)
@@ -197,6 +206,7 @@ uint16_t getHEQDampeningFactor(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_DAMPENING_FACTOR,&factor, 2);
     return factor;
   }
+  return 0;
 }
 
 void setHEQMaxGain(struct lepton_driver *driver, uint16_t gain)
@@ -213,6 +223,7 @@ uint16_t getHEQMaxGain(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_MAX_GAIN,&gain, 2);
     return gain;
   }
+  return 0;
 }
 
 void setHEQClipLimitHigh(struct lepton_driver *driver, uint16_t limit)
@@ -229,6 +240,7 @@ uint16_t getHEQClipLimitHigh(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_CLIP_LIMIT_HIGH,&limit, 2);
     return limit;
   }
+  return 0;
 }
 
 void setHEQClipLimitLow(struct lepton_driver *driver, uint16_t limit)
@@ -245,6 +257,7 @@ uint16_t getHEQClipLimitLow(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_CLIP_LIMIT_LOW,&limit, 2);
     return limit;
   }
+  return 0;
 }
 
 void setHEQBinExtension(struct lepton_driver *driver, uint16_t extension)
@@ -261,6 +274,7 @@ uint16_t getHEQBinExtension(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_BIN_EXTENSION,&extension, 2);
     return extension;
   }
+  return 0;
 }
 
 void setHEQMidpoint(struct lepton_driver *driver, uint16_t midpoint)
@@ -277,6 +291,7 @@ uint16_t getHEQMidpoint(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_MIDPOINT,&midpoint, 2);
     return midpoint;
   }
+  return 0;
 }
 
 void setHEQEmptyCounts(struct lepton_driver *driver, uint16_t counts)
@@ -293,6 +308,7 @@ uint16_t getHEQEmptyCounts(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_EMPTY_COUNTS,&counts, 2);
     return counts;
   }
+  return 0;
 }
 
 void setHEQNormalizationFactor(struct lepton_driver *driver, uint16_t factor)
@@ -309,6 +325,7 @@ uint16_t getHEQNormalizationFactor(struct lepton_driver *driver)
     get_common(driver,u16,LEP_CID_AGC_HEQ_NORMALIZATION_FACTOR,&factor, 2);
     return factor;
   }
+  return 0;
 }
 
 #endif

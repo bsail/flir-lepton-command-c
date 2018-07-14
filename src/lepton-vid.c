@@ -24,6 +24,7 @@ LEP_VID_POLARITY getPolarity(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &polarity);
     return (LEP_VID_POLARITY) polarity;
   }
+  return 0;
 }
 
 void setPseudoColorLUT(struct lepton_driver *driver, LEP_VID_PCOLOR_LUT table)
@@ -44,6 +45,7 @@ LEP_VID_PCOLOR_LUT getPseudoColorLUT(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &table);
     return (LEP_VID_PCOLOR_LUT) table;
   }
+  return 0;
 }
 
 void setFocusCalcEnabled(struct lepton_driver *driver, uint8_t enabled)
@@ -64,6 +66,7 @@ uint8_t getFocusCalcEnabled(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
   }
+  return 0;
 }
 
 void setFreezeEnabled(struct lepton_driver *driver, uint8_t enabled)
@@ -84,6 +87,7 @@ uint8_t getFreezeEnabled(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
   }
+  return 0;
 }
 
 #ifndef LEPFLIR_EXCLUDE_EXT_I2C_FUNCS
@@ -153,6 +157,7 @@ uint32_t getFocusThreshold(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &threshold);
     return threshold;
   }
+  return 0;
 }
 
 uint32_t getFocusMetric(struct lepton_driver * driver)
@@ -164,6 +169,7 @@ uint32_t getFocusMetric(struct lepton_driver * driver)
                                LEP_I2C_COMMAND_TYPE_GET), &metric);
     return metric;
   }
+  return 0;
 }
 
 void setSceneBasedNUCEnabled(struct lepton_driver *driver, uint8_t enabled)
@@ -184,6 +190,7 @@ uint8_t getSceneBasedNUCEnabled(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &enabled);
     return enabled;
   }
+  return 0;
 }
 
 void setGamma(struct lepton_driver *driver, uint32_t gamma)
@@ -204,6 +211,7 @@ uint32_t getGamma(struct lepton_driver *driver)
                                LEP_I2C_COMMAND_TYPE_GET), &gamma);
     return gamma;
   }
+  return 0;
 }
 
 #endif
