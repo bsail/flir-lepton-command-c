@@ -63,31 +63,3 @@ Build & Run Unit Tests
 ceedling test:all
 ```
 You may use and create additional tasks for Ceedling build system. Please refer to the documentation in the `vendor/ceedling/docs`.
-
-
-# Project Structure
-## Source Directories
-* /src - library source directory
-  * lepton-flir.h - main header
-  * lepton-flir-defs.h - additional defines
-  * lepton-flir.c - main implementation
-
-* /test
-  * test_lepton-flir.c - Unity test file for lepton-flir.c module (use `ceedling test:lepton-flir` to run tests only in this source file)
-
-* /
-  * LICENSE - The MIT License
-  * README.md   - this file
-  * project.yml - Ceedling project file including parameters of test compiler and linker
-  * .gitignore  - definitions of files and directories to be ignored by git
-
-
-## Third Party Source Directories
-* /vendor  - Ceedling source with documentation and plugins
-
-## Build Directories
-* /build - Ceedling library build directory
-
-
-## Additional Directories
-* /reference - Reference documentation about Lepton FLiR camera
