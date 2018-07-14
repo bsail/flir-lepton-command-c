@@ -51,7 +51,7 @@ void getCustomerSerialNumber(struct lepton_driver * driver,char *buffer,int maxL
   if (!buffer || maxLength < 64)
     return;
   uint16_t innerBuffer[16];
-  receiveCommand_array(&(driver->communication),cmdCode(LEP_CID_SYS_CUST_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET),innerBuffer,16);
+  get_common(driver,array,LEP_CID_SYS_CUST_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET,innerBuffer,16);
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
   driver->misc.wordsToHexString(innerBuffer,16,buffer,maxLength);
 #endif

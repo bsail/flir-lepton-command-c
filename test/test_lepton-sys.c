@@ -169,7 +169,32 @@ void test_getFlirSerialNumber_should_work(void)
   TEST_ASSERT_EQUAL_MEMORY(result,buffer,16);
 }
 
+void test_getCustomerSerialNumber_null_buffer(void)
+{
+  getCustomerSerialNumber(&driver,0,16);
+}
 
+void test_getCustomerSerialNumber_small_buffer(void)
+{
+  char buffer[10];
+  getCustomerSerialNumber(&driver,buffer,10);
+}
+
+void test_getCustomerSerialNumber_should_work(void)
+{
+  char buffer[64];
+  char *result = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
+  uint16_t buf[16] = {0x0123,0x4567,0x89AB,0xCDEF,0x0123,0x4567,0x89AB,0xCDEF,0x0123,0x4567,0x89AB,0xCDEF,0x0123,0x4567,0x89AB,0xCDEF};
+  uint16_t code = 0xAB;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_CUST_SERIAL_NUMBER,LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_array_Expect(&(driver.communication),code,0,16);
+  receiveCommand_array_IgnoreArg_readWords();
+  receiveCommand_array_ReturnMemThruPtr_readWords(buf,16*sizeof(buf[0]));
+
+  getCustomerSerialNumber(&driver,buffer,64);
+
+  TEST_ASSERT_EQUAL_MEMORY(result,buffer,64);
+}
 
 
 
