@@ -58,9 +58,7 @@ LEP_AGC_HEQ_SCALE_FACTOR getHEQScaleFactor(struct lepton_driver *driver)
 void setAGCCalcEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_CALC_ENABLE_STATE,
-                            LEP_I2C_COMMAND_TYPE_SET), (uint32_t) enabled);
+    set_common(driver,u32,LEP_CID_AGC_CALC_ENABLE_STATE,(uint16_t *) &enabled, 4);
   }
 }
 
@@ -68,9 +66,7 @@ uint8_t getAGCCalcEnabled(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t enabled;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_CALC_ENABLE_STATE,
-                               LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    get_common(driver,u32,LEP_CID_AGC_CALC_ENABLE_STATE,(uint16_t *) &enabled, 4);
     return enabled;
   }
 }
@@ -83,9 +79,7 @@ void setHistogramRegion(struct lepton_driver *driver,
   if (driver) {
     if (!region)
       return;
-    sendCommand_array(&(driver->communication),
-                      cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_SET),
-                      (uint16_t *) region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
+    set_common(driver,array,LEP_CID_AGC_ROI,(uint16_t*)region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
   }
 }
 
@@ -95,10 +89,7 @@ void getHistogramRegion(struct lepton_driver *driver,
   if (driver) {
     if (!region)
       return;
-    receiveCommand_array(&(driver->communication),
-                         cmdCode(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_GET),
-                         (uint16_t *) region,
-                         sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
+    get_common(driver,array,LEP_CID_AGC_ROI,(uint16_t*)region, sizeof(LEP_AGC_HISTOGRAM_ROI) / 2);
   }
 }
 
@@ -108,20 +99,14 @@ void getHistogramStatistics(struct lepton_driver *driver,
   if (driver) {
     if (!statistics)
       return;
-    receiveCommand_array(&(driver->communication),
-                         cmdCode(LEP_CID_AGC_STATISTICS,
-                                 LEP_I2C_COMMAND_TYPE_GET),
-                         (uint16_t *) statistics,
-                         sizeof(LEP_AGC_HISTOGRAM_STATISTICS) / 2);
+    get_common(driver,array,LEP_CID_AGC_STATISTICS,(uint16_t*)statistics, sizeof(LEP_AGC_HISTOGRAM_STATISTICS) / 2);
   }
 }
 
 void setHistogramClipPercent(struct lepton_driver *driver, uint16_t percent)
 {
   if (driver) {
-    sendCommand_u16(&(driver->communication),
-                    cmdCode(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,
-                            LEP_I2C_COMMAND_TYPE_SET), percent);
+    set_common(driver,u16,LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,&percent, 2);
   }
 }
 
@@ -129,9 +114,7 @@ uint16_t getHistogramClipPercent(struct lepton_driver *driver)
 {
   if (driver) {
     uint16_t percent;
-    receiveCommand_u16(&(driver->communication),
-                       cmdCode(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,
-                               LEP_I2C_COMMAND_TYPE_GET), &percent);
+    get_common(driver,u16,LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT,&percent, 2);
     return percent;
   }
 }

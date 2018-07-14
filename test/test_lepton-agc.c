@@ -6,6 +6,7 @@
 #include "mock_lepton-sys.h"
 #include "mock_lepton-comm-internal.h"
 #include "mock_lepton-communication.h"
+#include <string.h>
 
 struct lepton_driver driver;
 
@@ -102,7 +103,6 @@ void test_setHEQScaleFactor_should_work(void)
   setHEQScaleFactor(&driver,factor);
 }
 
-
 void test_getHEQScaleFactor_null_driver_pointer(void)
 {
   getHEQScaleFactor(0);
@@ -126,9 +126,33 @@ void test_setAGCCalcEnabled_null_driver_pointer(void)
   setAGCCalcEnabled(0,0);
 }
 
+void test_setAGCCalcEnabled_should_work(void)
+{
+  uint8_t enabled = rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u32_Expect(&(driver.communication),code,enabled);
+
+  setAGCCalcEnabled(&driver,enabled);
+}
+
+
 void test_getAGCCalcEnabled_null_driver_pointer(void)
 {
   getAGCCalcEnabled(0);
+}
+
+void test_getAGCCalcEnabled_should_work(void)
+{
+  uint8_t enabled = rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_CALC_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u32_Expect(&(driver.communication),code,0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value((uint32_t*)&enabled);
+
+  TEST_ASSERT_EQUAL(enabled,getAGCCalcEnabled(&driver));
 }
 
 void test_setHistogramRegion_null_driver_pointer(void)
@@ -137,10 +161,47 @@ void test_setHistogramRegion_null_driver_pointer(void)
   setHistogramRegion(0, &region);
 }
 
+void test_setHistogramRegion_null_pointer_region(void)
+{
+  setHistogramRegion(&driver,0);
+}
+
+void test_setHistogramRegion_should_work(void)
+{
+  LEP_AGC_HISTOGRAM_ROI region;
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_array_Expect(&(driver.communication),code,(uint16_t*)&region,4);
+
+  setHistogramRegion(&driver,&region);
+}
+
 void test_getHistogramRegion_null_driver_pointer(void)
 {
   LEP_AGC_HISTOGRAM_ROI region;
   getHistogramRegion(0,&region);
+}
+
+void test_getHistogramRegion_should_work(void)
+{
+  LEP_AGC_HISTOGRAM_ROI region,ideal;
+  memset(&region,rand(),sizeof(LEP_AGC_HISTOGRAM_ROI));
+  memcpy(&ideal,&region,sizeof(LEP_AGC_HISTOGRAM_ROI));
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_ROI, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_array_Expect(&(driver.communication),code,0,4);
+  receiveCommand_array_IgnoreArg_readWords();
+  receiveCommand_array_ReturnThruPtr_readWords((uint16_t*)&region);
+
+  getHistogramRegion(&driver,&region);
+  TEST_ASSERT_EQUAL_MEMORY(&ideal,&region,sizeof(LEP_AGC_HISTOGRAM_ROI));
+}
+
+void test_getHistogramRegion_null_pointer_region(void)
+{
+  getHistogramRegion(&driver,0);
 }
 
 void test_getHistogramStatistics_null_driver_pointer(void)
@@ -149,14 +210,59 @@ void test_getHistogramStatistics_null_driver_pointer(void)
   getHistogramStatistics(0,&statistics);
 }
 
+void test_getHistogramStatistics_null_pointer_statistics(void)
+{
+  getHistogramStatistics(&driver,0);
+}
+
+void test_getHistogramStatistics_should_work(void)
+{
+  LEP_AGC_HISTOGRAM_STATISTICS statistics,ideal;
+  memset(&statistics,rand(),sizeof(LEP_AGC_HISTOGRAM_STATISTICS));
+  memcpy(&ideal,&statistics,sizeof(LEP_AGC_HISTOGRAM_STATISTICS));
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_STATISTICS, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_array_Expect(&(driver.communication),code,0,4);
+  receiveCommand_array_IgnoreArg_readWords();
+  receiveCommand_array_ReturnThruPtr_readWords((uint16_t*)&statistics);
+
+  getHistogramStatistics(&driver,&statistics);
+  TEST_ASSERT_EQUAL_MEMORY(&ideal,&statistics,sizeof(LEP_AGC_HISTOGRAM_STATISTICS));
+}
+
+
 void test_setHistogramClipPercent_null_driver_pointer(void)
 {
   setHistogramClipPercent(0,0);
 }
 
+void test_setHistogramClipPercent_should_work(void)
+{
+  uint16_t percent = rand()*rand();
+  uint16_t code = rand()*rand();
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT, LEP_I2C_COMMAND_TYPE_SET,code);
+  sendCommand_u16_Expect(&(driver.communication),code,percent);
+
+  setHistogramClipPercent(&driver,percent);
+}
+
 void test_getHistogramClipPercent_null_driver_pointer(void)
 {
   getHistogramClipPercent(0);
+}
+
+void test_getHistogramClipPercent_should_work(void)
+{
+  uint16_t percent = rand()*rand();
+  uint16_t code = rand()*rand();
+
+  cmdCode_ExpectAndReturn(LEP_CID_AGC_HISTOGRAM_CLIP_PERCENT, LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u16_Expect(&(driver.communication),code,0);
+  receiveCommand_u16_IgnoreArg_value();
+  receiveCommand_u16_ReturnThruPtr_value(&percent);
+
+  TEST_ASSERT_EQUAL(percent,getHistogramClipPercent(&driver));
 }
 
 void test_setHistogramTailSize_null_driver_pointer(void)
