@@ -62,7 +62,7 @@ uint32_t getCameraUptime(struct lepton_driver * driver)
 {
   uint32_t uptime = 0;
   if(driver!=0) {
-  receiveCommand_u32(&(driver->communication),cmdCode(LEP_CID_SYS_CAM_UPTIME,LEP_I2C_COMMAND_TYPE_GET),&uptime);
+  get_common(driver,u32,LEP_CID_SYS_CAM_UPTIME,LEP_I2C_COMMAND_TYPE_GET,(uint16_t *)&uptime,4);
 }
   return uptime;
 }

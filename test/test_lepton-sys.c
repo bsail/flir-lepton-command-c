@@ -196,7 +196,16 @@ void test_getCustomerSerialNumber_should_work(void)
   TEST_ASSERT_EQUAL_MEMORY(result,buffer,64);
 }
 
-
+void test_getCameraUptime_should_work(void)
+{
+  uint8_t code = 0xAB;
+  uint32_t value = 0x12345678;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_CAM_UPTIME,LEP_I2C_COMMAND_TYPE_GET,code);
+  receiveCommand_u32_Expect(&(driver.communication),code,0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL(0x12345678,getCameraUptime(&driver));
+}
 
 
 
