@@ -264,3 +264,28 @@ void test_getFPATemperature_should_work(void)
   receiveCommand_u16_ReturnThruPtr_value(&value);
   TEST_ASSERT_EQUAL_FLOAT(123.45, getFPATemperature(&driver));
 }
+
+void test_getTelemetryEnabled_should_work(void)
+{
+  uint8_t code = 0xAB;
+  uint32_t value = 0x12;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_u32_Expect(&(driver.communication), code, 0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL(0x12, getTelemetryEnabled(&driver));
+}
+
+void test_getTelemetryLocation_should_work(void)
+{
+  uint8_t code = 0xAB;
+  LEP_SYS_TELEMETRY_LOCATION value = LEP_TELEMETRY_LOCATION_FOOTER;
+  cmdCode_ExpectAndReturn(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET,
+                          code);
+  receiveCommand_u32_Expect(&(driver.communication), code, 0);
+  receiveCommand_u32_IgnoreArg_value();
+  receiveCommand_u32_ReturnThruPtr_value(&value);
+  TEST_ASSERT_EQUAL(LEP_TELEMETRY_LOCATION_FOOTER, getTelemetryLocation(&driver));
+}
+

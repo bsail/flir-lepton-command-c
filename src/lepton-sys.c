@@ -124,9 +124,8 @@ uint8_t getTelemetryEnabled(struct lepton_driver *driver)
 {
   uint32_t enabled;
   if (driver != 0) {
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_TELEMETRY_ENABLE_STATE,
-                               LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    get_common(driver, u32, LEP_CID_SYS_TELEMETRY_ENABLE_STATE, LEP_I2C_COMMAND_TYPE_GET,
+               (uint16_t *) & enabled, 4);
   }
   return enabled;
 }
@@ -163,9 +162,8 @@ LEP_SYS_TELEMETRY_LOCATION getTelemetryLocation(struct lepton_driver *driver)
 {
   uint32_t location;
   if (driver != 0) {
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_SYS_TELEMETRY_LOCATION,
-                               LEP_I2C_COMMAND_TYPE_GET), &location);
+get_common(driver, u32, LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET,
+               (uint16_t *) & location, 4);
   }
   return (LEP_SYS_TELEMETRY_LOCATION) location;
 }
