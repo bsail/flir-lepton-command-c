@@ -420,6 +420,20 @@ void lepton_delay_set_callback(struct lepton_driver *driver,
   driver->communication.callbacks.delay_callback = callback;
 }
 
+#ifndef LEPFLIT_EXCLUDE_LOCKING
+void mutex_lock_set_callback(struct lepton_driver *driver,
+                               void (*callback) (void))
+{
+  driver->communication.callbacks.mutex_lock = callback;
+}
+
+void mutex_unlock_set_callback(struct lepton_driver *driver,
+                               void (*callback) (void))
+{
+  driver->communication.callbacks.mutex_unlock = callback;
+}
+#endif
+
 void LeptonFLiR_init(
 #ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
                       LeptonFLiR_ImageStorageMode storageMode,
@@ -471,6 +485,10 @@ void LeptonFLiR_init(
       &lepton_i2cWire_set_buffer_length;
   driver->init.lepton_millis_set_callback = &lepton_millis_set_callback;
   driver->init.lepton_delay_set_callback = &lepton_delay_set_callback;
+#ifndef LEPFLIT_EXCLUDE_LOCKING
+  driver->init.mutex_lock_set_callback = &mutex_lock_set_callback;
+  driver->init.mutex_unlock_set_callback = &mutex_unlock_set_callback;
+#endif
   lepton_communication_init(&(driver->communication));
 #ifndef LEPFLIR_EXCLUDE_SYS_FUNCS
   lepton_sys_init(&(driver->sys));
