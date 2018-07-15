@@ -9,9 +9,8 @@
 void setPolarity(struct lepton_driver *driver, LEP_VID_POLARITY polarity)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_POLARITY_SELECT,
-                            LEP_I2C_COMMAND_TYPE_SET), (uint32_t) polarity);
+    set_common(driver, u32, LEP_CID_VID_POLARITY_SELECT,
+               (uint16_t *) &polarity, 4);
   }
 }
 
@@ -19,9 +18,8 @@ LEP_VID_POLARITY getPolarity(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t polarity;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_POLARITY_SELECT,
-                               LEP_I2C_COMMAND_TYPE_GET), &polarity);
+    get_common(driver, u32, LEP_CID_VID_POLARITY_SELECT,
+               (uint16_t *) &polarity, 4);
     return (LEP_VID_POLARITY) polarity;
   }
   return 0;
@@ -30,9 +28,8 @@ LEP_VID_POLARITY getPolarity(struct lepton_driver *driver)
 void setPseudoColorLUT(struct lepton_driver *driver, LEP_VID_PCOLOR_LUT table)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint32_t) table);
+    set_common(driver, u32, LEP_CID_VID_LUT_SELECT,
+               (uint16_t *) &table, 4);
   }
 }
 
@@ -40,9 +37,8 @@ LEP_VID_PCOLOR_LUT getPseudoColorLUT(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t table;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_LUT_SELECT,
-                               LEP_I2C_COMMAND_TYPE_GET), &table);
+    get_common(driver, u32, LEP_CID_VID_LUT_SELECT,
+               (uint16_t *) &table, 4);
     return (LEP_VID_PCOLOR_LUT) table;
   }
   return 0;
@@ -51,9 +47,8 @@ LEP_VID_PCOLOR_LUT getPseudoColorLUT(struct lepton_driver *driver)
 void setFocusCalcEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_FOCUS_CALC_ENABLE,
-                            LEP_I2C_COMMAND_TYPE_SET), (uint32_t) enabled);
+    set_common(driver, u32, LEP_CID_VID_FOCUS_CALC_ENABLE,
+               (uint16_t *) &enabled, 4);
   }
 }
 
@@ -61,9 +56,8 @@ uint8_t getFocusCalcEnabled(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t enabled;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_FOCUS_CALC_ENABLE,
-                               LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    get_common(driver, u32, LEP_CID_VID_FOCUS_CALC_ENABLE,
+               (uint16_t *) &enabled, 4);
     return enabled;
   }
   return 0;
@@ -72,9 +66,8 @@ uint8_t getFocusCalcEnabled(struct lepton_driver *driver)
 void setFreezeEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_FREEZE_ENABLE,
-                            LEP_I2C_COMMAND_TYPE_SET), (uint32_t) enabled);
+    set_common(driver, u32, LEP_CID_VID_FREEZE_ENABLE,
+               (uint16_t *) &enabled, 4);
   }
 }
 
@@ -82,9 +75,8 @@ uint8_t getFreezeEnabled(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t enabled;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_FREEZE_ENABLE,
-                               LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    get_common(driver, u32, LEP_CID_VID_FREEZE_ENABLE,
+               (uint16_t *) &enabled, 4);
     return enabled;
   }
   return 0;
@@ -97,10 +89,8 @@ void setUserColorLUT(struct lepton_driver *driver, LEP_VID_LUT_BUFFER * table)
   if (driver) {
     if (!table)
       return;
-    sendCommand_array(&(driver->communication),
-                      cmdCode(LEP_CID_VID_LUT_TRANSFER,
-                              LEP_I2C_COMMAND_TYPE_SET), (uint16_t *) table,
-                      sizeof(LEP_VID_LUT_BUFFER) / 2);
+    set_common(driver, array, LEP_CID_VID_LUT_TRANSFER,
+               (uint16_t *) table, sizeof(LEP_VID_LUT_BUFFER) / 2);
   }
 }
 
@@ -109,10 +99,8 @@ void getUserColorLUT(struct lepton_driver *driver, LEP_VID_LUT_BUFFER * table)
   if (driver) {
     if (!table)
       return;
-    receiveCommand_array(&(driver->communication),
-                         cmdCode(LEP_CID_VID_LUT_TRANSFER,
-                                 LEP_I2C_COMMAND_TYPE_GET), (uint16_t *) table,
-                         sizeof(LEP_VID_LUT_BUFFER) / 2);
+    get_common(driver, array, LEP_CID_VID_LUT_TRANSFER,
+               (uint16_t *) table, sizeof(LEP_VID_LUT_BUFFER) / 2);
   }
 }
 
@@ -121,9 +109,8 @@ void setFocusRegion(struct lepton_driver *driver, LEP_VID_FOCUS_ROI * region)
   if (driver) {
     if (!region)
       return;
-    sendCommand_array(&(driver->communication),
-                      cmdCode(LEP_CID_VID_FOCUS_ROI, LEP_I2C_COMMAND_TYPE_SET),
-                      (uint16_t *) region, sizeof(LEP_VID_FOCUS_ROI) / 2);
+    set_common(driver, array, LEP_CID_VID_FOCUS_ROI,
+               (uint16_t *) region, sizeof(LEP_VID_FOCUS_ROI) / 2);
   }
 }
 
@@ -132,19 +119,16 @@ void getFocusRegion(struct lepton_driver *driver, LEP_VID_FOCUS_ROI * region)
   if (driver) {
     if (!region)
       return;
-    receiveCommand_array(&(driver->communication),
-                         cmdCode(LEP_CID_VID_FOCUS_ROI,
-                                 LEP_I2C_COMMAND_TYPE_GET), (uint16_t *) region,
-                         sizeof(LEP_VID_FOCUS_ROI) / 2);
+    get_common(driver, array, LEP_CID_VID_FOCUS_ROI,
+               (uint16_t *) region, sizeof(LEP_VID_FOCUS_ROI) / 2);
   }
 }
 
 void setFocusThreshold(struct lepton_driver *driver, uint32_t threshold)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_FOCUS_THRESHOLD,
-                            LEP_I2C_COMMAND_TYPE_SET), threshold);
+    set_common(driver, u32, LEP_CID_VID_FOCUS_THRESHOLD,
+               (uint16_t *) &threshold, 4);
   }
 }
 
@@ -152,9 +136,8 @@ uint32_t getFocusThreshold(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t threshold;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_FOCUS_THRESHOLD,
-                               LEP_I2C_COMMAND_TYPE_GET), &threshold);
+    get_common(driver, u32, LEP_CID_VID_FOCUS_THRESHOLD,
+               (uint16_t *) &threshold, 4);
     return threshold;
   }
   return 0;
@@ -164,9 +147,8 @@ uint32_t getFocusMetric(struct lepton_driver * driver)
 {
   if (driver) {
     uint32_t metric;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_FOCUS_METRIC,
-                               LEP_I2C_COMMAND_TYPE_GET), &metric);
+    get_common(driver, u32, LEP_CID_VID_FOCUS_METRIC,
+               (uint16_t *) &metric, 4);
     return metric;
   }
   return 0;
@@ -175,9 +157,8 @@ uint32_t getFocusMetric(struct lepton_driver * driver)
 void setSceneBasedNUCEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_SBNUC_ENABLE, LEP_I2C_COMMAND_TYPE_SET),
-                    (uint32_t) enabled);
+    set_common(driver, u32, LEP_CID_VID_SBNUC_ENABLE,
+               (uint16_t *) &enabled, 4);
   }
 }
 
@@ -185,9 +166,8 @@ uint8_t getSceneBasedNUCEnabled(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t enabled;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_SBNUC_ENABLE,
-                               LEP_I2C_COMMAND_TYPE_GET), &enabled);
+    get_common(driver, u32, LEP_CID_VID_SBNUC_ENABLE,
+               (uint16_t *) &enabled, 4);
     return enabled;
   }
   return 0;
@@ -196,9 +176,8 @@ uint8_t getSceneBasedNUCEnabled(struct lepton_driver *driver)
 void setGamma(struct lepton_driver *driver, uint32_t gamma)
 {
   if (driver) {
-    sendCommand_u32(&(driver->communication),
-                    cmdCode(LEP_CID_VID_GAMMA_SELECT, LEP_I2C_COMMAND_TYPE_SET),
-                    gamma);
+    set_common(driver, u32, LEP_CID_VID_GAMMA_SELECT,
+               (uint16_t *) &gamma, 4);
   }
 }
 
@@ -206,9 +185,8 @@ uint32_t getGamma(struct lepton_driver *driver)
 {
   if (driver) {
     uint32_t gamma;
-    receiveCommand_u32(&(driver->communication),
-                       cmdCode(LEP_CID_VID_GAMMA_SELECT,
-                               LEP_I2C_COMMAND_TYPE_GET), &gamma);
+    get_common(driver, u32, LEP_CID_VID_GAMMA_SELECT,
+               (uint16_t *) &gamma, 4);
     return gamma;
   }
   return 0;
