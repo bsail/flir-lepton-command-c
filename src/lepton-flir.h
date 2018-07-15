@@ -336,6 +336,10 @@ extern "C" {
   };
 #endif
 
+#ifdef TEST
+uint16_t getStatusRegister(struct lepton_driver *driver);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

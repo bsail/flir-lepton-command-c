@@ -40,9 +40,12 @@
 
 uint16_t getStatusRegister(struct lepton_driver *driver)
 {
-  uint16_t status;
-  readRegister(&(driver->communication), LEP_I2C_STATUS_REG, &status);
-  return status;
+  if(driver){
+    uint16_t status;
+    readRegister(&(driver->communication), LEP_I2C_STATUS_REG, &status);
+    return status;
+  }
+  return 0;
 }
 
 #ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
