@@ -77,7 +77,8 @@ void test_getAGCPolicy_null_driver_pointer(void)
 
 void test_getAGCPolicy_should_work(void)
 {
-  LEP_AGC_POLICY policy = rand()*rand()*rand()*rand();
+  uint8_t random = rand();
+  uint32_t policy = random;
   uint16_t code = rand()*rand();
 
   cmdCode_ExpectAndReturn(LEP_CID_AGC_POLICY, LEP_I2C_COMMAND_TYPE_GET,code);
@@ -110,7 +111,8 @@ void test_getHEQScaleFactor_null_driver_pointer(void)
 
 void test_getHEQScaleFactor_should_work(void)
 {
-  LEP_AGC_HEQ_SCALE_FACTOR factor = rand()*rand()*rand()*rand();
+  uint8_t random = rand();
+  uint32_t factor = random;
   uint16_t code = rand()*rand();
 
   cmdCode_ExpectAndReturn(LEP_CID_AGC_HEQ_SCALE_FACTOR, LEP_I2C_COMMAND_TYPE_GET,code);

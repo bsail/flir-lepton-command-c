@@ -30,7 +30,8 @@ void test_getCameraStatus_should_not_segfault_null_pointer(void)
 
 void test_getCameraStatus_should_work(void)
 {
-  uint32_t status = rand() * rand() * rand() * rand();
+  uint8_t random = rand();
+  uint32_t status = random;
   uint16_t code = rand() * rand();
   LEP_SYS_CAM_STATUS camStatus;
   camStatus.camStatus = status;
@@ -280,24 +281,24 @@ void test_getTelemetryEnabled_should_work(void)
 void test_getTelemetryLocation_should_work(void)
 {
   uint8_t code = 0xAB;
-  LEP_SYS_TELEMETRY_LOCATION value = LEP_TELEMETRY_LOCATION_FOOTER;
+  uint32_t value = LEP_TELEMETRY_LOCATION_FOOTER;
   cmdCode_ExpectAndReturn(LEP_CID_SYS_TELEMETRY_LOCATION, LEP_I2C_COMMAND_TYPE_GET,
                           code);
   receiveCommand_u32_Expect(&(driver.communication), code, 0);
   receiveCommand_u32_IgnoreArg_value();
-  receiveCommand_u32_ReturnThruPtr_value(&value);
+  receiveCommand_u32_ReturnThruPtr_value((uint32_t*)&value);
   TEST_ASSERT_EQUAL(LEP_TELEMETRY_LOCATION_FOOTER, getTelemetryLocation(&driver));
 }
 
 void test_getNumFramesToAverage_should_work(void)
 {
   uint8_t code = 0xAB;
-  LEP_SYS_FRAME_AVERAGE value = LEP_SYS_FA_DIV_128;
+  uint32_t value = LEP_SYS_FA_DIV_128;
   cmdCode_ExpectAndReturn(LEP_CID_SYS_NUM_FRAMES_TO_AVERAGE, LEP_I2C_COMMAND_TYPE_GET,
                           code);
   receiveCommand_u32_Expect(&(driver.communication), code, 0);
   receiveCommand_u32_IgnoreArg_value();
-  receiveCommand_u32_ReturnThruPtr_value(&value);
+  receiveCommand_u32_ReturnThruPtr_value((uint32_t*)&value);
   TEST_ASSERT_EQUAL(LEP_SYS_FA_DIV_128, getNumFramesToAverage(&driver));
 }
 

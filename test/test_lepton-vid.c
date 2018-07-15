@@ -46,7 +46,8 @@ void test_getPolarity_null_driver(void)
 
 void test_getPolarity_should_work(void)
 {
-  LEP_AGC_POLICY policy = rand()*rand()*rand()*rand();
+  uint8_t random = rand();
+  uint32_t policy = random;
   uint16_t code = rand()*rand();
 
   cmdCode_ExpectAndReturn(LEP_CID_VID_POLARITY_SELECT, LEP_I2C_COMMAND_TYPE_GET,code);
@@ -81,7 +82,8 @@ void test_getPseudoColorLUT_null_driver(void)
 
 void test_getPseudoColorLUT_should_work(void)
 {
-  LEP_VID_PCOLOR_LUT value = rand()*rand()*rand()*rand();
+  uint8_t random = rand();
+  uint32_t value = random;
   uint16_t code = rand()*rand();
 
   cmdCode_ExpectAndReturn(LEP_CID_VID_LUT_SELECT, LEP_I2C_COMMAND_TYPE_GET,code);
