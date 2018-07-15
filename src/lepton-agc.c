@@ -9,7 +9,8 @@
 void setAGCEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    set_common(driver,u32,LEP_CID_AGC_ENABLE_STATE,(uint16_t *) &enabled, 4);
+    uint32_t value = enabled;
+    set_common(driver,u32,LEP_CID_AGC_ENABLE_STATE,(uint16_t *) &value, 4);
   }
 }
 
@@ -61,7 +62,8 @@ LEP_AGC_HEQ_SCALE_FACTOR getHEQScaleFactor(struct lepton_driver *driver)
 void setAGCCalcEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
-    set_common(driver,u32,LEP_CID_AGC_CALC_ENABLE_STATE,(uint16_t *) &enabled, 4);
+    uint32_t value = enabled;
+    set_common(driver,u32,LEP_CID_AGC_CALC_ENABLE_STATE,(uint16_t *) &value, 4);
   }
 }
 

@@ -47,8 +47,9 @@ LEP_VID_PCOLOR_LUT getPseudoColorLUT(struct lepton_driver *driver)
 void setFocusCalcEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
+    uint32_t en = enabled;
     set_common(driver, u32, LEP_CID_VID_FOCUS_CALC_ENABLE,
-               (uint16_t *) &enabled, 4);
+               (uint16_t *) &en, 4);
   }
 }
 
@@ -66,8 +67,9 @@ uint8_t getFocusCalcEnabled(struct lepton_driver *driver)
 void setFreezeEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
+    uint32_t value = enabled;
     set_common(driver, u32, LEP_CID_VID_FREEZE_ENABLE,
-               (uint16_t *) &enabled, 4);
+               (uint16_t *) &value, 4);
   }
 }
 
@@ -157,8 +159,9 @@ uint32_t getFocusMetric(struct lepton_driver * driver)
 void setSceneBasedNUCEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
+    uint32_t value = enabled;
     set_common(driver, u32, LEP_CID_VID_SBNUC_ENABLE,
-               (uint16_t *) &enabled, 4);
+               (uint16_t *) &value, 4);
   }
 }
 

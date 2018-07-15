@@ -39,10 +39,18 @@
     :compile:
       :*:       # add '--O1' to compilation of main.c as part of test builds including main.c
         - -std=c99
+        - -Wall
+        - -Wextra
+        - -pedantic
+        - -Werror
   :gcov:
     :compile:
       :*:       # add '--O1' to compilation of main.c as part of test builds including main.c
         - -std=c99
+        - -Wall
+        - -Wextra
+        - -pedantic
+        - -Werror
 
 :defines:
   # in order to add common defines:

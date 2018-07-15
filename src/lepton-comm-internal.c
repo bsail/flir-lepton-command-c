@@ -1,6 +1,10 @@
 #define LEPTON_FLIR_INTERNAL
 #include "lepton-comm-internal.h"
 
+#ifdef TEST
+#include <stdio.h>
+#endif
+
 #define true 1
 #define false 0
 
@@ -78,7 +82,7 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
   // have been written out into their registers.
 
   if (dataWords && dataLength) {
-    #ifndef LEPFLIT_EXCLUDE_LOCKING
+    #ifndef LEPFLIR_EXCLUDE_LOCKING
     this->callbacks.mutex_lock();
     #endif
     this->callbacks.i2cWire_beginTransmission(&(this->callbacks),
@@ -87,7 +91,7 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
                                     LEP_I2C_DATA_LENGTH_REG);
     this->callbacks.i2cWire_write16(&(this->callbacks), dataLength);
     int ret = this->callbacks.i2cWire_endTransmission(&(this->callbacks));
-    #ifndef LEPFLIT_EXCLUDE_LOCKING
+    #ifndef LEPFLIR_EXCLUDE_LOCKING
     this->callbacks.mutex_unlock();
     #endif
     if (ret)
@@ -99,7 +103,7 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
         dataLength <= 16 ? LEP_I2C_DATA_0_REG : LEP_I2C_DATA_BUFFER;
 
     while (dataLength > 0) {
-      #ifndef LEPFLIT_EXCLUDE_LOCKING
+      #ifndef LEPFLIR_EXCLUDE_LOCKING
       this->callbacks.mutex_lock();
       #endif
       this->callbacks.i2cWire_beginTransmission(&(this->callbacks),
@@ -109,7 +113,7 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
       while (writeLength-- > 0)
         this->callbacks.i2cWire_write16(&(this->callbacks), *dataWords++);
       ret = this->callbacks.i2cWire_endTransmission(&(this->callbacks));
-      #ifndef LEPFLIT_EXCLUDE_LOCKING
+      #ifndef LEPFLIR_EXCLUDE_LOCKING
       this->callbacks.mutex_unlock();
       #endif
       if (ret)
@@ -121,7 +125,7 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
     }
   }
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
   this->callbacks.i2cWire_beginTransmission(&(this->callbacks),
@@ -130,7 +134,7 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
   this->callbacks.i2cWire_write16(&(this->callbacks), cmdCode);
   int ret = this->callbacks.i2cWire_endTransmission(&(this->callbacks));
   
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
   return ret;
@@ -139,20 +143,20 @@ int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
 int readDataRegister(struct lepton_communication *this, uint16_t * readWords,
                      int maxLength)
 {
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
   this->callbacks.i2cWire_beginTransmission(&(this->callbacks),
                                             LEP_I2C_DEVICE_ADDRESS);
   this->callbacks.i2cWire_write16(&(this->callbacks), LEP_I2C_DATA_LENGTH_REG);
   int ret = this->callbacks.i2cWire_endTransmission(&(this->callbacks));
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
   if (ret)
     return this->callbacks._lastI2CError;
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
 
@@ -167,7 +171,7 @@ int readDataRegister(struct lepton_communication *this, uint16_t * readWords,
   if (uint8_tsRead != 2) {
     while (uint8_tsRead-- > 0)
       this->callbacks.i2cWire_read(&(this->callbacks));
-    #ifndef LEPFLIT_EXCLUDE_LOCKING
+    #ifndef LEPFLIR_EXCLUDE_LOCKING
     this->callbacks.mutex_unlock();
     #endif
     ret = (this->callbacks._lastI2CError = 4);
@@ -176,7 +180,7 @@ int readDataRegister(struct lepton_communication *this, uint16_t * readWords,
 
   int readLength = this->callbacks.i2cWire_read16(&(this->callbacks));
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
 
@@ -191,7 +195,7 @@ int readDataRegister(struct lepton_communication *this, uint16_t * readWords,
   // how many words can be read at once. Therefore, we loop around until all words
   // have been read out from their registers.
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
 
@@ -220,14 +224,14 @@ int readDataRegister(struct lepton_communication *this, uint16_t * readWords,
   while (uint8_tsRead-- > 0)
     this->callbacks.i2cWire_read(&(this->callbacks));
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
 
   while (maxLength-- > 0)
     *readWords++ = 0;
 #ifdef TEST
-  //printf("200:%d\n",readLength);
+  // printf("200:%d\n",readLength);
 #endif
   return (this->callbacks._lastI2CError = readLength ? 4 : 0);
 }
@@ -235,7 +239,10 @@ int readDataRegister(struct lepton_communication *this, uint16_t * readWords,
 int writeRegister(struct lepton_communication *this, uint16_t regAddress,
                   uint16_t value)
 {
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifdef TEST
+  // printf("Reg:%d\n",regAddress);
+  #endif
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
   this->callbacks.i2cWire_beginTransmission(&(this->callbacks),
@@ -243,7 +250,7 @@ int writeRegister(struct lepton_communication *this, uint16_t regAddress,
   this->callbacks.i2cWire_write16(&(this->callbacks), regAddress);
   this->callbacks.i2cWire_write16(&(this->callbacks), value);
   int ret = this->callbacks.i2cWire_endTransmission(&(this->callbacks));
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
   return ret;
@@ -252,20 +259,20 @@ int writeRegister(struct lepton_communication *this, uint16_t regAddress,
 int readRegister(struct lepton_communication *this, uint16_t regAddress,
                  uint16_t * value)
 {
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
   this->callbacks.i2cWire_beginTransmission(&(this->callbacks),
                                             LEP_I2C_DEVICE_ADDRESS);
   this->callbacks.i2cWire_write16(&(this->callbacks), regAddress);
   int ret = this->callbacks.i2cWire_endTransmission(&(this->callbacks));
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
   if (ret)
     return this->callbacks._lastI2CError;
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_lock();
   #endif
 
@@ -280,7 +287,7 @@ int readRegister(struct lepton_communication *this, uint16_t regAddress,
 
   *value = this->callbacks.i2cWire_read16(&(this->callbacks));
 
-  #ifndef LEPFLIT_EXCLUDE_LOCKING
+  #ifndef LEPFLIR_EXCLUDE_LOCKING
   this->callbacks.mutex_unlock();
   #endif
 

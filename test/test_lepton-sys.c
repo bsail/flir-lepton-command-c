@@ -332,7 +332,6 @@ void test_getSceneStatistics_statistics_null_pointer(void)
 
 void test_getSceneStatistics_should_work(void)
 {
-  uint32_t status = rand() * rand() * rand() * rand();
   uint16_t code = rand() * rand();
   LEP_SYS_SCENE_STATISTICS stats;
 
@@ -350,7 +349,6 @@ void test_getSceneRegion_region_null_pointer(void)
 
 void test_getSceneRegion_should_work(void)
 {
-  uint32_t status = rand() * rand() * rand() * rand();
   uint16_t code = rand() * rand();
   LEP_SYS_SCENE_ROI region;
 
@@ -368,7 +366,6 @@ void test_getFFCShutterMode_mode_null_pointer(void)
 
 void test_getFFCShutterMode_should_work(void)
 {
-  uint32_t status = rand() * rand() * rand() * rand();
   uint16_t code = rand() * rand();
   LEP_SYS_FFC_SHUTTER_MODE mode;
 

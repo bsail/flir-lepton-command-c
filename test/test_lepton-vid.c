@@ -25,7 +25,7 @@ void tearDown(void)
 
 void test_setPolarity_null_driver(void)
 {
-  LEP_VID_POLARITY polarity;
+  LEP_VID_POLARITY polarity = 0;
   setPolarity(0,polarity);
 }
 
@@ -60,7 +60,7 @@ void test_getPolarity_should_work(void)
 
 void test_setPseudoColorLUT_null_driver(void)
 {
-  LEP_VID_PCOLOR_LUT table;
+  LEP_VID_PCOLOR_LUT table = 0;
   setPseudoColorLUT(0,table);
 }
 

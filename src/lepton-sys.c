@@ -94,8 +94,12 @@ float getFPATemperature(struct lepton_driver *driver)
 void setTelemetryEnabled(struct lepton_driver *driver, uint8_t enabled)
 {
   if (driver) {
+    #ifdef TEST
+    // printf("enabled:%d\n",enabled);
+    #endif
+    uint32_t en = enabled;
     set_common(driver, u32, LEP_CID_SYS_TELEMETRY_ENABLE_STATE,
-               (uint16_t *) & enabled, 4);
+               (uint16_t *) & en, 4);
   }
 }
 

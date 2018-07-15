@@ -60,7 +60,7 @@ extern "C" {
 // #define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
 
 /* Do not use locking instruction in case of single threading */
-// #define LEPFLIT_EXCLUDE_LOCKING
+// #define LEPFLIR_EXCLUDE_LOCKING
 
 #ifndef LEPFLIR_EXCLUDE_MISC_FUNCS
 #ifdef LEPFLIR_EXCLUDE_IMAGE_FUNCS
@@ -94,7 +94,7 @@ extern "C" {
      uint16_t(*i2cWire_read16) (struct lepton_callbacks * this);
     unsigned long (*millis_callback) (void);
     void (*delay_callback) (unsigned long);
-#ifndef LEPFLIT_EXCLUDE_LOCKING
+#ifndef LEPFLIR_EXCLUDE_LOCKING
     void (*mutex_lock) (void);
     void (*mutex_unlock) (void);
 #endif
@@ -280,7 +280,7 @@ extern "C" {
                                         unsigned long (*callback) (void));
     void (*lepton_delay_set_callback) (struct lepton_driver * driver,
                                        void (*callback) (unsigned long));
-#ifndef LEPFLIT_EXCLUDE_LOCKING
+#ifndef LEPFLIR_EXCLUDE_LOCKING
     void (*mutex_lock_set_callback) (struct lepton_driver * driver,
                                        void (*callback) (void));
     void (*mutex_unlock_set_callback) (struct lepton_driver * driver,
