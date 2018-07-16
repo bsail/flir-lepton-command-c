@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <inttypes.h>
-#include "fake_system.h"
 #include "lepton-flir.h"
 
 void lepton_beginTransmission(struct lepton_callbacks * this, uint8_t addr);
