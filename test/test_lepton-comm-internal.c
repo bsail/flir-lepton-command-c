@@ -165,6 +165,75 @@ void test_waitCommandFinish_timeout(void)
   TEST_ASSERT_EQUAL(LEP_TIMEOUT_ERROR,driver.communication._lastLepResult);
 }
 
+void test_writeCmdRegister_writeLengthRegisterFailed(void)
+{
+  uint16_t code = rand()*rand();
+  uint16_t length = 16;
+  uint16_t * buffer = alloca(length);
+  memset(buffer,0,length);
+  driver.communication.callbacks._lastI2CError = 0x04;
+
+  writeLengthRegister_ExpectAndReturn(&(driver.communication), length, 1);
+
+  TEST_ASSERT_EQUAL(0x04,writeCmdRegister(&(driver.communication),code,buffer,length));
+}
+
+void test_writeCmdRegister_writeDataCommonFailed(void)
+{
+  uint16_t code = rand()*rand();
+  uint16_t length = 16;
+  uint16_t * buffer = alloca(length);
+  memset(buffer,0,length);
+  driver.communication.callbacks._lastI2CError = 0x04;
+
+  writeLengthRegister_ExpectAndReturn(&(driver.communication), length, 0);
+  writeDataCommon_ExpectAndReturn(&(driver.communication),LEP_I2C_DATA_0_REG,buffer,0, 1);
+  writeDataCommon_IgnoreArg_writeLength();
+
+  TEST_ASSERT_EQUAL(0x04,writeCmdRegister(&(driver.communication),code,buffer,length));
+}
+
+void test_readDataRegister_selectLengthRegisterFailed(void)
+{
+  uint16_t length = 16;
+  uint16_t * buffer = alloca(length);
+  memset(buffer,0,length);
+  driver.communication.callbacks._lastI2CError = 0x04;
+
+  selectLengthRegister_ExpectAndReturn(&(driver.communication), 1);
+
+  TEST_ASSERT_EQUAL(0x04,readDataRegister(&(driver.communication),buffer,length));
+}
+
+void test_readDataRegister_readLengthRegisterFailed(void)
+{
+  uint16_t length = 16;
+  uint16_t * buffer = alloca(length);
+  memset(buffer,0,length);
+  driver.communication.callbacks._lastI2CError = 0x04;
+
+  selectLengthRegister_ExpectAndReturn(&(driver.communication), 0);
+  readLengthRegister_ExpectAndReturn(&(driver.communication),0,1);
+  readLengthRegister_IgnoreArg_readLength();
+
+  TEST_ASSERT_EQUAL(0x04,readDataRegister(&(driver.communication),buffer,length));
+}
+
+void test_readDataRegister_readLengthRegisterFailed_returned_zero_length(void)
+{
+  uint16_t length = 16;
+  uint16_t * buffer = alloca(length);
+  memset(buffer,0,length);
+  driver.communication.callbacks._lastI2CError = 0x04;
+
+  selectLengthRegister_ExpectAndReturn(&(driver.communication), 0);
+  readLengthRegister_ExpectAndReturn(&(driver.communication),0,0);
+  readLengthRegister_IgnoreArg_readLength();
+  int readLength = 0;
+  readLengthRegister_ReturnThruPtr_readLength(&readLength);
+
+  TEST_ASSERT_EQUAL(0x04,readDataRegister(&(driver.communication),buffer,length));
+}
 
 
 

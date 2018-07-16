@@ -20,9 +20,6 @@ static inline void sendCommand_common(struct lepton_communication *this,
   if (this != 0) {
     if ((value != 0) && (dataLength != 0)) {
       if (waitCommandBegin(this, LEPFLIR_GEN_CMD_TIMEOUT)) {
-        #ifdef TEST
-        // printf("Value:%d, Length:%d",*value,dataLength);
-        #endif
         if (writeCmdRegister(this, cmdCode, value, dataLength) == 0) {
           waitCommandFinish(this, LEPFLIR_GEN_CMD_TIMEOUT);
         }

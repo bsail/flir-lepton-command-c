@@ -135,6 +135,8 @@ static void agc_enabled_common(void)
 
 void setUp(void)
 {
+  delay_Ignore();
+  millis_IgnoreAndReturn(0);
   LeptonFLiR_init(LeptonFLiR_ImageStorageMode_80x60_16bpp,
                   LeptonFLiR_TemperatureMode_Kelvin, &driver);
   lepton_setup_callbacks(&driver);
