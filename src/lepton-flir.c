@@ -372,14 +372,6 @@ lepton_i2cWire_requestFrom_set_callback(struct lepton_driver *driver,
   driver->communication.callbacks.i2cWire_requestFrom = callback;
 }
 
-void lepton_i2cWire_write_set_callback(struct lepton_driver *driver,
-                                       size_t(*callback) (struct
-                                                          lepton_callbacks *,
-                                                          uint8_t))
-{
-  driver->communication.callbacks.i2cWire_write = callback;
-}
-
 void lepton_i2cWire_write16_set_callback(struct lepton_driver *driver,
                                          size_t(*callback) (struct
                                                             lepton_callbacks *,
@@ -473,8 +465,6 @@ void LeptonFLiR_init(
       &lepton_i2cWire_endTransmission_set_callback;
   driver->init.lepton_i2cWire_requestFrom_set_callback =
       &lepton_i2cWire_requestFrom_set_callback;
-  driver->init.lepton_i2cWire_write_set_callback =
-      &lepton_i2cWire_write_set_callback;
   driver->init.lepton_i2cWire_write16_set_callback =
       &lepton_i2cWire_write16_set_callback;
   driver->init.lepton_i2cWire_read_set_callback =

@@ -88,7 +88,6 @@ extern "C" {
      uint8_t(*i2cWire_endTransmission) (struct lepton_callbacks * this);
      uint8_t(*i2cWire_requestFrom) (struct lepton_callbacks * this,
                                     uint8_t addr, uint8_t len);
-     size_t(*i2cWire_write) (struct lepton_callbacks * this, uint8_t data);
      size_t(*i2cWire_write16) (struct lepton_callbacks * this, uint16_t data);
      uint8_t(*i2cWire_read) (struct lepton_callbacks * this);
      uint16_t(*i2cWire_read16) (struct lepton_callbacks * this);
@@ -257,10 +256,6 @@ extern "C" {
                                                                          *,
                                                                          uint8_t,
                                                                          uint8_t));
-    void (*lepton_i2cWire_write_set_callback) (struct lepton_driver * driver,
-                                               size_t(*callback) (struct
-                                                                  lepton_callbacks
-                                                                  *, uint8_t));
     void (*lepton_i2cWire_write16_set_callback) (struct lepton_driver * driver,
                                                  size_t(*callback) (struct
                                                                     lepton_callbacks

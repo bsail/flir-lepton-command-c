@@ -29,11 +29,6 @@ uint8_t lepton_requestFrom(__attribute__((unused)) struct lepton_callbacks * thi
     return ret;
 }
 
-size_t lepton_write(__attribute__((unused)) struct lepton_callbacks * this, uint8_t data) {
-    uint8_t ret = TwoWire_write(data);
-    return ret;
-}
-
 size_t lepton_write16(__attribute__((unused)) struct lepton_callbacks * this, uint16_t data) {
     return TwoWire_write(highByte(data)) + TwoWire_write(lowByte(data));
 }
@@ -52,7 +47,6 @@ void lepton_setup_callbacks(struct lepton_driver * driver)
   driver->init.lepton_i2cWire_beginTransmission_set_callback(driver,&lepton_beginTransmission);
   driver->init.lepton_i2cWire_endTransmission_set_callback(driver,&lepton_endTransmission);
   driver->init.lepton_i2cWire_requestFrom_set_callback(driver,&lepton_requestFrom);
-  driver->init.lepton_i2cWire_write_set_callback(driver,&lepton_write);
   driver->init.lepton_i2cWire_write16_set_callback(driver,&lepton_write16);
   driver->init.lepton_i2cWire_read_set_callback(driver,&lepton_read);
   driver->init.lepton_i2cWire_read16_set_callback(driver,&lepton_read16);
