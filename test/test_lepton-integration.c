@@ -179,11 +179,10 @@ static void get_status_register_common(uint16_t val)
 
 void test_integration_get_status_register(void)
 {
-  get_status_register_common(0x1234);
+  uint16_t status = rand()*rand();
+  get_status_register_common(status);
 
-  uint32_t status = driver.getStatusRegister(&driver);
-
-  TEST_ASSERT_EQUAL(0x1234,status);
+  TEST_ASSERT_EQUAL(status,driver.getStatusRegister(&driver));
 }
 
 static void get_uptime_common(uint32_t uptime)
@@ -198,8 +197,6 @@ static void get_uptime_common(uint32_t uptime)
   TwoWire_beginTransmission_Expect(LEP_I2C_DEVICE_ADDRESS);
   TwoWire_write_ExpectAndReturn(0x00,0);
   TwoWire_write_ExpectAndReturn(0x02,0);
-  // TwoWire_write_ExpectAndReturn(0x00,00);
-  // TwoWire_write_ExpectAndReturn(0x01,0);
   TwoWire_endTransmission_ExpectAndReturn(0);
   critical_i2c_unlock_Expect();
 
@@ -223,8 +220,6 @@ static void get_uptime_common(uint32_t uptime)
   TwoWire_beginTransmission_Expect(LEP_I2C_DEVICE_ADDRESS);
   TwoWire_write_ExpectAndReturn(0x00,0);
   TwoWire_write_ExpectAndReturn(0x02,0);
-  // TwoWire_write_ExpectAndReturn(0x00,00);
-  // TwoWire_write_ExpectAndReturn(0x01,0);
   TwoWire_endTransmission_ExpectAndReturn(0);
   critical_i2c_unlock_Expect();
 
@@ -240,8 +235,6 @@ static void get_uptime_common(uint32_t uptime)
   TwoWire_beginTransmission_Expect(LEP_I2C_DEVICE_ADDRESS);
   TwoWire_write_ExpectAndReturn(0,0);
   TwoWire_write_ExpectAndReturn(0x06,0);
-  // TwoWire_write_ExpectAndReturn(0x02,0);
-  // TwoWire_write_ExpectAndReturn(0x04,0);
   TwoWire_endTransmission_ExpectAndReturn(0);
   critical_i2c_unlock_Expect();
 
@@ -263,7 +256,7 @@ static void get_uptime_common(uint32_t uptime)
 
 void test_integration_get_uptime(void)
 {
-  uint32_t uptime = 15000UL;
+  uint32_t uptime = rand()*rand()*rand()*rand();
 
   get_uptime_common(uptime);
 
