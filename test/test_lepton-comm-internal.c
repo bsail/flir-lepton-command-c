@@ -95,3 +95,77 @@ void test_waitCommandBegin_success_wait(void)
   // millis_ExpectAndReturn(1101);
   TEST_ASSERT_EQUAL(1,waitCommandBegin(&(driver.communication),1000));
 }
+
+void test_waitCommandFinish_read_register_fail_1(void)
+{
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 1);
+  readRegister_IgnoreArg_value();
+  TEST_ASSERT_EQUAL(0,waitCommandFinish(&(driver.communication),1000));
+}
+
+void test_waitCommandFinish_success_no_wait(void)
+{
+  uint16_t status;
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 0);
+  readRegister_IgnoreArg_value();
+  status = 0;
+  readRegister_ReturnThruPtr_value(&status);
+  TEST_ASSERT_EQUAL(1,waitCommandFinish(&(driver.communication),1000));
+}
+
+void test_waitCommandFinish_success_wait(void)
+{
+  uint16_t status;
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 0);
+  readRegister_IgnoreArg_value();
+  status = 1;
+  readRegister_ReturnThruPtr_value(&status);
+  millis_ExpectAndReturn(100);
+  millis_ExpectAndReturn(101);
+  delay_Expect(1);
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 0);
+  readRegister_IgnoreArg_value();
+  uint16_t newstatus = 0;
+  readRegister_ReturnThruPtr_value(&newstatus);
+  // millis_ExpectAndReturn(1101);
+  TEST_ASSERT_EQUAL(1,waitCommandFinish(&(driver.communication),1000));
+}
+
+void test_waitCommandFinish_read_register_fail_2(void)
+{
+  uint16_t status;
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 0);
+  readRegister_IgnoreArg_value();
+  status = 1;
+  readRegister_ReturnThruPtr_value(&status);
+  millis_ExpectAndReturn(100);
+  millis_ExpectAndReturn(101);
+  delay_Expect(1);
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 1);
+  readRegister_IgnoreArg_value();
+  TEST_ASSERT_EQUAL(0,waitCommandFinish(&(driver.communication),1000));
+}
+
+void test_waitCommandFinish_timeout(void)
+{
+  uint16_t status;
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 0);
+  readRegister_IgnoreArg_value();
+  status = 1;
+  readRegister_ReturnThruPtr_value(&status);
+  millis_ExpectAndReturn(100);
+  millis_ExpectAndReturn(101);
+  delay_Expect(1);
+  readRegister_ExpectAndReturn(&(driver.communication), LEP_I2C_STATUS_REG, 0, 0);
+  readRegister_IgnoreArg_value();
+  status = 1;
+  readRegister_ReturnThruPtr_value(&status);
+  millis_ExpectAndReturn(1101);
+  TEST_ASSERT_EQUAL(0,waitCommandFinish(&(driver.communication),1000));
+  TEST_ASSERT_EQUAL(LEP_TIMEOUT_ERROR,driver.communication._lastLepResult);
+}
+
+
+
+
+

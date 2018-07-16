@@ -11,37 +11,9 @@
 
 #define min(a,b) (((a)<(b))?(a):(b))
 
-uint8_t waitCommandBegin(struct lepton_communication *this, int timeout)
+static inline uint8_t waitCommandCommon(struct lepton_communication *this, int timeout)
 {
   this->_lastLepResult = 0;
-  uint16_t status;
-  if (readRegister(this, LEP_I2C_STATUS_REG, &status))
-    return false;
-
-  if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK))
-    return true;
-
-  unsigned long endTime =
-      this->callbacks.millis_callback() + (unsigned long)timeout;
-
-  while ((status & LEP_I2C_STATUS_BUSY_BIT_MASK)
-         && (timeout <= 0 || this->callbacks.millis_callback() < endTime)) {
-    this->callbacks.delay_callback(1);
-
-    if (readRegister(this, LEP_I2C_STATUS_REG, &status))
-      return false;
-  }
-
-  if (!(status & LEP_I2C_STATUS_BUSY_BIT_MASK))
-    return true;
-  else {
-    this->_lastLepResult = LEP_TIMEOUT_ERROR;
-    return false;
-  }
-}
-
-uint8_t waitCommandFinish(struct lepton_communication * this, int timeout)
-{
   uint16_t status;
   if (readRegister(this, LEP_I2C_STATUS_REG, &status))
     return false;
@@ -73,6 +45,16 @@ uint8_t waitCommandFinish(struct lepton_communication * this, int timeout)
     this->_lastLepResult = LEP_TIMEOUT_ERROR;
     return false;
   }
+}
+
+uint8_t waitCommandBegin(struct lepton_communication *this, int timeout)
+{
+  return waitCommandCommon(this, timeout);
+}
+
+uint8_t waitCommandFinish(struct lepton_communication * this, int timeout)
+{
+  return waitCommandCommon(this, timeout);
 }
 
 int writeCmdRegister(struct lepton_communication *this, uint16_t cmdCode,
