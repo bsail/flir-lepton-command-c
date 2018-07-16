@@ -7,7 +7,7 @@
 #include "lepton-comm-internal.h"
 #include "lepton-communication.h"
 #include <string.h>
-#include "example.h"
+#include "example-lepton.h"
 #include "mock_fake_system.h"
 #include "lepton-register.h"
 

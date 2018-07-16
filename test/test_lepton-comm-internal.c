@@ -1,7 +1,7 @@
 #include "unity.h"
 #include "lepton-flir.h"
 #include "lepton-comm-internal.h"
-#include "example.h"
+#include "example-lepton.h"
 #include "mock_lepton-register.h"
 #include "mock_fake_system.h"
 #include "lepton-communication.h"

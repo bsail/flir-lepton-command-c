@@ -2,7 +2,7 @@
 #include "lepton-flir.h"
 #include "lepton-register.h"
 #include "mock_lepton-comm-internal.h"
-#include "example.h"
+#include "example-lepton.h"
 #include "mock_fake_system.h"
 #include "lepton-communication.h"
 #include "mock_lepton-sys.h"
