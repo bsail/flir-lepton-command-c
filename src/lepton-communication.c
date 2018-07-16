@@ -1,6 +1,7 @@
 #define LEPTON_FLIR_INTERNAL
 #include "lepton-communication.h"
 #include "lepton-comm-internal.h"
+#include "lepton-register.h"
 #ifdef TEST
 #include <stdio.h>
 #endif

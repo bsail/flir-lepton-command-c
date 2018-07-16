@@ -27,6 +27,7 @@
 #define LEPTON_FLIR_INTERNAL
 #include "lepton-flir.h"
 #include "lepton-communication.h"
+#include "lepton-register.h"
 #include "lepton-comm-internal.h"
 #include "lepton-sys.h"
 #include "lepton-agc.h"

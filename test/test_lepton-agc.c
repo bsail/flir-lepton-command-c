@@ -6,6 +6,7 @@
 #include "mock_lepton-sys.h"
 #include "mock_lepton-comm-internal.h"
 #include "mock_lepton-communication.h"
+#include "mock_lepton-register.h"
 #include <string.h>
 
 struct lepton_driver driver;

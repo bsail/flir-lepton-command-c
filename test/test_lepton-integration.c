@@ -9,6 +9,7 @@
 #include <string.h>
 #include "example.h"
 #include "mock_fake_system.h"
+#include "lepton-register.h"
 
 struct lepton_driver driver;
 

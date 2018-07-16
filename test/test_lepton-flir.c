@@ -5,6 +5,7 @@
 #include "mock_lepton-agc.h"
 #include "mock_lepton-vid.h"
 #include "mock_lepton-comm-internal.h"
+#include "mock_lepton-register.h"
 #include <alloca.h>
 #include <string.h>
 
