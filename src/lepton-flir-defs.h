@@ -411,6 +411,47 @@ extern "C" {
     LEP_UNDEFINED_ERROR_CODE = -127 /* Undefined error */
   } LEP_RESULT;
 
+#define LEP_I2C_ERROR_STRING_0 "Success"
+#define LEP_I2C_ERROR_STRING_1 "Data too long to fit in transmit buffer"
+#define LEP_I2C_ERROR_STRING_2 "Received NACK on transmit of address"
+#define LEP_I2C_ERROR_STRING_3 "Received NACK on transmit of data"
+#define LEP_I2C_ERROR_STRING_4 "Other error"
+
+#define LEP_OK_STRING "LEP_OK Camera ok"
+#define LEP_ERROR_STRING "LEP_ERROR Camera general error"
+#define LEP_NOT_READY_STRING "LEP_NOT_READY Camera not ready error"
+#define LEP_RANGE_ERROR_STRING "LEP_RANGE_ERROR Camera range error"
+#define LEP_CHECKSUM_ERROR_STRING "LEP_CHECKSUM_ERROR Camera checksum error"
+#define LEP_BAD_ARG_POINTER_ERROR_STRING "LEP_BAD_ARG_POINTER_ERROR Camera Bad argument  error"
+#define LEP_DATA_SIZE_ERROR_STRING "LEP_DATA_SIZE_ERROR Camera uint8_t count error"
+#define LEP_UNDEFINED_FUNCTION_ERROR_STRING "LEP_UNDEFINED_FUNCTION_ERROR Camera undefined function error"
+#define LEP_FUNCTION_NOT_SUPPORTED_STRING "LEP_FUNCTION_NOT_SUPPORTED Camera function not yet supported error"
+#define LEP_OTP_WRITE_ERROR_STRING "LEP_OTP_WRITE_ERROR Camera OTP write error"
+#define LEP_OTP_READ_ERROR_STRING "LEP_OTP_READ_ERROR Double bit error detected (uncorrectible)"
+#define LEP_OTP_NOT_PROGRAMMED_ERROR_STRING "LEP_OTP_NOT_PROGRAMMED_ERROR Flag read as non-zero"
+#define LEP_ERROR_I2C_BUS_NOT_READY_STRING "LEP_ERROR_I2C_BUS_NOT_READY I2C Bus Error - Bus Not Avaialble"
+#define LEP_ERROR_I2C_BUFFER_OVERFLOW_STRING "LEP_ERROR_I2C_BUFFER_OVERFLOW I2C Bus Error - Buffer Overflow"
+#define LEP_ERROR_I2C_ARBITRATION_LOST_STRING "LEP_ERROR_I2C_ARBITRATION_LOST I2C Bus Error - Bus Arbitration Lost"
+#define LEP_ERROR_I2C_BUS_ERROR_STRING "LEP_ERROR_I2C_BUS_ERROR I2C Bus Error - General Bus Error"
+#define LEP_ERROR_I2C_NACK_RECEIVED_STRING "LEP_ERROR_I2C_NACK_RECEIVED I2C Bus Error - NACK Received"
+#define LEP_ERROR_I2C_FAIL_STRING "LEP_ERROR_I2C_FAIL I2C Bus Error - General Failure"
+#define LEP_DIV_ZERO_ERROR_STRING "LEP_DIV_ZERO_ERROR Attempted div by zero"
+#define LEP_COMM_PORT_NOT_OPEN_STRING "LEP_COMM_PORT_NOT_OPEN Comm port not open"
+#define LEP_COMM_INVALID_PORT_ERROR_STRING "LEP_COMM_INVALID_PORT_ERROR Comm port no such port error"
+#define LEP_COMM_RANGE_ERROR_STRING "LEP_COMM_RANGE_ERROR Comm port range error"
+#define LEP_ERROR_CREATING_COMM_STRING "LEP_ERROR_CREATING_COMM Error creating comm"
+#define LEP_ERROR_STARTING_COMM_STRING "LEP_ERROR_STARTING_COMM Error starting comm"
+#define LEP_ERROR_CLOSING_COMM_STRING "LEP_ERROR_CLOSING_COMM Error closing comm"
+#define LEP_COMM_CHECKSUM_ERROR_STRING "LEP_COMM_CHECKSUM_ERROR Comm checksum error"
+#define LEP_COMM_NO_DEV_STRING "LEP_COMM_NO_DEV No comm device"
+#define LEP_TIMEOUT_ERROR_STRING "LEP_TIMEOUT_ERROR Comm timeout error"
+#define LEP_COMM_ERROR_WRITING_COMM_STRING "LEP_COMM_ERROR_WRITING_COMM Error writing comm"
+#define LEP_COMM_ERROR_READING_COMM_STRING "LEP_COMM_ERROR_READING_COMM Error reading comm"
+#define LEP_COMM_COUNT_ERROR_STRING "LEP_COMM_COUNT_ERROR Comm uint8_t count error"
+#define LEP_OPERATION_CANCELED_STRING "LEP_OPERATION_CANCELED Camera operation canceled"
+#define LEP_UNDEFINED_ERROR_CODE_STRING "LEP_UNDEFINED_ERROR_CODE Undefined error"
+#define LEP_OTHER_ERROR_STRING "LEP Other error"
+
 #ifdef __cplusplus
 }
 #endif

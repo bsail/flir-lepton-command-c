@@ -1,5 +1,7 @@
 #include "unity.h"
+#include "lepton-config.h"
 #include "lepton-flir.h"
+#include "lepton-flir-defs.h"
 #include "mock_lepton-communication.h"
 #include "mock_lepton-sys.h"
 #include "mock_lepton-agc.h"
@@ -225,4 +227,100 @@ void test_temperatureToKelvin100(void)
   TEST_ASSERT_EQUAL_UINT16(12345UL,driver.misc.temperatureToKelvin100(&driver,123.45f));
   driver._tempMode = LeptonFLiR_TemperatureMode_Count;
   TEST_ASSERT_EQUAL_UINT16(0,driver.misc.temperatureToKelvin100(&driver,123.45f));
+}
+
+void test_getLastI2CErrorString_null_driver(void)
+{
+  TEST_ASSERT_EQUAL_PTR(0,driver.getLastI2CErrorString(0));
+}
+
+void test_getLastI2CErrorString_should_work(void)
+{
+  driver.communication.callbacks._lastI2CError = 0;
+  TEST_ASSERT_EQUAL_STRING(LEP_I2C_ERROR_STRING_0,driver.getLastI2CErrorString(&driver));
+  driver.communication.callbacks._lastI2CError = 1;
+  TEST_ASSERT_EQUAL_STRING(LEP_I2C_ERROR_STRING_1,driver.getLastI2CErrorString(&driver));
+  driver.communication.callbacks._lastI2CError = 2;
+  TEST_ASSERT_EQUAL_STRING(LEP_I2C_ERROR_STRING_2,driver.getLastI2CErrorString(&driver));
+  driver.communication.callbacks._lastI2CError = 3;
+  TEST_ASSERT_EQUAL_STRING(LEP_I2C_ERROR_STRING_3,driver.getLastI2CErrorString(&driver));
+  driver.communication.callbacks._lastI2CError = 4;
+  TEST_ASSERT_EQUAL_STRING(LEP_I2C_ERROR_STRING_4,driver.getLastI2CErrorString(&driver));
+}
+
+void test_getLastLepResultString_null_driver(void)
+{
+  TEST_ASSERT_EQUAL_PTR(0,driver.getLastLepResultString(0));
+}
+
+void test_getLastLepResultString_should_work(void)
+{
+  driver.communication._lastLepResult = LEP_OK;
+  TEST_ASSERT_EQUAL_STRING(LEP_OK_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_NOT_READY;
+  TEST_ASSERT_EQUAL_STRING(LEP_NOT_READY_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_RANGE_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_RANGE_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_CHECKSUM_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_CHECKSUM_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_BAD_ARG_POINTER_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_BAD_ARG_POINTER_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_DATA_SIZE_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_DATA_SIZE_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_UNDEFINED_FUNCTION_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_UNDEFINED_FUNCTION_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_FUNCTION_NOT_SUPPORTED;
+  TEST_ASSERT_EQUAL_STRING(LEP_FUNCTION_NOT_SUPPORTED_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_OTP_WRITE_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_OTP_WRITE_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_OTP_READ_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_OTP_READ_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_OTP_NOT_PROGRAMMED_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_OTP_NOT_PROGRAMMED_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_I2C_BUS_NOT_READY;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_I2C_BUS_NOT_READY_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_I2C_BUFFER_OVERFLOW;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_I2C_BUFFER_OVERFLOW_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_I2C_ARBITRATION_LOST;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_I2C_ARBITRATION_LOST_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_I2C_BUS_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_I2C_BUS_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_I2C_NACK_RECEIVED;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_I2C_NACK_RECEIVED_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_I2C_FAIL;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_I2C_FAIL_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_DIV_ZERO_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_DIV_ZERO_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_PORT_NOT_OPEN;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_PORT_NOT_OPEN_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_INVALID_PORT_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_INVALID_PORT_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_RANGE_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_RANGE_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_CREATING_COMM;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_CREATING_COMM_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_STARTING_COMM;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_STARTING_COMM_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_ERROR_CLOSING_COMM;
+  TEST_ASSERT_EQUAL_STRING(LEP_ERROR_CLOSING_COMM_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_CHECKSUM_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_CHECKSUM_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_NO_DEV;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_NO_DEV_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_TIMEOUT_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_TIMEOUT_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_ERROR_WRITING_COMM;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_ERROR_WRITING_COMM_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_ERROR_READING_COMM;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_ERROR_READING_COMM_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_COMM_COUNT_ERROR;
+  TEST_ASSERT_EQUAL_STRING(LEP_COMM_COUNT_ERROR_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_OPERATION_CANCELED;
+  TEST_ASSERT_EQUAL_STRING(LEP_OPERATION_CANCELED_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = LEP_UNDEFINED_ERROR_CODE;
+  TEST_ASSERT_EQUAL_STRING(LEP_UNDEFINED_ERROR_CODE_STRING,driver.getLastLepResultString(&driver));
+  driver.communication._lastLepResult = -125;
+  TEST_ASSERT_EQUAL_STRING(LEP_OTHER_ERROR_STRING,driver.getLastLepResultString(&driver));
 }

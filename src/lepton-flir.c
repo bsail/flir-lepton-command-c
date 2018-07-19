@@ -254,94 +254,95 @@ LEP_RESULT getLastLepResult(struct lepton_driver * driver)
 
 #ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
 
-static const char *textForI2CError(uint8_t errorCode)
+const char *getLastI2CErrorString(struct lepton_driver * driver)
 {
-  switch (errorCode) {
+  if(driver==NULL) return 0;
+  switch (driver->communication.callbacks._lastI2CError) {
   case 0:
-    return "Success";
+    return LEP_I2C_ERROR_STRING_0;
   case 1:
-    return "Data too long to fit in transmit buffer";
+    return LEP_I2C_ERROR_STRING_1;
   case 2:
-    return "Received NACK on transmit of address";
+    return LEP_I2C_ERROR_STRING_2;
   case 3:
-    return "Received NACK on transmit of data";
+    return LEP_I2C_ERROR_STRING_3;
   default:
-    return "Other error";
+    return LEP_I2C_ERROR_STRING_4;
   }
 }
 
-static const char *textForLepResult(LEP_RESULT errorCode)
+const char *getLastLepResultString(struct lepton_driver * driver)
 {
-  switch (errorCode) {
+  if(driver==NULL) return 0;
+  switch (driver->communication._lastLepResult) {
   case LEP_OK:
-    return "LEP_OK Camera ok";
+    return LEP_OK_STRING;
   case LEP_ERROR:
-    return "LEP_ERROR Camera general error";
+    return LEP_ERROR_STRING;
   case LEP_NOT_READY:
-    return "LEP_NOT_READY Camera not ready error";
+    return LEP_NOT_READY_STRING;
   case LEP_RANGE_ERROR:
-    return "LEP_RANGE_ERROR Camera range error";
+    return LEP_RANGE_ERROR_STRING;
   case LEP_CHECKSUM_ERROR:
-    return "LEP_CHECKSUM_ERROR Camera checksum error";
+    return LEP_CHECKSUM_ERROR_STRING;
   case LEP_BAD_ARG_POINTER_ERROR:
-    return "LEP_BAD_ARG_POINTER_ERROR Camera Bad argument  error";
+    return LEP_BAD_ARG_POINTER_ERROR_STRING;
   case LEP_DATA_SIZE_ERROR:
-    return "LEP_DATA_SIZE_ERROR Camera uint8_t count error";
+    return LEP_DATA_SIZE_ERROR_STRING;
   case LEP_UNDEFINED_FUNCTION_ERROR:
-    return "LEP_UNDEFINED_FUNCTION_ERROR Camera undefined function error";
+    return LEP_UNDEFINED_FUNCTION_ERROR_STRING;
   case LEP_FUNCTION_NOT_SUPPORTED:
-    return "LEP_FUNCTION_NOT_SUPPORTED Camera function not yet supported error";
+    return LEP_FUNCTION_NOT_SUPPORTED_STRING;
   case LEP_OTP_WRITE_ERROR:
-    return "LEP_OTP_WRITE_ERROR Camera OTP write error";
+    return LEP_OTP_WRITE_ERROR_STRING;
   case LEP_OTP_READ_ERROR:
-    return "LEP_OTP_READ_ERROR Double bit error detected (uncorrectible)";
+    return LEP_OTP_READ_ERROR_STRING;
   case LEP_OTP_NOT_PROGRAMMED_ERROR:
-    return "LEP_OTP_NOT_PROGRAMMED_ERROR Flag read as non-zero";
+    return LEP_OTP_NOT_PROGRAMMED_ERROR_STRING;
   case LEP_ERROR_I2C_BUS_NOT_READY:
-    return "LEP_ERROR_I2C_BUS_NOT_READY I2C Bus Error - Bus Not Avaialble";
+    return LEP_ERROR_I2C_BUS_NOT_READY_STRING;
   case LEP_ERROR_I2C_BUFFER_OVERFLOW:
-    return "LEP_ERROR_I2C_BUFFER_OVERFLOW I2C Bus Error - Buffer Overflow";
+    return LEP_ERROR_I2C_BUFFER_OVERFLOW_STRING;
   case LEP_ERROR_I2C_ARBITRATION_LOST:
-    return
-        "LEP_ERROR_I2C_ARBITRATION_LOST I2C Bus Error - Bus Arbitration Lost";
+    return LEP_ERROR_I2C_ARBITRATION_LOST_STRING;
   case LEP_ERROR_I2C_BUS_ERROR:
-    return "LEP_ERROR_I2C_BUS_ERROR I2C Bus Error - General Bus Error";
+    return LEP_ERROR_I2C_BUS_ERROR_STRING;
   case LEP_ERROR_I2C_NACK_RECEIVED:
-    return "LEP_ERROR_I2C_NACK_RECEIVED I2C Bus Error - NACK Received";
+    return LEP_ERROR_I2C_NACK_RECEIVED_STRING;
   case LEP_ERROR_I2C_FAIL:
-    return "LEP_ERROR_I2C_FAIL I2C Bus Error - General Failure";
+    return LEP_ERROR_I2C_FAIL_STRING;
   case LEP_DIV_ZERO_ERROR:
-    return "LEP_DIV_ZERO_ERROR Attempted div by zero";
+    return LEP_DIV_ZERO_ERROR_STRING;
   case LEP_COMM_PORT_NOT_OPEN:
-    return "LEP_COMM_PORT_NOT_OPEN Comm port not open";
+    return LEP_COMM_PORT_NOT_OPEN_STRING;
   case LEP_COMM_INVALID_PORT_ERROR:
-    return "LEP_COMM_INVALID_PORT_ERROR Comm port no such port error";
+    return LEP_COMM_INVALID_PORT_ERROR_STRING;
   case LEP_COMM_RANGE_ERROR:
-    return "LEP_COMM_RANGE_ERROR Comm port range error";
+    return LEP_COMM_RANGE_ERROR_STRING;
   case LEP_ERROR_CREATING_COMM:
-    return "LEP_ERROR_CREATING_COMM Error creating comm";
+    return LEP_ERROR_CREATING_COMM_STRING;
   case LEP_ERROR_STARTING_COMM:
-    return "LEP_ERROR_STARTING_COMM Error starting comm";
+    return LEP_ERROR_STARTING_COMM_STRING;
   case LEP_ERROR_CLOSING_COMM:
-    return "LEP_ERROR_CLOSING_COMM Error closing comm";
+    return LEP_ERROR_CLOSING_COMM_STRING;
   case LEP_COMM_CHECKSUM_ERROR:
-    return "LEP_COMM_CHECKSUM_ERROR Comm checksum error";
+    return LEP_COMM_CHECKSUM_ERROR_STRING;
   case LEP_COMM_NO_DEV:
-    return "LEP_COMM_NO_DEV No comm device";
+    return LEP_COMM_NO_DEV_STRING;
   case LEP_TIMEOUT_ERROR:
-    return "LEP_TIMEOUT_ERROR Comm timeout error";
+    return LEP_TIMEOUT_ERROR_STRING;
   case LEP_COMM_ERROR_WRITING_COMM:
-    return "LEP_COMM_ERROR_WRITING_COMM Error writing comm";
+    return LEP_COMM_ERROR_WRITING_COMM_STRING;
   case LEP_COMM_ERROR_READING_COMM:
-    return "LEP_COMM_ERROR_READING_COMM Error reading comm";
+    return LEP_COMM_ERROR_READING_COMM_STRING;
   case LEP_COMM_COUNT_ERROR:
-    return "LEP_COMM_COUNT_ERROR Comm uint8_t count error";
+    return LEP_COMM_COUNT_ERROR_STRING;
   case LEP_OPERATION_CANCELED:
-    return "LEP_OPERATION_CANCELED Camera operation canceled";
+    return LEP_OPERATION_CANCELED_STRING;
   case LEP_UNDEFINED_ERROR_CODE:
-    return "LEP_UNDEFINED_ERROR_CODE Undefined error";
+    return LEP_UNDEFINED_ERROR_CODE_STRING;
   default:
-    return "Other error";
+    return LEP_OTHER_ERROR_STRING;
   }
 }
 
@@ -439,6 +440,10 @@ void LeptonFLiR_init(
   driver->getLastLepResult = &getLastLepResult;
   driver->communication._lastLepResult = 0;
   driver->communication.callbacks._lastI2CError = 0;
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+  driver->getLastI2CErrorString = &getLastI2CErrorString;
+  driver->getLastLepResultString = &getLastLepResultString;
+#endif
 #ifndef LEPFLIR_EXCLUDE_IMAGE_FUNCS
   driver->_storageMode = storageMode;
   driver->_tempMode = tempMode;

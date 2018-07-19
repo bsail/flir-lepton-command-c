@@ -30,7 +30,7 @@ extern "C" {
 // #define LEPFLIR_EXCLUDE_LOCKING
 
 // Uncomment this define to enable debug output functions.
-// #define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
+#define LEPFLIR_ENABLE_DEBUG_OUTPUT     1
 
 #ifdef __cplusplus
 }

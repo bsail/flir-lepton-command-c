@@ -270,6 +270,10 @@ extern "C" {
     int (*getImageHeight) (struct lepton_driver * driver);
     int (*getImageBpp) (struct lepton_driver * driver); // Bytes per pixel
 #endif
+#ifdef LEPFLIR_ENABLE_DEBUG_OUTPUT
+    const char * (*getLastI2CErrorString)(struct lepton_driver * driver);
+    const char * (*getLastLepResultString)(struct lepton_driver * driver);
+#endif
     /* VTables */
     struct lepton_communication communication;
 #ifndef LEPFLIR_EXCLUDE_SYS_FUNCS
