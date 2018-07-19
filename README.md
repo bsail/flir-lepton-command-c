@@ -4,8 +4,6 @@ C Library for the Lepton FLiR Thermal Camera Module.
 [![Build Status](https://img.shields.io/travis/bsail/flir-lepton-command-c/master.svg)](https://travis-ci.org/bsail/flir-lepton-command-c)
 [![Coverage Status](https://img.shields.io/coveralls/github/bsail/flir-lepton-command-c/master.svg)](https://coveralls.io/github/bsail/flir-lepton-command-c?branch=master)
 
-Fork of original library by [NachtRaveVL](https://github.com/NachtRaveVL/Lepton-FLiR-Arduino).
-
 Library to control a Lepton FLiR (forward looking infrared) thermal camera module.
 Licensed under the non-restrictive MIT license.
 
@@ -17,7 +15,8 @@ This library allows communication with boards running a Lepton FLiR thermal came
 
 Parts of this library are derived from the Lepton FLiR software development SDK, Copyright 2011,2012,2013,2014 FLIR Systems - Commercial Vision Systems.
 
-This version differs from original version by [NachtRaveVL](https://github.com/NachtRaveVL/Lepton-FLiR-Arduino): it was ported to plain C to allow usage in wider range of architectures. We also removed the support of VoISP communication, it has only command and control interface.
+Fork of original library by [NachtRaveVL](https://github.com/NachtRaveVL/Lepton-FLiR-Arduino).
+This version differs from original version: it was ported to plain C to allow usage in wider range of architectures. We also removed the support of VoISP communication, it has only command and control interface.
 
 [Latest version of the library](https://github.com/bsail/flir-lepton-command-c)
 
