@@ -14,4 +14,4 @@ Thumbs.db
 *.bak
 build/**
 coverage.info
-
+vendor/**

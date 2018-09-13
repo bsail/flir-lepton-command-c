@@ -78,6 +78,7 @@ Get Code
 ```bash
 mkdir lepton
 git clone https://github.com/bsail/flir-lepton-command-c lepton
+ceedling upgrade lepton
 cd lepton
 ```
 
